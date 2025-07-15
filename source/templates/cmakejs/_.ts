@@ -1,6 +1,8 @@
-import { APTCmakeJSProjectComponents } from "./project_components";
+import { APTCMakeJSProjectComponents } from "./project_components";
+import { APTCMakeJSProjectPrototype } from "./project_prototype";
 
 export let APTCMakeJS = 
 {
-    ProjectComponents: APTCmakeJSProjectComponents
+    ProjectComponents: APTCMakeJSProjectComponents,
+    ProjectPrototype: APTCMakeJSProjectPrototype
 }

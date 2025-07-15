@@ -4,6 +4,6 @@ export class F_APTCMakeJSProjectStructure extends A_APTProjectComponent
 {
     public constructor()
     {
-        super();
+        super("CMakeJS.ProjectStructure");
     }
 }

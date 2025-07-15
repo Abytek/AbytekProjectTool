@@ -3,4 +3,6 @@ import { APT } from "./_"
 
 let system = new APT.Core.F_System();
 
-console.log("Hello");
+system.start();
+
+console.log(APT.Templates.CMakeJS.ProjectComponents);

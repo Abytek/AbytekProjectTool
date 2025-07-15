@@ -1,6 +1,6 @@
 import { F_APTCMakeJSProjectStructure } from "./project_structure";
 
-export let APTCmakeJSProjectComponents = 
+export let APTCMakeJSProjectComponents = 
 {
-    F_APTCMakeJSProjectStructure
+    F_ProjectStructure: F_APTCMakeJSProjectStructure
 }

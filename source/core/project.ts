@@ -2,7 +2,7 @@ import { A_APTProjectComponent } from "./project_component";
 
 export class F_APTProject
 {
-    private _components: A_APTProjectComponent[] = [];
+    private _components: Map<string, A_APTProjectComponent> = new Map;
     public get components()
     {
         return this._components;
@@ -14,18 +14,11 @@ export class F_APTProject
 
     public add_component(component: A_APTProjectComponent)
     {
-        this._components.push(component);
+        this._components.set(component.name, component);
     }
-    public remove_component(component: A_APTProjectComponent)
+    public remove_component(name: string)
     {
-        for(let i = 0; i < this._components.length; ++i)
-        {
-            if (this._components[i] === component)
-            {
-                this._components.splice(i, 1);
-                break;
-            }
-        }
+        this._components.delete(name);
     }
 
     public start()
