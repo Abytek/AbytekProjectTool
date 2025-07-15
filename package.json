@@ -1,0 +1,25 @@
+{
+  "name": "abytekprojecttool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ts-node source/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/n-c0d3r/AbytekProjectTool.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/n-c0d3r/AbytekProjectTool/issues"
+  },
+  "homepage": "https://github.com/n-c0d3r/AbytekProjectTool#readme",
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
