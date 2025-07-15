@@ -2,14 +2,21 @@ import { A_APTProjectComponent } from "./project_component";
 
 export class F_APTProject
 {
+    private _name: string = "";
+    public get name()
+    {
+        return this._name;
+    }
+
     private _components: Map<string, A_APTProjectComponent> = new Map;
     public get components()
     {
         return this._components;
     }
 
-    public constructor()
+    public constructor(name: string)
     {
+        this._name = name;
     }
 
     public add_component(component: A_APTProjectComponent)
