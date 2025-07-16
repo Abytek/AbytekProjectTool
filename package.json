@@ -1,25 +1,20 @@
 {
-  "name": "abytekprojecttool",
+  "name": "apt",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "Source/APT/Bootstrap.js",
   "scripts": {
-    "start": "npx ts-node source/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node Source/APT/Bootstrap.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/n-c0d3r/AbytekProjectTool.git"
+    "url": "git+https://github.com/Abytek/AbytekProjectTool.git"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Abytek",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/n-c0d3r/AbytekProjectTool/issues"
+    "url": "https://github.com/Abytek/AbytekProjectTool/issues"
   },
-  "homepage": "https://github.com/n-c0d3r/AbytekProjectTool#readme",
-  "dependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
-  }
+  "homepage": "https://github.com/Abytek/AbytekProjectTool#readme"
 }
