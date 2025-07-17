@@ -1,6 +1,10 @@
 
-const F_ModuleSystem = require("./ModuleSystem/ModuleSystem");
+const AMJS = require("../../Submodules/AbytekModuleJS/Source/AMJS/.js");
 
-let ModuleSystem = new F_ModuleSystem();
-ModuleSystem.GlobalContext.ModuleSystem = ModuleSystem;
-ModuleSystem.Test();
+let ModuleSystem = new AMJS.F_ModuleSystem();
+ModuleSystem.SourceDirectoryPaths = 
+[
+    __dirname
+];
+
+let APTModule = ModuleSystem.LoadModule(null, ".js");
