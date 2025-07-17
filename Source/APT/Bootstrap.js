@@ -7,4 +7,6 @@ ModuleSystem.SourceDirectoryPaths =
     __dirname
 ];
 
-let APTModule = ModuleSystem.LoadModule(null, ".js");
+let APT = ModuleSystem.Import(null, ".js");
+
+let System = new APT.Core.F_System();
