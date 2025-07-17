@@ -1,0 +1,3 @@
+[submodule "Submodules/AbytekModuleJS"]
+	path = Submodules/AbytekModuleJS
+	url = https://github.com/Abytek/AbytekModuleJS
