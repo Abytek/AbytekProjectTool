@@ -18,7 +18,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         this.Generator = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
             "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator",
-            APT.Templates.CMake.Utilities.GetDefaultConfig(PlatformTags)
+            APT.Templates.CMake.Utilities.GetDefaultGenerator(PlatformTags)
         );
     }
 }

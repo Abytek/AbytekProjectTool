@@ -5,6 +5,8 @@ APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default
 );
 
+console.log();
+
 {
     let AdditionalOptions = new Object();
     APT.ImportProject("./HelloAPT2", AdditionalOptions);
