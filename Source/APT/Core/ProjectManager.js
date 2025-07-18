@@ -19,11 +19,7 @@ AMJS.Namespace.F_ProjectManager = class
     {
         let ParsedAdditionalOptions = { ...AdditionalOptions };
 
-        let InstanceData = JSON.parse(
-            JSON.stringify(
-                this.DefaultInstanceData
-            )
-        );
+        let InstanceData = APT.Common.SimpleDeepCopy(this.DefaultInstanceData);
         if (AdditionalOptions.InstanceData)
         {
             for(let Key in AdditionalOptions.InstanceData)

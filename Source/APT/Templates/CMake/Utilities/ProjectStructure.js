@@ -22,7 +22,7 @@ AMJS.Namespace.Generators =
     VS2022: "VisualStudio2022",
     UNIX_MAKE_FILES: "UnixMakefiles",
     XCODE: "Xcode",
-    CLion: "CLion",
+    CLION: "CLion",
 }
 
 AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
@@ -36,4 +36,55 @@ AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
         return AMJS.Namespace.Generators.XCODE;
     }
     return AMJS.Namespace.Generators.UNIX_MAKE_FILES;
+}
+
+AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
+{
+    if (
+        (Config == AMJS.Namespace.Configs.GENERATOR_EXPRESSION)
+    )
+    {
+        if (
+            (Generator == AMJS.Namespace.Generators.VS2022)
+            || (Generator == AMJS.Namespace.Generators.CLION)
+        )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
+{
+    if (
+        (Config == AMJS.Namespace.Configs.GENERATOR_EXPRESSION)
+    )
+    {
+        if (
+            (Generator == AMJS.Namespace.Generators.VS2022)
+            || (Generator == AMJS.Namespace.Generators.CLION)
+        )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    return (Config != null);
+}
+
+AMJS.Namespace.ParseConfig = function(Config, Generator, PlatformTags)
+{
+    if (AMJS.Namespace.IsConfigCompatibleWithGenerator(Config, Generator))
+    {
+        return Config;
+    }
+    return AMJS.Namespace.GetDefaultConfig(PlatformTags);
 }

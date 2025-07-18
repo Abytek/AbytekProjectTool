@@ -196,3 +196,10 @@ AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
     }
     return Value;
 }
+
+AMJS.Namespace.SimpleDeepCopy = function(Value)
+{
+    return JSON.parse(
+        JSON.stringify(Value)
+    );
+}

@@ -25,6 +25,11 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 APT.Templates.CMake.Utilities.GetDefaultGenerator(PlatformTags)
             )
         );
+        this.Config = APT.Templates.CMake.Utilities.ParseConfig(
+            this.Config,
+            this.Generator,
+            PlatformTags
+        );
     }
 
     Init()
