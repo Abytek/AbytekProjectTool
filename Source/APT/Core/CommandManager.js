@@ -64,15 +64,18 @@ AMJS.Namespace.F_CommandManager = class
                 (Value, Key, Map) =>
                 {
                     let KeyParts = Key.split(".");
-                    if (Key.split(".").length > 1)
+                    if (KeyParts[0] == Category)
                     {
-                        APT.Common.SetPropertyByPath(
-                            this.CLIInput.get(Category),
-                            Key,
-                            Value
-                        );
-                        KeysToDelete.push(Key);
-                    }       
+                        if (KeyParts.length > 1)
+                        {
+                            APT.Common.SetPropertyByPath(
+                                this.CLIInput.get(Category),
+                                KeyParts.slice(1).join('.'),
+                                Value
+                            );
+                            KeysToDelete.push(Key);
+                        }      
+                    } 
                 }
             );
             for(let KeyToDelete of KeysToDelete)
