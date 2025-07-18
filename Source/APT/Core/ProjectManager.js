@@ -6,12 +6,12 @@ AMJS.Namespace.F_ProjectManager = class
     constructor(System)
     {
         this.System = System;
-        this.Projects = new Object();
+        this.Projects = new Map();
     }
 
     CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData = new Object())
     {
-        return { AbsoluteProjectEntryFilePath, InstanceData }.toString();
+        return { AbsoluteProjectEntryFilePath, InstanceData };
     }
     ImportProject(BaseModule, ProjectEntryFilePath, AdditionalOptions = new Object(), Required = true)
     {
@@ -28,9 +28,9 @@ AMJS.Namespace.F_ProjectManager = class
         }
 
         const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData);
-        if (ProjectKey in this.Projects)
+        if (this.Projects.has(ProjectKey))
         {
-            return this.Projects[ProjectKey];
+            return this.Projects.get(ProjectKey);
         }
 
         let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFilePath, AdditionalOptions);
@@ -53,7 +53,8 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFilePath2, AdditionalOptions2, Required2);
                     }
-                }
+                },
+                IsAnonymous: true
             }
         );
 
@@ -62,7 +63,7 @@ AMJS.Namespace.F_ProjectManager = class
             return false;
         }
 
-        this.Projects[ProjectKey] = Project;
+        this.Projects.set(ProjectKey, Project);
         return Project;
     }
 }

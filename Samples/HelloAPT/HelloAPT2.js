@@ -1,2 +1,2 @@
 
-console.log(`HelloAPT2 ${APT.Project.AbsoluteEntryFilePath}`);
+console.log(`HelloAPT2`, APT.Project.AdditionalOptions);

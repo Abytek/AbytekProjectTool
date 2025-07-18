@@ -8,29 +8,29 @@ AMJS.Namespace.F_Project = class
         this.AbsoluteEntryFilePath = AbsoluteEntryFilePath;
         this.Name = AbsoluteEntryFilePath;
         this.Label = this.Name;
-        this.AdditionalOptions = AdditionalOptions | new Object();
-        this.Components = new Object();
+        this.AdditionalOptions = AdditionalOptions ?? new Object();
+        this.Components = new Map();
     }
 
     AddComponent(ComponentClass, ...Args)
     {
         let Component = new ComponentClass(this, ...Args);
-        this.Components[ComponentClass] = Component;
+        this.Components.set(ComponentClass, Component);
         return Component;
     }
     FindComponent(ComponentClass)
     {
-        if (ComponentClass in this.Components)
+        if (this.Components.has(ComponentClass))
         {
-            return this.Components[ComponentClass];
+            return this.Components.get(ComponentClass);
         }
         return null;
     }
     GetComponent(ComponentClass)
     {
-        if (ComponentClass in this.Components)
+        if (this.Components.has(ComponentClass))
         {
-            return this.Components[ComponentClass];
+            return this.Components.get(ComponentClass);
         }
         throw new Error(`not found project component ${ComponentClass}`);
     }
