@@ -5,5 +5,17 @@ APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default
 );
 
-APT.ImportProject("./HelloAPT2");
-APT.ImportProject("./HelloAPT2", { InstanceData: 3 });
+{
+    let AdditionalOptions = new Object();
+    APT.ImportProject("./HelloAPT2", AdditionalOptions);
+}
+
+{
+    let AdditionalOptions = new Object();
+    APT.Common.TrySetPropertyByPath(
+        AdditionalOptions,
+        "InstanceData.APT.Templates.Common.ProjectComponents.PlatformTags.Value",
+        [ APT.Common.PlatformTags.EMSCRIPTEN ]
+    );
+    APT.ImportProject("./HelloAPT2", AdditionalOptions);
+}

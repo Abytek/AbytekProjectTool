@@ -29,9 +29,9 @@ AMJS.Namespace.CalculateBuildDirectoryPath = function(Options)
     APT.Common.Assert(Options);
     const AbsoluteProjectEntryFilePath = APT.Common.Assert(Options.AbsoluteProjectEntryFilePath);
     const PlatformTags = APT.Common.Assert(Options.PlatformTags);
-    const AProjectType = Options.AProjectType ?? AMJS.Namespace.GetDefaultAProjectType(PlatformTags);
-    const Config = Options.Config ?? APT.Templates.CMake.Utilities.GetDefaultConfig(PlatformTags);
-    const Generator = Options.Config ?? APT.Templates.CMake.Utilities.GetDefaultGenerator(PlatformTags);
+    const AProjectType = APT.Common.Assert(Options.AProjectType);
+    const Config = APT.Common.Assert(Options.Config);
+    const Generator = APT.Common.Assert(Options.Generator);
 
     const TopmostBuildDirectoryPath = AMJS.Namespace.CalculateTopmostBuildDirectoryPath(AbsoluteProjectEntryFilePath);
 

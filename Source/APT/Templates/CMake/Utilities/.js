@@ -1,3 +1,2 @@
 
-AMJS.Import("./Config");
-AMJS.Import("./Generator");
+AMJS.Import("./ProjectStructure");

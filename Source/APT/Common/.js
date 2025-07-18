@@ -61,13 +61,91 @@ AMJS.Namespace.GetHostPlatformTags = function()
     return null;
 }
 
-AMJS.Namespace.ForwardOption = function(Key, Value)
+AMJS.Namespace.TrySetPropertyByPath = function(InObject, Key, Value)
 {
-    let CommandManager = APT.Core.System.CommandManager;
-    const CLIInput = CommandManager.CLIInput;
-    if (CLIInput.has(Key))
+    let KeyParts = Key.split(".");
+    let ParsedKeyParts = [];
+    for(let KeyPart of KeyParts)
     {
-        return CLIInput.get(Key);
+        if (KeyPart != "")
+        {
+            ParsedKeyParts.push(KeyPart);
+        }
+    }
+
+    let NumKeyParts = ParsedKeyParts.length;
+    let Subobject = InObject;
+    AMJS.Namespace.Assert(NumKeyParts > 0);
+    for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
+    {
+        let KeyPart = ParsedKeyParts[Idx];
+        if (!(KeyPart in Subobject))
+        {
+            Subobject[KeyPart] = new Object();
+        }
+        Subobject = Subobject[KeyPart];
+    }
+    let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
+    if (LastKeyPart in Subobject)
+    {
+        return Subobject[LastKeyPart];
+    }
+    else
+    {
+        Subobject[LastKeyPart] = Value;
     }
     return Value;
+}
+AMJS.Namespace.SetPropertyByPath = function(InObject, Key, Value)
+{
+    let KeyParts = Key.split(".");
+    let ParsedKeyParts = [];
+    for(let KeyPart of KeyParts)
+    {
+        if (KeyPart != "")
+        {
+            ParsedKeyParts.push(KeyPart);
+        }
+    }
+
+    let NumKeyParts = ParsedKeyParts.length;
+    let Subobject = InObject;
+    AMJS.Namespace.Assert(NumKeyParts > 0);
+    for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
+    {
+        let KeyPart = ParsedKeyParts[Idx];
+        if (!(KeyPart in Subobject))
+        {
+            Subobject[KeyPart] = new Object();
+        }
+        Subobject = Subobject[KeyPart];
+    }
+    let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
+    Subobject[LastKeyPart] = Value;
+    return Value;
+}
+AMJS.Namespace.GetPropertyByPath = function(InObject, Key)
+{
+    let KeyParts = Key.split(".");
+    let ParsedKeyParts = [];
+    for(let KeyPart of KeyParts)
+    {
+        if (KeyPart != "")
+        {
+            ParsedKeyParts.push(KeyPart);
+        }
+    }
+
+    let NumKeyParts = ParsedKeyParts.length;
+    let Subobject = InObject;
+    AMJS.Namespace.Assert(NumKeyParts > 0);
+    for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
+    {
+        let KeyPart = ParsedKeyParts[Idx];
+        AMJS.Namespace.Assert(KeyPart in Subobject);
+        Subobject = Subobject[KeyPart];
+    }
+    let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
+    AMJS.Namespace.Assert(LastKeyPart in Subobject);
+    return Subobject[LastKeyPart];
 }
