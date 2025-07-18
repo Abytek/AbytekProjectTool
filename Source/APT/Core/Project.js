@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.Import("./ProjectComponent");
 
 AMJS.Namespace.F_Project = class
@@ -6,6 +8,7 @@ AMJS.Namespace.F_Project = class
     constructor(AbsoluteEntryFilePath, AdditionalOptions)
     {
         this.AbsoluteEntryFilePath = AbsoluteEntryFilePath;
+        this.EntryDirectoryPath = path.dirname(AbsoluteEntryFilePath);
         this.Name = AbsoluteEntryFilePath;
         this.Label = this.Name;
         this.AdditionalOptions = AdditionalOptions ?? new Object();

@@ -4,8 +4,6 @@ const path = require("path");
 AMJS.Namespace.AProjectTypes =
 {
     STANDALONE: "Standalone",
-    OPERATOR: "Operator",
-    NODE: "Node"
 }
 
 AMJS.Namespace.GetDefaultAProjectType = function(PlatformTags)

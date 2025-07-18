@@ -10,7 +10,7 @@ console.log();
 
 {
     let AdditionalOptions = new Object();
-    APT.ImportProject("./HelloAPT2", AdditionalOptions);
+    APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
 }
 
 {
@@ -20,5 +20,5 @@ console.log();
         "InstanceData.APT.Templates.Common.ProjectComponents.PlatformTags.Value",
         [ APT.Common.PlatformTags.EMSCRIPTEN ]
     );
-    APT.ImportProject("./HelloAPT2", AdditionalOptions);
+    APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
 }

@@ -35,9 +35,4 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             BuildDirectoryPath
         )
     }
-
-    Start()
-    {
-        APT.Templates.AbytekCMake.Utilities.GenerateProjectFiles(this.Project);
-    }
 }

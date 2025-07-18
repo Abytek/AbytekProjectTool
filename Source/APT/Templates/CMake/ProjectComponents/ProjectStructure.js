@@ -1,5 +1,6 @@
 
 AMJS.Import("../Utilities/ProjectStructure");
+AMJS.Import("../Utilities/Generator");
 AMJS.Import("../../Common/ProjectComponents/PlatformTags");
 
 AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
@@ -24,6 +25,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
     Init()
     {
+        this.SourceDirectoryPath = APT.Common.FindPropertyByPath(
+            this.Project.AdditionalOptions,
+            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectoryPath"
+        ) ?? this.Project.EntryDirectoryPath;
         this.BuildDirectoryPath = APT.Common.Assert(
             APT.Common.FindPropertyByPath(
                 this.Project.AdditionalOptions,
@@ -31,5 +36,13 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             ),
             "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath"
         );
+        this.ExtraArguments = APT.Common.FindPropertyByPath(
+            this.Project.AdditionalOptions,
+            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments"
+        ) ?? [];
+    }
+    Start()
+    {
+        APT.Templates.CMake.Utilities.GenerateProjectFiles(this);
     }
 }
