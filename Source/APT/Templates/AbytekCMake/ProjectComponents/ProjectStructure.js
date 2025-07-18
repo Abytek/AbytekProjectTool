@@ -13,10 +13,12 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         let Config = CMakeProjectStructure.Config;
         let Generator = CMakeProjectStructure.Generator;
 
-        const AProjectType = APT.Common.TrySetPropertyByPath(
-            Project.AdditionalOptions,
-            "InstanceData.APT.Templates.AbytekCMake.ProjectComponents.ProjectStructure.AProjectType",
-            APT.Templates.AbytekCMake.Utilities.GetDefaultAProjectType(PlatformTags)
+        const AProjectType = APT.Common.ForwardString(
+            APT.Common.TrySetPropertyByPath(
+                Project.AdditionalOptions,
+                "InstanceData.APT.Templates.AbytekCMake.ProjectComponents.ProjectStructure.AProjectType",
+                APT.Templates.AbytekCMake.Utilities.GetDefaultAProjectType(PlatformTags)
+            )
         );
         this.AProjectType = AProjectType;
 

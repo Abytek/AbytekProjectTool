@@ -183,3 +183,16 @@ AMJS.Namespace.FindPropertyByPath = function(InObject, Key)
     }
     return Subobject[LastKeyPart];
 }
+
+AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
+{
+    if (Value == null)
+    {
+        return null;
+    }
+    if (Array.isArray(Value))
+    {
+        return Value.join(ArrayCombinatorKeyword);
+    }
+    return Value;
+}

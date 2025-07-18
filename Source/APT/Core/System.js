@@ -6,8 +6,8 @@ AMJS.Namespace.F_System = class
 {
     constructor()
     {
-        this.ProjectManager = new AMJS.Namespace.F_ProjectManager(this);
         this.CommandManager = new AMJS.Namespace.F_CommandManager(this);
+        this.ProjectManager = new AMJS.Namespace.F_ProjectManager(this);
     }
 
     Start()

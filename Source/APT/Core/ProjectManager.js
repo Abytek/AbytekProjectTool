@@ -7,6 +7,8 @@ AMJS.Namespace.F_ProjectManager = class
     {
         this.System = System;
         this.Projects = new Map();
+
+        this.DefaultInstanceData = this.System.CommandManager.CLIInput.get('ProjectDefault').InstanceData ?? new Object();
     }
 
     CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData = new Object())
@@ -15,7 +17,21 @@ AMJS.Namespace.F_ProjectManager = class
     }
     ImportProject(BaseModule, ProjectEntryFilePath, AdditionalOptions = new Object(), Required = true)
     {
-        const InstanceData = AdditionalOptions.InstanceData ?? new Object();
+        let ParsedAdditionalOptions = { ...AdditionalOptions };
+
+        let InstanceData = JSON.parse(
+            JSON.stringify(
+                this.DefaultInstanceData
+            )
+        );
+        if (AdditionalOptions.InstanceData)
+        {
+            for(let Key in AdditionalOptions.InstanceData)
+            {
+                InstanceData[Key] = AdditionalOptions.InstanceData[Key];
+            }
+        }
+        ParsedAdditionalOptions.InstanceData = InstanceData;
 
         let AbsoluteProjectEntryFilePath = AMJS.ModuleSystem.SearchModuleAbsoluteFilePath(BaseModule, ProjectEntryFilePath);
         if (!AbsoluteProjectEntryFilePath)
@@ -33,7 +49,7 @@ AMJS.Namespace.F_ProjectManager = class
             return this.Projects.get(ProjectKey);
         }
 
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFilePath, AdditionalOptions);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFilePath, ParsedAdditionalOptions);
 
         let ProjectManager = this;
 
