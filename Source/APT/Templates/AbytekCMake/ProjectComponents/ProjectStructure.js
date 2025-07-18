@@ -28,6 +28,16 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             Config,
             Generator
         };
-        this.BuildDirectoryPath = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectoryPath(CalculateBuildDirectoryPathParams);
+        const BuildDirectoryPath = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectoryPath(CalculateBuildDirectoryPathParams);
+        APT.Common.TrySetPropertyByPath(
+            Project.AdditionalOptions,
+            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath",
+            BuildDirectoryPath
+        )
+    }
+
+    Start()
+    {
+        APT.Templates.AbytekCMake.Utilities.GenerateProjectFiles(this.Project);
     }
 }

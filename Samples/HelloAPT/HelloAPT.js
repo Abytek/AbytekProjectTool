@@ -4,6 +4,7 @@ console.log(`HelloAPT ${APT.Project.AbsoluteEntryFilePath}`);
 APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default
 );
+APT.Project.TryFinalize();
 
 console.log();
 

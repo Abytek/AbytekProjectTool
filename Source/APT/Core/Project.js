@@ -10,6 +10,8 @@ AMJS.Namespace.F_Project = class
         this.Label = this.Name;
         this.AdditionalOptions = AdditionalOptions ?? new Object();
         this.Components = new Map();
+
+        this.IsFinalized = false;
     }
 
     AddComponent(ComponentClass, ...Args)
@@ -51,5 +53,37 @@ AMJS.Namespace.F_Project = class
             Prototype(this);
         }
         return this;
+    }
+
+    TryFinalize()
+    {
+        if (this.IsFinalized)
+        {
+            return;
+        }
+        this.IsFinalized = true;
+        this.PostLoad();
+    }
+
+    PostLoad()
+    {
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.Init();
+            }
+        );
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.PostInit();
+            }
+        );
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.Start();
+            }
+        );
     }
 };

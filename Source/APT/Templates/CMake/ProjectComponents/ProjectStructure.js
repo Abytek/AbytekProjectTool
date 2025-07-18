@@ -21,4 +21,15 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             APT.Templates.CMake.Utilities.GetDefaultGenerator(PlatformTags)
         );
     }
+
+    Init()
+    {
+        this.BuildDirectoryPath = APT.Common.Assert(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath"
+            ),
+            "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath"
+        );
+    }
 }

@@ -64,6 +64,7 @@ AMJS.Namespace.F_ProjectManager = class
         }
 
         this.Projects.set(ProjectKey, Project);
+        Project.TryFinalize();
         return Project;
     }
 }
