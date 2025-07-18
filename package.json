@@ -1,0 +1,20 @@
+{
+  "name": "apt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Source/APT/Bootstrap.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node Source/APT/Bootstrap.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abytek/AbytekProjectTool.git"
+  },
+  "author": "Abytek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Abytek/AbytekProjectTool/issues"
+  },
+  "homepage": "https://github.com/Abytek/AbytekProjectTool#readme"
+}
