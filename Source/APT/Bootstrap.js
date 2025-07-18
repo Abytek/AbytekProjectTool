@@ -10,4 +10,5 @@ ModuleSystem.SourceDirectoryPaths =
 let APT = ModuleSystem.Import(null, ".js");
 
 let System = new APT.Core.F_System();
+APT.Core.System = System;
 System.Start();

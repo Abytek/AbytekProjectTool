@@ -1,4 +1,6 @@
 
+AMJS.ImportNamespace("../Common");
+
 AMJS.Import("./System");
 AMJS.Import("./Project");
 AMJS.Import("./ProjectComponent");

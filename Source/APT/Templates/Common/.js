@@ -1,0 +1,2 @@
+
+AMJS.ImportSubnamespace("ProjectComponents");

@@ -9,8 +9,14 @@ AMJS.Namespace.F_ProjectManager = class
         this.Projects = new Object();
     }
 
-    ImportProject(BaseModule, ProjectEntryFilePath, AdditionalOptions, Required = true)
+    CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData = new Object())
     {
+        return { AbsoluteProjectEntryFilePath, InstanceData }.toString();
+    }
+    ImportProject(BaseModule, ProjectEntryFilePath, AdditionalOptions = new Object(), Required = true)
+    {
+        const InstanceData = AdditionalOptions.InstanceData ?? new Object();
+
         let AbsoluteProjectEntryFilePath = AMJS.ModuleSystem.SearchModuleAbsoluteFilePath(BaseModule, ProjectEntryFilePath);
         if (!AbsoluteProjectEntryFilePath)
         {
@@ -21,7 +27,15 @@ AMJS.Namespace.F_ProjectManager = class
             return false;
         }
 
+        const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData);
+        if (ProjectKey in this.Projects)
+        {
+            return this.Projects[ProjectKey];
+        }
+
         let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFilePath, AdditionalOptions);
+
+        let ProjectManager = this;
 
         let ProjectContext = AMJS.ModuleSystem.Import(
             BaseModule,
@@ -33,7 +47,12 @@ AMJS.Namespace.F_ProjectManager = class
                     Context.APT = {
                         ...Context.APT
                     };
+                    Project.Context = Context;
                     Context.APT.Project = Project;
+                    Context.APT.ImportProject = function(ProjectEntryFilePath2, AdditionalOptions2 = new Object(), Required2 = true)
+                    {
+                        return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFilePath2, AdditionalOptions2, Required2);
+                    }
                 }
             }
         );
@@ -43,17 +62,7 @@ AMJS.Namespace.F_ProjectManager = class
             return false;
         }
 
-        if (Project.Name in this.Projects)
-        {
-            console.log(`Project ${Project.Name} was already added`);
-            if (Required)
-            {
-                throw new Error(`Project ${Project.Name} was already added`);
-            }
-            return false;
-        }
-
-        this.Projects[Project.Name] = Project;
+        this.Projects[ProjectKey] = Project;
         return Project;
     }
 }

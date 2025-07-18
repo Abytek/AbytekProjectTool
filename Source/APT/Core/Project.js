@@ -34,10 +34,22 @@ AMJS.Namespace.F_Project = class
         }
         throw new Error(`not found project component ${ComponentClass}`);
     }
-
-    ApplyPrototype(Prototype)
+    EnsureComponent(ComponentClass, ...Args)
     {
-        Prototype(this);
+        let Component = this.FindComponent(ComponentClass);
+        if (Component)
+        {
+            return Component;
+        }
+        return this.AddComponent(ComponentClass, ...Args);
+    }
+
+    ApplyPrototype(...Prototypes)
+    {
+        for(let Prototype of Prototypes)
+        {
+            Prototype(this);
+        }
         return this;
     }
 };
