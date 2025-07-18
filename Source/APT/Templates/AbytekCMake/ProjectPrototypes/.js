@@ -1,0 +1,2 @@
+
+AMJS.Import("Minimal");
