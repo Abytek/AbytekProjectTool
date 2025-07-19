@@ -20,7 +20,8 @@ AMJS.Namespace.PlatformTags =
     POSIX: "POSIX",
     UNIX: "Unix",
     ANDROID: "Android",
-    EMSCRIPTEN: "Emscripten"
+    EMSCRIPTEN: "Emscripten",
+    WEB: "Web"
 }
 
 AMJS.Namespace.GetHostPlatformTags = function()

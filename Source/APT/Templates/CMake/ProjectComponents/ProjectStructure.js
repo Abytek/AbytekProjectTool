@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("../Utilities/Generator");
 AMJS.Import("../../Common/ProjectComponents/PlatformTags");
@@ -11,18 +13,18 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
         let PlatformTags = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_PlatformTags).Value;
 
-        this.Config = APT.Common.ForwardString(
-            APT.Common.TrySetPropertyByPath(
-                Project.AdditionalOptions,
-                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Config",
-                APT.Templates.CMake.Utilities.GetDefaultConfig(PlatformTags)
-            )
-        );
         this.Generator = APT.Common.ForwardString(
             APT.Common.TrySetPropertyByPath(
                 Project.AdditionalOptions,
                 "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator",
                 APT.Templates.CMake.Utilities.GetDefaultGenerator(PlatformTags)
+            )
+        );
+        this.Config = APT.Common.ForwardString(
+            APT.Common.TrySetPropertyByPath(
+                Project.AdditionalOptions,
+                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Config",
+                APT.Templates.CMake.Utilities.GetDefaultConfig(this.Generator)
             )
         );
         this.Config = APT.Templates.CMake.Utilities.ParseConfig(

@@ -6,10 +6,13 @@ APT.Project.ApplyPrototype(
 );
 APT.Project.TryFinalize();
 
-console.log();
-
 {
     let AdditionalOptions = new Object();
+    APT.Common.TrySetPropertyByPath(
+        AdditionalOptions,
+        "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator",
+        [ APT.Templates.CMake.Utilities.Generators.CLION ]
+    );
     APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
 }
 

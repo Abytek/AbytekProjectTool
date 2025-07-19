@@ -1,20 +1,39 @@
 
 AMJS.Namespace.Configs =
 {
-    GENERATOR_EXPRESSION: "GeneratorExpression",
+    AUTO: "Auto",
     DEBUG: "Debug",
     RELEASE: "Release",
     REL_WITH_DEB_INFO: "RelWithDebInfo",
-    MIN_SIZE_REL: "MinSizeRel"
+    MIN_SIZE_REL: "MinSizeRel",
+
+    DEFAULT_DIRECT: "Debug",
 }
 
-AMJS.Namespace.GetDefaultConfig = function(PlatformTags)
+AMJS.Namespace.GetDefaultDirectConfig = function()
 {
-    if (PlatformTags.includes(APT.Common.PlatformTags.WINDOWS))
-    {
-        return AMJS.Namespace.Configs.GENERATOR_EXPRESSION;
-    }
     return AMJS.Namespace.Configs.DEBUG;
+}
+AMJS.Namespace.GetDefaultConfig = function(Generator)
+{
+    if (
+        (Generator == AMJS.Namespace.Generators.VS2022)
+        || (Generator == AMJS.Namespace.Generators.CLION)
+    )
+    {
+        return AMJS.Namespace.Configs.AUTO;
+    }
+    return AMJS.Namespace.GetDefaultDirectConfig();
+}
+AMJS.Namespace.EnsureDirectConfig = function(Config)
+{
+    if (
+        (Config == AMJS.Namespace.Configs.AUTO)
+    )
+    {
+        return AMJS.Namespace.GetDefaultDirectConfig();
+    }
+    return Config;
 }
 
 AMJS.Namespace.Generators =
@@ -41,7 +60,7 @@ AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
 AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
 {
     if (
-        (Config == AMJS.Namespace.Configs.GENERATOR_EXPRESSION)
+        (Config == AMJS.Namespace.Configs.AUTO)
     )
     {
         if (
@@ -57,27 +76,6 @@ AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
         }
     }
     return true;
-}
-
-AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
-{
-    if (
-        (Config == AMJS.Namespace.Configs.GENERATOR_EXPRESSION)
-    )
-    {
-        if (
-            (Generator == AMJS.Namespace.Generators.VS2022)
-            || (Generator == AMJS.Namespace.Generators.CLION)
-        )
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    return (Config != null);
 }
 
 AMJS.Namespace.ParseConfig = function(Config, Generator, PlatformTags)
