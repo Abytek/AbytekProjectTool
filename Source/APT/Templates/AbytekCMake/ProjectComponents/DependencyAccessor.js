@@ -10,6 +10,8 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
     {
         super(Project);
 
+        APT.Templates.AbytekCMake.Utilities.ImportedResults = APT.Templates.AbytekCMake.Utilities.ImportedResults ?? new Map();
+
         this.Config = APT.Templates.CMake.Utilities.EnsureDirectConfig(
             APT.Common.TrySetPropertyByPath(
                 Project.AdditionalOptions,
@@ -26,47 +28,37 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
     GetCMakeBuildDirectoryPath(Project)
     {
         let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        let AbytekCMakeProjectStructure = Project.GetComponent(APT.Templates.AbytekCMake.ProjectComponents.F_ProjectStructure);
-
-        let Generator = CMakeProjectStructure.Generator;
-        if (Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
-        {
-            return Project.BuildDirectoryPath;
-        }
-        if (Generator == APT.Templates.CMake.Utilities.Generators.CLION)
-        {
-            if (this.Config == APT.Templates.CMake.Utilities.Configs.DEBUG)
-            {
-                return path.join(this.BuildDirectoryPath, "cmake-build-debug");
-            }
-            if (this.Config == APT.Templates.CMake.Utilities.Configs.RELEASE)
-            {
-                return path.join(this.BuildDirectoryPath, "cmake-build-release");
-            }
-            if (this.Config == APT.Templates.CMake.Utilities.Configs.REL_WITH_DEB_INFO)
-            {
-                return path.join(this.BuildDirectoryPath, "cmake-build-relwithdebinfo");
-            }
-            if (this.Config == APT.Templates.CMake.Utilities.Configs.MIN_SIZE_REL)
-            {
-                return path.join(this.BuildDirectoryPath, "cmake-build-minsizerel");
-            }
-        }
-        return this.BuildDirectoryPath;
+        return APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectoryPath(
+            CMakeProjectStructure.BuildDirectoryPath, 
+            CMakeProjectStructure.Generator,
+            this.Config
+        );
     }
     GetImportJSFilePath(Project)
     {
         return path.join(this.GetCMakeBuildDirectoryPath(Project), "APT.Import.js");
     }
-    GetTargetFilePath(Project, TargetName)
+    GetImportedResult(Project)
     {
-        let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        let AbytekCMakeProjectStructure = Project.GetComponent(APT.Templates.AbytekCMake.ProjectComponents.F_ProjectStructure);
-
-        let Generator = CMakeProjectStructure.Generator;
-        if (Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
+        let ImportKey = {
+            Project,
+            Config: this.Config
+        };
+        let ImportedResult = null;
+        if (APT.Templates.AbytekCMake.Utilities.ImportedResults.has(ImportKey))
         {
-            
+            ImportedResult = APT.Templates.AbytekCMake.Utilities.ImportedResults.get(ImportKey);
         }
+        else
+        {
+            ImportedResult = require(this.GetImportJSFilePath(Project));
+            APT.Templates.AbytekCMake.Utilities.ImportedResults.set(ImportKey, ImportedResult);
+        }
+        return ImportedResult;
+    }
+    GetTargetModule(Project, TargetName)
+    {
+        let ImportedResult = this.GetImportedResult(Project);
+        return ImportedResult.Context.RequireModule(TargetName);
     }
 }

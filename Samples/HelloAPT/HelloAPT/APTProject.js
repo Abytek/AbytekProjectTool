@@ -23,5 +23,4 @@ APT.Project.TryFinalize();
         "InstanceData.APT.Templates.Common.ProjectComponents.PlatformTags.Value",
         [ APT.Common.PlatformTags.EMSCRIPTEN ]
     );
-    APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
 }
