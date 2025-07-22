@@ -1,4 +1,8 @@
 
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
 AMJS.ImportNamespace("../Utilities");
 AMJS.ImportNamespace("../../CMake/ProjectComponents");
 
@@ -45,5 +49,41 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams)
             )
         );
+
+        this.DefaultDirectConfig = APT.Common.TrySetPropertyByPath(
+            Project.AdditionalOptions,
+            "InstanceData.APT.Templates.AbytekCMake.ProjectComponents.ProjectStructure.DefaultDirectConfig",
+            APT.Templates.CMake.Utilities.GetDefaultDirectConfig()
+        );
+    }
+
+    Build(DirectConfig, TargetName)
+    {
+        let ParsedDirectConfig = DirectConfig;
+        if (DirectConfig == null)
+        {
+            ParsedDirectConfig = this.DefaultDirectConfig;
+        }
+
+        let CMakeProjectStructure = this.Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
+        let CMakeBuildDirectory = APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectory(
+            CMakeProjectStructure.BuildDirectory, 
+            CMakeProjectStructure.Generator,
+            ParsedDirectConfig
+        );
+
+        let TargetNameArgument = '';
+        if (TargetName)
+        {
+            TargetNameArgument = `--target ${TargetName}`;   
+        }
+            
+        execSync(
+            `cmake --build "${CMakeBuildDirectory}" --config "${ParsedDirectConfig}" ${TargetNameArgument}
+            `, { 
+                stdio: 'inherit' 
+            }
+        );
+        console.log(`Built ${this.Project.AbsoluteEntryFile} (Config: ${ParsedDirectConfig})`);
     }
 }

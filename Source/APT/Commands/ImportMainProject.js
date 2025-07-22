@@ -1,12 +1,12 @@
 
 AMJS.Namespace.ImportMainProject = function(CommandManager)
 {
-    if (CommandManager.CLIInput.has("main_project_entry_file_path"))
+    if (CommandManager.CLIInput.has("MainProjectEntryFile"))
     {
-        const Slot = CommandManager.CLIInput.get("main_project_entry_file_path");
+        const Slot = CommandManager.CLIInput.get("MainProjectEntryFile");
         if (Slot.length != 1)
         {
-            throw new Error("Invalid main_project_entry_file_path");
+            throw new Error("Invalid MainProjectEntryFile");
         }
 
         const MainProjectEntryFile = Slot[0];

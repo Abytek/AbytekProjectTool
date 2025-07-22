@@ -40,23 +40,23 @@ AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator
 {
     if (Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
     {
-        return Project.BuildDirectory;
+        return BuildDirectory;
     }
     if (Generator == APT.Templates.CMake.Utilities.Generators.CLION)
     {
-        if (Config == APT.Templates.CMake.Utilities.Configs.DEBUG)
+        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.DEBUG)
         {
             return path.join(BuildDirectory, "cmake-build-debug");
         }
-        if (Config == APT.Templates.CMake.Utilities.Configs.RELEASE)
+        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.RELEASE)
         {
             return path.join(BuildDirectory, "cmake-build-release");
         }
-        if (Config == APT.Templates.CMake.Utilities.Configs.REL_WITH_DEB_INFO)
+        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.REL_WITH_DEB_INFO)
         {
             return path.join(BuildDirectory, "cmake-build-relwithdebinfo");
         }
-        if (Config == APT.Templates.CMake.Utilities.Configs.MIN_SIZE_REL)
+        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.MIN_SIZE_REL)
         {
             return path.join(BuildDirectory, "cmake-build-minsizerel");
         }

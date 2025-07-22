@@ -47,7 +47,7 @@ AMJS.Namespace.F_CommandManager = class
             return parsed;
         }
 
-        this.CLIInput = ParseArgs(process.argv, 2, 'main_project_entry_file_path');
+        this.CLIInput = ParseArgs(process.argv, 2, 'MainProjectEntryFile');
 
         let Categories = [ 
             'ProjectDefault',
