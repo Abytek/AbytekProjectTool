@@ -88,7 +88,7 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
         }
         return ImportedResult;
     }
-    GetTargetModule(Project, TargetName, Required = true)
+    GetModule(Project, TargetName, Required = true)
     {
         let ImportedResult = this.GetImportedResult(Project);
         for(let JSContext of ImportedResult.JSContexts)
@@ -103,5 +103,10 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
             throw new Error(`Not found target module ${TargetName}`);
         }
         return null;
+    }
+    ResolveModuleAutoProperty(Project, TargetName, AutoPropertyName)
+    {
+        let Module = this.GetModule(Project, TargetName);
+        return Module.GetResolvedGeneratorExpression(AutoPropertyName, this.Config);
     }
 }
