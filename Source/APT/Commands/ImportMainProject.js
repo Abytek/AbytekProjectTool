@@ -9,9 +9,9 @@ AMJS.Namespace.ImportMainProject = function(CommandManager)
             throw new Error("Invalid main_project_entry_file_path");
         }
 
-        const MainProjectEntryFilePath = Slot[0];
+        const MainProjectEntryFile = Slot[0];
         
         let ProjectManager = CommandManager.System.ProjectManager;
-        ProjectManager.ImportProject(null, MainProjectEntryFilePath);
+        ProjectManager.ImportProject(null, MainProjectEntryFile);
     }
 }

@@ -1,15 +1,20 @@
 
+const path = require("path");
+
 AMJS.Import("./ProjectComponent");
 
 AMJS.Namespace.F_Project = class
 {
-    constructor(AbsoluteEntryFilePath, AdditionalOptions)
+    constructor(AbsoluteEntryFile, AdditionalOptions)
     {
-        this.AbsoluteEntryFilePath = AbsoluteEntryFilePath;
-        this.Name = AbsoluteEntryFilePath;
+        this.AbsoluteEntryFile = AbsoluteEntryFile;
+        this.EntryDirectory = path.dirname(AbsoluteEntryFile);
+        this.Name = AbsoluteEntryFile;
         this.Label = this.Name;
         this.AdditionalOptions = AdditionalOptions ?? new Object();
         this.Components = new Map();
+
+        this.IsFinalized = false;
     }
 
     AddComponent(ComponentClass, ...Args)
@@ -51,5 +56,37 @@ AMJS.Namespace.F_Project = class
             Prototype(this);
         }
         return this;
+    }
+
+    TryFinalize()
+    {
+        if (this.IsFinalized)
+        {
+            return;
+        }
+        this.IsFinalized = true;
+        this.PostLoad();
+    }
+
+    PostLoad()
+    {
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.Init();
+            }
+        );
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.PostInit();
+            }
+        );
+        this.Components.forEach(
+            (Value, Key, Map) =>
+            {
+                Value.Start();
+            }
+        );
     }
 };

@@ -20,7 +20,8 @@ AMJS.Namespace.PlatformTags =
     POSIX: "POSIX",
     UNIX: "Unix",
     ANDROID: "Android",
-    EMSCRIPTEN: "Emscripten"
+    EMSCRIPTEN: "Emscripten",
+    WEB: "Web"
 }
 
 AMJS.Namespace.GetHostPlatformTags = function()
@@ -75,7 +76,7 @@ AMJS.Namespace.TrySetPropertyByPath = function(InObject, Key, Value)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0);
+    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
@@ -110,7 +111,7 @@ AMJS.Namespace.SetPropertyByPath = function(InObject, Key, Value)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0);
+    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
@@ -138,14 +139,71 @@ AMJS.Namespace.GetPropertyByPath = function(InObject, Key)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0);
+    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
-        AMJS.Namespace.Assert(KeyPart in Subobject);
+        AMJS.Namespace.Assert(KeyPart in Subobject, `key ${Key} not added`);
         Subobject = Subobject[KeyPart];
     }
     let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
-    AMJS.Namespace.Assert(LastKeyPart in Subobject);
+    AMJS.Namespace.Assert(LastKeyPart in Subobject, `key ${Key} not added`);
     return Subobject[LastKeyPart];
 }
+AMJS.Namespace.FindPropertyByPath = function(InObject, Key)
+{
+    let KeyParts = Key.split(".");
+    let ParsedKeyParts = [];
+    for(let KeyPart of KeyParts)
+    {
+        if (KeyPart != "")
+        {
+            ParsedKeyParts.push(KeyPart);
+        }
+    }
+
+    let NumKeyParts = ParsedKeyParts.length;
+    let Subobject = InObject;
+    if (!(NumKeyParts > 0))
+    {
+        return null;
+    }
+    for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
+    {
+        let KeyPart = ParsedKeyParts[Idx];
+        if (!(KeyPart in Subobject))
+        {
+            return null;
+        }
+        Subobject = Subobject[KeyPart];
+    }
+    let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
+    if (!(LastKeyPart in Subobject))
+    {
+        return null;
+    }
+    return Subobject[LastKeyPart];
+}
+
+AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
+{
+    if (Value == null)
+    {
+        return null;
+    }
+    if (Array.isArray(Value))
+    {
+        return Value.join(ArrayCombinatorKeyword);
+    }
+    return Value;
+}
+
+AMJS.Namespace.SimpleDeepCopy = function(Value)
+{
+    return JSON.parse(
+        JSON.stringify(Value)
+    );
+}
+
+AMJS.Namespace.EnableOptimization = false;
+AMJS.Namespace.EnableMinSize = false;
