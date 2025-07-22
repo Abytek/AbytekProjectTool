@@ -50,7 +50,8 @@ AMJS.Namespace.F_CommandManager = class
         this.CLIInput = ParseArgs(process.argv, 2, 'main_project_entry_file_path');
 
         let Categories = [ 
-            'ProjectDefault'
+            'ProjectDefault',
+            'GlobalDefault'
         ];
         for(let Category of Categories)
         {

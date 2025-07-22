@@ -1,2 +1,2 @@
 
-AMJS.Import("./PlatformTags");
+AMJS.Import("./ProjectStructure");

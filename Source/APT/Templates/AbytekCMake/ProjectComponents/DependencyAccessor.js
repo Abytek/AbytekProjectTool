@@ -4,6 +4,12 @@ const path = require("path");
 AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("./ProjectStructure");
 
+// Dependent components:
+//
+// Constructor-phase properties:
+//      InstanceData.APT.Templates.AbytekCMake.ProjectComponents.DependencyAccessor.Config
+//
+// Init-phase properties:
 AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
 {
     constructor(Project)

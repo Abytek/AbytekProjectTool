@@ -20,7 +20,7 @@ APT.Project.TryFinalize();
     let AdditionalOptions = new Object();
     APT.Common.TrySetPropertyByPath(
         AdditionalOptions,
-        "InstanceData.APT.Templates.Common.ProjectComponents.PlatformTags.Value",
+        "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.PlatformTags",
         [ APT.Common.PlatformTags.EMSCRIPTEN ]
     );
 }

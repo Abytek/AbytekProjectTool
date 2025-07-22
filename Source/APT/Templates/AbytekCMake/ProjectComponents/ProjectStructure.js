@@ -2,13 +2,21 @@
 AMJS.ImportNamespace("../Utilities");
 AMJS.ImportNamespace("../../CMake/ProjectComponents");
 
+// Dependent components:
+//      APT.Templates.Common.ProjectComponents.F_PlatformTags
+//      APT.Templates.CMake.ProjectComponents.F_ProjectStructure
+//
+// Constructor-phase properties:
+//      InstanceData.APT.Templates.AbytekCMake.ProjectComponents.ProjectStructure.AProjectType
+//
+// Init-phase properties:
 AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 {
     constructor(Project)
     {
         super(Project);
 
-        let PlatformTags = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_PlatformTags).Value;
+        let PlatformTags = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).PlatformTags;
         let CMakeProjectStructure = Project.EnsureComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
         let Config = CMakeProjectStructure.Config;
         let Generator = CMakeProjectStructure.Generator;

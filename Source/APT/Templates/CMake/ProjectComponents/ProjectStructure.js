@@ -3,15 +3,25 @@ const path = require("path");
 
 AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("../Utilities/Generator");
-AMJS.Import("../../Common/ProjectComponents/PlatformTags");
+AMJS.Import("../../Common/ProjectComponents/ProjectStructure");
 
+// Dependent components:
+//
+// Constructor-phase properties:
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Config
+//
+// Init-phase properties:
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectory
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments
 AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 {
     constructor(Project)
     {
         super(Project);
 
-        let PlatformTags = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_PlatformTags).Value;
+        let PlatformTags = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).PlatformTags;
 
         this.Generator = APT.Common.ForwardString(
             APT.Common.TrySetPropertyByPath(

@@ -8,11 +8,11 @@ APT.Project.TryFinalize();
 
 {
     let ProjectComponent = APT.Project.GetComponent(
-        APT.Templates.Common.ProjectComponents.F_PlatformTags
+        APT.Templates.Common.ProjectComponents.F_ProjectStructure
     );
     console.log(
         'Platform tags:',
-        ProjectComponent.Value
+        ProjectComponent.PlatformTags
     );
 }
 {

@@ -204,3 +204,6 @@ AMJS.Namespace.SimpleDeepCopy = function(Value)
         JSON.stringify(Value)
     );
 }
+
+AMJS.Namespace.EnableOptimization = false;
+AMJS.Namespace.EnableMinSize = false;
