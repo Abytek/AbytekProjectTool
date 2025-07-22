@@ -30,11 +30,12 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             Config,
             Generator
         };
-        const BuildDirectory = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams);
-        APT.Common.TrySetPropertyByPath(
-            Project.AdditionalOptions,
-            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory",
-            BuildDirectory
-        )
+        const BuildDirectory = APT.Common.ForwardString(
+            APT.Common.TrySetPropertyByPath(
+                Project.AdditionalOptions,
+                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory",
+                APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams)
+            )
+        );
     }
 }

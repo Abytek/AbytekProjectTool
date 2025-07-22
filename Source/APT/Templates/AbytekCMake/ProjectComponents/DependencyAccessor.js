@@ -36,7 +36,7 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
     }
     GetImportJSFile(Project)
     {
-        return path.join(this.GetCMakeBuildDirectory(Project), "AbytekCMake.Import.js");
+        return path.join(this.GetCMakeBuildDirectory(Project), "AbytekCMake/Import.js");
     }
     GetImportedResult(Project)
     {
