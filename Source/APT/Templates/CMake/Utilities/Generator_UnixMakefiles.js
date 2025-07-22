@@ -9,9 +9,9 @@ AMJS.Namespace.GenerateProjectFiles_UnixMakefiles = function(ProjectStructure)
         `cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=${
             ProjectStructure.Config
         } -S "${
-            ProjectStructure.SourceDirectoryPath
+            ProjectStructure.SourceDirectory
         }" -B "${
-            ProjectStructure.BuildDirectoryPath
+            ProjectStructure.BuildDirectory
         }" ${
             ProjectStructure.ExtraArguments.join(' ')
         }`, { 

@@ -10,9 +10,9 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
     let Project = ProjectStructure.Project;
 
-    console.log(`<APT.Templates.CMake> Begin generating project files for ${Project.AbsoluteEntryFilePath}`);
+    console.log(`<APT.Templates.CMake> Begin generating project files for ${Project.AbsoluteEntryFile}`);
 
-    fs.mkdirSync(ProjectStructure.BuildDirectoryPath, { recursive: true });
+    fs.mkdirSync(ProjectStructure.BuildDirectory, { recursive: true });
 
     if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.CLION)
     {
@@ -31,5 +31,5 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
         throw new Error(`unknown CMake generator ${ProjectStructure.Generator}`);
     }
 
-    console.log(`<APT.Templates.CMake> Generated project files for ${Project.AbsoluteEntryFilePath} successfully`);
+    console.log(`<APT.Templates.CMake> Generated project files for ${Project.AbsoluteEntryFile} successfully`);
 }

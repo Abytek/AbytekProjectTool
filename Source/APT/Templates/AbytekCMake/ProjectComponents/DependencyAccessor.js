@@ -25,18 +25,18 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
         );
     }
 
-    GetCMakeBuildDirectoryPath(Project)
+    GetCMakeBuildDirectory(Project)
     {
         let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        return APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectoryPath(
-            CMakeProjectStructure.BuildDirectoryPath, 
+        return APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectory(
+            CMakeProjectStructure.BuildDirectory, 
             CMakeProjectStructure.Generator,
             this.Config
         );
     }
-    GetImportJSFilePath(Project)
+    GetImportJSFile(Project)
     {
-        return path.join(this.GetCMakeBuildDirectoryPath(Project), "APT.Import.js");
+        return path.join(this.GetCMakeBuildDirectory(Project), "AbytekCMake.Import.js");
     }
     GetImportedResult(Project)
     {
@@ -51,7 +51,7 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
         }
         else
         {
-            ImportedResult = require(this.GetImportJSFilePath(Project));
+            ImportedResult = require(this.GetImportJSFile(Project));
             APT.Templates.AbytekCMake.Utilities.ImportedResults.set(ImportKey, ImportedResult);
         }
         return ImportedResult;

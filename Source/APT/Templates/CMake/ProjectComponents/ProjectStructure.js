@@ -36,20 +36,20 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
     Init()
     {
-        this.SourceDirectoryPath = APT.Common.ForwardString(
+        this.SourceDirectory = APT.Common.ForwardString(
             APT.Common.FindPropertyByPath(
                 this.Project.AdditionalOptions,
-                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectoryPath"
-            ) ?? this.Project.EntryDirectoryPath
+                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectory"
+            ) ?? this.Project.EntryDirectory
         );
-        this.BuildDirectoryPath = APT.Common.Assert(
+        this.BuildDirectory = APT.Common.Assert(
             APT.Common.ForwardString(
                 APT.Common.FindPropertyByPath(
                     this.Project.AdditionalOptions,
-                    "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath"
+                    "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
                 )
             ),
-            "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath"
+            "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
         );
         this.ExtraArguments = APT.Common.FindPropertyByPath(
             this.Project.AdditionalOptions,

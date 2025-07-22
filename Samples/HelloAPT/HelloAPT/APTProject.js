@@ -1,5 +1,5 @@
 
-console.log(`HelloAPT ${APT.Project.AbsoluteEntryFilePath}`);
+console.log(`HelloAPT ${APT.Project.AbsoluteEntryFile}`);
 
 APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default

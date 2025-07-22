@@ -11,11 +11,11 @@ AMJS.Namespace.F_ProjectManager = class
         this.DefaultInstanceData = this.System.CommandManager.CLIInput.get('ProjectDefault').InstanceData ?? new Object();
     }
 
-    CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData = new Object())
+    CalculateProjectKey(AbsoluteProjectEntryFile, InstanceData = new Object())
     {
-        return { AbsoluteProjectEntryFilePath, InstanceData };
+        return { AbsoluteProjectEntryFile, InstanceData };
     }
-    ImportProject(BaseModule, ProjectEntryFilePath, AdditionalOptions = new Object(), Required = true)
+    ImportProject(BaseModule, ProjectEntryFile, AdditionalOptions = new Object(), Required = true)
     {
         let ParsedAdditionalOptions = { ...AdditionalOptions };
 
@@ -29,29 +29,29 @@ AMJS.Namespace.F_ProjectManager = class
         }
         ParsedAdditionalOptions.InstanceData = InstanceData;
 
-        let AbsoluteProjectEntryFilePath = AMJS.ModuleSystem.SearchModuleAbsoluteFilePath(BaseModule, ProjectEntryFilePath);
-        if (!AbsoluteProjectEntryFilePath)
+        let AbsoluteProjectEntryFile = AMJS.ModuleSystem.SearchModuleAbsoluteFile(BaseModule, ProjectEntryFile);
+        if (!AbsoluteProjectEntryFile)
         {
             if (Required)
             {
-                throw new Error(`Project entry file ${ProjectEntryFilePath} not found`);
+                throw new Error(`Project entry file ${ProjectEntryFile} not found`);
             }
             return false;
         }
 
-        const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryFilePath, InstanceData);
+        const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryFile, InstanceData);
         if (this.Projects.has(ProjectKey))
         {
             return this.Projects.get(ProjectKey);
         }
 
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFilePath, ParsedAdditionalOptions);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFile, ParsedAdditionalOptions);
 
         let ProjectManager = this;
 
         let ProjectContext = AMJS.ModuleSystem.Import(
             BaseModule,
-            ProjectEntryFilePath,
+            ProjectEntryFile,
             Required,
             {
                 ModifyContext(Context)
@@ -61,9 +61,9 @@ AMJS.Namespace.F_ProjectManager = class
                     };
                     Project.Context = Context;
                     Context.APT.Project = Project;
-                    Context.APT.ImportProject = function(ProjectEntryFilePath2, AdditionalOptions2 = new Object(), Required2 = true)
+                    Context.APT.ImportProject = function(ProjectEntryFile2, AdditionalOptions2 = new Object(), Required2 = true)
                     {
-                        return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFilePath2, AdditionalOptions2, Required2);
+                        return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFile2, AdditionalOptions2, Required2);
                     }
                 },
                 IsAnonymous: true

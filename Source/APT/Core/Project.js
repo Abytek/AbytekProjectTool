@@ -5,11 +5,11 @@ AMJS.Import("./ProjectComponent");
 
 AMJS.Namespace.F_Project = class
 {
-    constructor(AbsoluteEntryFilePath, AdditionalOptions)
+    constructor(AbsoluteEntryFile, AdditionalOptions)
     {
-        this.AbsoluteEntryFilePath = AbsoluteEntryFilePath;
-        this.EntryDirectoryPath = path.dirname(AbsoluteEntryFilePath);
-        this.Name = AbsoluteEntryFilePath;
+        this.AbsoluteEntryFile = AbsoluteEntryFile;
+        this.EntryDirectory = path.dirname(AbsoluteEntryFile);
+        this.Name = AbsoluteEntryFile;
         this.Label = this.Name;
         this.AdditionalOptions = AdditionalOptions ?? new Object();
         this.Components = new Map();

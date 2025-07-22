@@ -22,19 +22,19 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         this.AProjectType = AProjectType;
 
-        let CalculateBuildDirectoryPathParams =
+        let CalculateBuildDirectoryParams =
         {
-            AbsoluteProjectEntryFilePath: Project.AbsoluteEntryFilePath,
+            AbsoluteProjectEntryFile: Project.AbsoluteEntryFile,
             PlatformTags,
             AProjectType,
             Config,
             Generator
         };
-        const BuildDirectoryPath = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectoryPath(CalculateBuildDirectoryPathParams);
+        const BuildDirectory = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams);
         APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
-            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectoryPath",
-            BuildDirectoryPath
+            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory",
+            BuildDirectory
         )
     }
 }

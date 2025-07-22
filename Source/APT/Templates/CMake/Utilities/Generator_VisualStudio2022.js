@@ -7,9 +7,9 @@ AMJS.Namespace.GenerateProjectFiles_VisualStudio2022 = function(ProjectStructure
 {
     execSync(
         `cmake -G "Visual Studio 17 2022" -S "${
-            ProjectStructure.SourceDirectoryPath
+            ProjectStructure.SourceDirectory
         }" -B "${
-            ProjectStructure.BuildDirectoryPath
+            ProjectStructure.BuildDirectory
         }" ${
             ProjectStructure.ExtraArguments.join(' ')
         }`, { 

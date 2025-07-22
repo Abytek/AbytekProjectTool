@@ -29,7 +29,7 @@ APT.Project.TryFinalize();
     );
     console.log(
         'Build directory path:',
-        ProjectComponent.BuildDirectoryPath
+        ProjectComponent.BuildDirectory
     );
 }
 {
