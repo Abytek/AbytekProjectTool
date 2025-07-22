@@ -1,5 +1,6 @@
 
 const path = require("path");
+const fs = require("fs");
 
 AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("./ProjectStructure");
@@ -57,14 +58,50 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
         }
         else
         {
-            ImportedResult = require(this.GetImportJSFile(Project));
+            let ImportJSFile = this.GetImportJSFile(Project);
+            if (!fs.existsSync(ImportJSFile))
+            {
+                throw new Error(`Not found AbytekCMake/Import.js for ${Project.AbsoluteEntryFile}`);
+            }
+
+            let JSListFiles = require(ImportJSFile);
+            ImportedResult = new Object();
+            
+            let JSContexts = [];
+            for(let JSListFile of JSListFiles)
+            {
+                let JSList = require(JSListFile);
+                let JSContextFile = JSList.JSContextFile;
+                if (JSContextFile)
+                {
+                    if (fs.existsSync(JSContextFile))
+                    {
+                        let JSContext = require(JSContextFile);
+                        JSContexts.push(JSContext);
+                    }
+                }
+            }
+
+            ImportedResult.JSContexts = JSContexts;
+
             APT.Templates.AbytekCMake.Utilities.ImportedResults.set(ImportKey, ImportedResult);
         }
         return ImportedResult;
     }
-    GetTargetModule(Project, TargetName)
+    GetTargetModule(Project, TargetName, Required = true)
     {
         let ImportedResult = this.GetImportedResult(Project);
-        return ImportedResult.Context.RequireModule(TargetName);
+        for(let JSContext of ImportedResult.JSContexts)
+        {
+            if (TargetName in JSContext.ModuleFiles)
+            {
+                return JSContext.RequireModule(TargetName);
+            }
+        }
+        if (Required)
+        {
+            throw new Error(`Not found target module ${TargetName}`);
+        }
+        return null;
     }
 }

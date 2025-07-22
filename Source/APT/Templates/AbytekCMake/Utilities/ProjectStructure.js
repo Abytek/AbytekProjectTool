@@ -40,7 +40,7 @@ AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator
 {
     if (Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
     {
-        return Project.BuildDirectory;
+        return BuildDirectory;
     }
     if (Generator == APT.Templates.CMake.Utilities.Generators.CLION)
     {
