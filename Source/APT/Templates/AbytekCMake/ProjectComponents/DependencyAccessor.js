@@ -109,4 +109,20 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
         let Module = this.GetModule(Project, TargetName);
         return Module.GetResolvedGeneratorExpression(AutoPropertyName, this.Config);
     }
+    ResolveModuleRuntimeOutputDirectory(Project, TargetName)
+    {
+        return this.ResolveModuleAutoProperty(Project, TargetName, "RuntimeOutputDirectory");
+    }
+    ResolveModuleLibraryOutputDirectory(Project, TargetName)
+    {
+        return this.ResolveModuleAutoProperty(Project, TargetName, "LibraryOutputDirectory");
+    }
+    ResolveModuleArchiveOutputDirectory(Project, TargetName)
+    {
+        return this.ResolveModuleAutoProperty(Project, TargetName, "ArchiveOutputDirectory");
+    }
+    ResolveModuleTargetFile(Project, TargetName)
+    {
+        return this.ResolveModuleAutoProperty(Project, TargetName, "TargetFile");
+    }
 }
