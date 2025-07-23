@@ -16,7 +16,7 @@ AMJS.Namespace.GetDefaultDirectConfig = function()
     let DefaultEnableOptimization = APT.Templates.Common.Utilities.GetDefaultEnableOptimization();
     let DefaultEnableMinSize = APT.Templates.Common.Utilities.GetDefaultEnableMinSize();
 
-    if (DefaultEnableOptimization)
+    if (DefaultEnableOptimization || (!DefaultEnableDebug))
     {
         if (DefaultEnableDebug)
         {
@@ -32,13 +32,6 @@ AMJS.Namespace.GetDefaultDirectConfig = function()
             {
                 return AMJS.Namespace.Configs.RELEASE;
             }
-        }
-    }
-    else
-    {
-        if (DefaultEnableDebug)
-        {
-            return AMJS.Namespace.Configs.DEBUG;
         }
     }
     return AMJS.Namespace.Configs.DEBUG;

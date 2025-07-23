@@ -1,5 +1,7 @@
 
 const os = require("os");
+const path = require("path");
+const fs = require("fs");
 
 AMJS.Namespace.Assert = function(Value, ...Args)
 {
@@ -197,6 +199,26 @@ AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
     }
     return Value;
 }
+AMJS.Namespace.ForwardBool = function(Value)
+{
+    if (
+        (Value == 1)
+        || (Value == '1')
+        || (Value == 'true')
+        || (Value == 'True')
+        || (Value == 'TRUE')
+        || (Value == 'on')
+        || (Value == 'On')
+        || (Value == 'ON')
+        || (Value == 'enable')
+        || (Value == 'Enable')
+        || (Value == 'ENABLE')
+    )
+    {
+        return true;
+    }
+    return false;
+}
 
 AMJS.Namespace.SimpleDeepCopy = function(Value)
 {
@@ -205,5 +227,81 @@ AMJS.Namespace.SimpleDeepCopy = function(Value)
     );
 }
 
-AMJS.Namespace.EnableOptimization = false;
-AMJS.Namespace.EnableMinSize = false;
+AMJS.Namespace.GetCacheDirectory = function()
+{
+    return path.join(__dirname, "../../../Data/Cache");
+}
+AMJS.Namespace.CalculateCacheFile = function(Key)
+{
+    return path.join(AMJS.Namespace.GetCacheDirectory(), Key);
+}
+AMJS.Namespace.HasCache = function(Key)
+{
+    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    if (!fs.existsSync(CacheFile))
+    {
+        return false;
+    }
+    let stats = fs.statSync(CacheFile);
+    return stats.isFile();
+}
+AMJS.Namespace.Cache = function(Key, Value, Required = true)
+{
+    if (AMJS.Namespace.HasCache(Key))
+    {
+        if (Required)
+        {
+            throw new Error(`Already cached ${Key}`);
+        }
+        return null;
+    }
+    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    {
+        const Dir = path.dirname(CacheFile);
+        if (!fs.existsSync(Dir))
+        {
+            fs.mkdirSync(Dir, { recursive: true });
+        }
+    }
+    fs.writeFileSync(CacheFile, Value);
+    return Value;
+}
+AMJS.Namespace.TryCache = function(Key, Value)
+{
+    return AMJS.Namespace.Cache(Key, Value, false);
+}
+AMJS.Namespace.Uncache = function(Key, Required = true)
+{
+    if (!(AMJS.Namespace.HasCache(Key)))
+    {
+        if (Required)
+        {
+            throw new Error(`Not cached ${Key}`);
+        }
+        return false;
+    }
+    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    fs.unlinkSync(CacheFile, Value);
+    return true;
+}
+AMJS.Namespace.TryUncache = function(Key)
+{
+    return AMJS.Namespace.Uncache(Key, false);
+}
+AMJS.Namespace.ReadCache = function(Key, Required = true)
+{
+    if (!(AMJS.Namespace.HasCache(Key)))
+    {
+        if (Required)
+        {
+            throw new Error(`Not cached ${Key}`);
+        }
+        return false;
+    }
+    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    return fs.readFileSync(CacheFile);
+}
+AMJS.Namespace.TryReadCache = function(Key)
+{
+    return AMJS.Namespace.ReadCache(Key, false);
+}

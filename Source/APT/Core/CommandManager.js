@@ -90,6 +90,14 @@ AMJS.Namespace.F_CommandManager = class
 
     ExecuteCLI()
     {
-        APT.Commands.ImportMainProject(this);
+        if (APT.Commands.CleanCache(this))
+        {
+            return true;
+        }
+        if (APT.Commands.ImportMainProject(this))
+        {
+            return true;
+        }
+        return false;
     }
 }
