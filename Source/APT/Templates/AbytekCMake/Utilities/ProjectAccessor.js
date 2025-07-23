@@ -1,35 +1,26 @@
 
-const path = require("path");
-const fs = require("fs");
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
 AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("./ProjectStructure");
 
-// Dependent components:
-//
-// Constructor-phase properties:
-//      InstanceData.APT.Templates.AbytekCMake.ProjectComponents.DependencyAccessor.Config
-//
-// Init-phase properties:
-AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
+AMJS.Namespace.F_ProjectAccessor = class
 {
-    constructor(Project)
+    constructor(DirectConfig)
     {
-        super(Project);
-
         APT.Templates.AbytekCMake.Utilities.ImportedResults = APT.Templates.AbytekCMake.Utilities.ImportedResults ?? new Map();
 
-        this.Config = APT.Templates.CMake.Utilities.EnsureDirectConfig(
-            APT.Common.TrySetPropertyByPath(
-                Project.AdditionalOptions,
-                "InstanceData.APT.Templates.AbytekCMake.ProjectComponents.DependencyAccessor.Config",
-                APT.Common.TrySetPropertyByPath(
-                    Project.AdditionalOptions,
-                    "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Config",
-                    APT.Templates.CMake.Utilities.GetDefaultDirectConfig()
-                )
-            )
-        );
+        this.Config = DirectConfig;
+        if (this.Config == null)
+        {
+            this.Config = APT.Templates.CMake.Utilities.GetDefaultDirectConfig();
+        }
+        if (this.Config == null)
+        {
+            throw new Error(`Invalid config(null)`);
+        }
     }
 
     GetCMakeBuildDirectory(Project)
@@ -124,5 +115,38 @@ AMJS.Namespace.F_DependencyAccessor = class extends APT.Core.A_ProjectComponent
     ResolveModuleTargetFile(Project, TargetName)
     {
         return this.ResolveModuleAutoProperty(Project, TargetName, "TargetFile");
+    }
+
+    Build(Project, TargetName)
+    {
+        if (Project == null)
+        {
+            throw new Error(`Invalid project`);
+        }
+        if (TargetName == null)
+        {
+            throw new Error(`Invalid target name`);
+        }
+
+        let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
+        let CMakeBuildDirectory = APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectory(
+            CMakeProjectStructure.BuildDirectory, 
+            CMakeProjectStructure.Generator,
+            this.Config
+        );
+
+        let TargetNameArgument = '';
+        if (TargetName)
+        {
+            TargetNameArgument = `--target ${TargetName}`;   
+        }
+            
+        execSync(
+            `cmake --build "${CMakeBuildDirectory}" --config "${this.Config}" ${TargetNameArgument}
+            `, { 
+                stdio: 'inherit' 
+            }
+        );
+        console.log(`Built ${Project.AbsoluteEntryFile} (Config: ${this.Config})`);
     }
 }
