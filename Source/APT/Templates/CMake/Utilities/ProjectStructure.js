@@ -40,8 +40,12 @@ AMJS.Namespace.GetDefaultDirectConfig = function()
         {
             return AMJS.Namespace.Configs.DEBUG;
         }
+        else
+        {
+            return AMJS.Namespace.Configs.RELEASE;
+        }
     }
-    return AMJS.Namespace.Configs.DEBUG;
+    return AMJS.Namespace.Configs.RELEASE;
 }
 AMJS.Namespace.GetDefaultConfig = function(Generator)
 {

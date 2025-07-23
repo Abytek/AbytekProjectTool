@@ -197,6 +197,26 @@ AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
     }
     return Value;
 }
+AMJS.Namespace.ForwardBool = function(Value)
+{
+    if (
+        (Value == 1)
+        || (Value == '1')
+        || (Value == 'true')
+        || (Value == 'True')
+        || (Value == 'TRUE')
+        || (Value == 'on')
+        || (Value == 'On')
+        || (Value == 'ON')
+        || (Value == 'enable')
+        || (Value == 'Enable')
+        || (Value == 'ENABLE')
+    )
+    {
+        return true;
+    }
+    return false;
+}
 
 AMJS.Namespace.SimpleDeepCopy = function(Value)
 {

@@ -6,7 +6,7 @@ AMJS.Namespace.GetDefaultEnableDebug = function()
     {
         return true;
     }
-    return Result;
+    return APT.Common.ForwardBool(Result);
 }
 AMJS.Namespace.GetDefaultEnableOptimization = function()
 {
@@ -15,7 +15,7 @@ AMJS.Namespace.GetDefaultEnableOptimization = function()
     {
         return false;
     }
-    return Result;
+    return APT.Common.ForwardBool(Result);
 }
 AMJS.Namespace.GetDefaultEnableMinSize = function()
 {
@@ -24,5 +24,5 @@ AMJS.Namespace.GetDefaultEnableMinSize = function()
     {
         return false;
     }
-    return Result;
+    return APT.Common.ForwardBool(Result);
 }
