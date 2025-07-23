@@ -26,3 +26,12 @@ AMJS.Namespace.GetDefaultEnableMinSize = function()
     }
     return APT.Common.ForwardBool(Result);
 }
+AMJS.Namespace.GetDefaultEnableTest = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnableTest;
+    if (Result == null)
+    {
+        return false;
+    }
+    return APT.Common.ForwardBool(Result);
+}
