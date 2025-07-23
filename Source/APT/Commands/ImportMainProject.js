@@ -13,5 +13,7 @@ AMJS.Namespace.ImportMainProject = function(CommandManager)
         
         let ProjectManager = CommandManager.System.ProjectManager;
         ProjectManager.ImportProject(null, MainProjectEntryFile);
+        return true;
     }
+    return false;
 }
