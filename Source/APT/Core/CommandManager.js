@@ -94,6 +94,10 @@ AMJS.Namespace.F_CommandManager = class
         {
             return true;
         }
+        if (APT.Commands.OpenEditor(this))
+        {
+            return true;
+        }
         if (APT.Commands.ImportMainProject(this))
         {
             return true;

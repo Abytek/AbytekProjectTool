@@ -305,3 +305,24 @@ AMJS.Namespace.TryReadCache = function(Key)
 {
     return AMJS.Namespace.ReadCache(Key, false);
 }
+
+AMJS.Namespace.SmartWriteFile = function(File, Content)
+{
+    if (!(fs.existsSync(File)))
+    {
+        fs.writeFileSync(File, Content);
+        return;
+    }
+
+    let stats = fs.statSync(File);
+    if (!(stats.isFile()))
+    {
+        throw new Error(`The item is actually not a file`);
+    }
+
+    let LastContent = fs.readFileSync(File);
+    if (Content != LastContent)
+    {
+        fs.writeFileSync(File, Content);
+    }
+}

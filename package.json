@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Abytek/AbytekProjectTool/issues"
   },
-  "homepage": "https://github.com/Abytek/AbytekProjectTool#readme"
+  "homepage": "https://github.com/Abytek/AbytekProjectTool#readme",
+  "dependencies": {
+    "open": "^10.2.0"
+  }
 }

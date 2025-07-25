@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.Namespace.Configs =
 {
     AUTO: "Auto",
@@ -40,7 +42,6 @@ AMJS.Namespace.GetDefaultConfig = function(Generator)
 {
     if (
         (Generator == AMJS.Namespace.Generators.VS2022)
-        || (Generator == AMJS.Namespace.Generators.CLION)
     )
     {
         return AMJS.Namespace.Configs.AUTO;
@@ -63,7 +64,7 @@ AMJS.Namespace.Generators =
     VS2022: "VisualStudio2022",
     UNIX_MAKE_FILES: "UnixMakefiles",
     XCODE: "Xcode",
-    CLION: "CLion",
+    NINJA: "Ninja",
 }
 
 AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
@@ -87,7 +88,6 @@ AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
     {
         if (
             (Generator == AMJS.Namespace.Generators.VS2022)
-            || (Generator == AMJS.Namespace.Generators.CLION)
         )
         {
             return true;
@@ -107,4 +107,14 @@ AMJS.Namespace.ParseConfig = function(Config, Generator, PlatformTags)
         return Config;
     }
     return AMJS.Namespace.GetDefaultConfig(PlatformTags);
+}
+
+AMJS.Namespace.CalculateCMakeParentBuildDirectory = function(BuildDirectory, Generator)
+{
+    return BuildDirectory;
+}
+
+AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator, DirectConfig)
+{
+    return AMJS.Namespace.CalculateCMakeParentBuildDirectory(BuildDirectory, Generator);
 }
