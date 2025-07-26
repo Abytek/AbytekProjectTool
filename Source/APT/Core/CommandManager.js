@@ -85,6 +85,18 @@ AMJS.Namespace.F_CommandManager = class
             }
         }
 
+        {
+            let MainProjectEntryFileSlot = this.CLIInput.get('MainProjectEntryFile');
+            if (MainProjectEntryFileSlot.length == 1)
+            {
+                this.CLIInput.get("GlobalDefault").ProjectEntryFile = MainProjectEntryFileSlot[0];
+            }
+            if (MainProjectEntryFileSlot.length > 1)
+            {
+                throw new Error(`Too much argument for MainProjectEntryFile`);
+            }
+        }
+
         console.log(`CLI input:`, this.CLIInput);
     }
 

@@ -35,3 +35,13 @@ AMJS.Namespace.GetDefaultEnableTest = function()
     }
     return APT.Common.ForwardBool(Result);
 }
+
+AMJS.Namespace.GetDefaultProjectEntryFile = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryFile;
+    if (Result == null)
+    {
+        return null;
+    }
+    return APT.Common.ForwardString(Result);
+}
