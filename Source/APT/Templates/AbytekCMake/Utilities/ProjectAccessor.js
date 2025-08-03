@@ -26,7 +26,7 @@ AMJS.Namespace.F_ProjectAccessor = class
     GetCMakeBuildDirectory(Project)
     {
         let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        return APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectory(
+        return APT.Templates.CMake.Utilities.CalculateCMakeBuildDirectory(
             CMakeProjectStructure.BuildDirectory, 
             CMakeProjectStructure.Generator,
             this.Config
@@ -129,7 +129,7 @@ AMJS.Namespace.F_ProjectAccessor = class
         }
 
         let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        let CMakeBuildDirectory = APT.Templates.AbytekCMake.Utilities.CalculateCMakeBuildDirectory(
+        let CMakeBuildDirectory = APT.Templates.CMake.Utilities.CalculateCMakeBuildDirectory(
             CMakeProjectStructure.BuildDirectory, 
             CMakeProjectStructure.Generator,
             this.Config

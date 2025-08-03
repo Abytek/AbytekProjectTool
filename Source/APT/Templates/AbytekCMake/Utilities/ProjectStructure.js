@@ -35,31 +35,3 @@ AMJS.Namespace.CalculateBuildDirectory = function(Options)
 
     return path.join(TopmostBuildDirectory, AProjectType, PlatformTags.sort().join("."), Generator, Config);
 }
-
-AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator, DirectConfig)
-{
-    if (Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
-    {
-        return BuildDirectory;
-    }
-    if (Generator == APT.Templates.CMake.Utilities.Generators.CLION)
-    {
-        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.DEBUG)
-        {
-            return path.join(BuildDirectory, "cmake-build-debug");
-        }
-        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.RELEASE)
-        {
-            return path.join(BuildDirectory, "cmake-build-release");
-        }
-        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.REL_WITH_DEB_INFO)
-        {
-            return path.join(BuildDirectory, "cmake-build-relwithdebinfo");
-        }
-        if (DirectConfig == APT.Templates.CMake.Utilities.Configs.MIN_SIZE_REL)
-        {
-            return path.join(BuildDirectory, "cmake-build-minsizerel");
-        }
-    }
-    return BuildDirectory;
-}

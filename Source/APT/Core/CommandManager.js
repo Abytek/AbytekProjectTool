@@ -8,6 +8,12 @@ AMJS.Namespace.F_CommandManager = class
         this.System = System;
     
         this.CLIInput = new Object();
+        this.Commands = [
+            APT.Commands.CleanCache,
+            APT.Commands.OpenEditor,
+            APT.Commands.ImportMainProject,
+            APT.Commands.Help
+        ];
 
         this.ParseCLIInput();
     }
@@ -85,18 +91,29 @@ AMJS.Namespace.F_CommandManager = class
             }
         }
 
+        {
+            let MainProjectEntryFileSlot = this.CLIInput.get('MainProjectEntryFile');
+            if (MainProjectEntryFileSlot.length == 1)
+            {
+                this.CLIInput.get("GlobalDefault").ProjectEntryFile = MainProjectEntryFileSlot[0];
+            }
+            if (MainProjectEntryFileSlot.length > 1)
+            {
+                throw new Error(`Too much argument for MainProjectEntryFile`);
+            }
+        }
+
         console.log(`CLI input:`, this.CLIInput);
     }
 
     ExecuteCLI()
     {
-        if (APT.Commands.CleanCache(this))
+        for(let Command of this.Commands)
         {
-            return true;
-        }
-        if (APT.Commands.ImportMainProject(this))
-        {
-            return true;
+            if (Command(this))
+            {
+                return true;
+            }
         }
         return false;
     }

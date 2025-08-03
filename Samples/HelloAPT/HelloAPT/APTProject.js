@@ -11,7 +11,7 @@ APT.Project.TryFinalize();
     APT.Common.TrySetPropertyByPath(
         AdditionalOptions,
         "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator",
-        [ APT.Templates.CMake.Utilities.Generators.CLION ]
+        [ APT.Templates.CMake.Utilities.Generators.VS2022 ]
     );
     APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
 }

@@ -1,25 +1,25 @@
 
-AMJS.Namespace.GetDefaultEnableDebug = function()
+AMJS.Namespace.GetDefaultSupportDebug = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnableDebug;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').SupportDebug;
     if (Result == null)
     {
         return true;
     }
     return APT.Common.ForwardBool(Result);
 }
-AMJS.Namespace.GetDefaultEnableOptimization = function()
+AMJS.Namespace.GetDefaultSupportOptimization = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnableOptimization;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').SupportOptimization;
     if (Result == null)
     {
         return false;
     }
     return APT.Common.ForwardBool(Result);
 }
-AMJS.Namespace.GetDefaultEnableMinSize = function()
+AMJS.Namespace.GetDefaultSupportMinSize = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnableMinSize;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').SupportMinSize;
     if (Result == null)
     {
         return false;
@@ -34,4 +34,14 @@ AMJS.Namespace.GetDefaultEnableTest = function()
         return false;
     }
     return APT.Common.ForwardBool(Result);
+}
+
+AMJS.Namespace.GetDefaultProjectEntryFile = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryFile;
+    if (Result == null)
+    {
+        return null;
+    }
+    return APT.Common.ForwardString(Result);
 }

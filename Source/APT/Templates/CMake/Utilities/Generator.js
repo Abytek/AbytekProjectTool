@@ -2,9 +2,9 @@
 const fs = require('fs');
 
 AMJS.Import("./ProjectStructure");
-AMJS.Import("./Generator_CLion");
 AMJS.Import("./Generator_VisualStudio2022");
 AMJS.Import("./Generator_UnixMakefiles");
+AMJS.Import("./Generator_Ninja");
 
 AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
@@ -14,17 +14,17 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 
     fs.mkdirSync(ProjectStructure.BuildDirectory, { recursive: true });
 
-    if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.CLION)
-    {
-        AMJS.Namespace.GenerateProjectFiles_CLion(ProjectStructure);
-    }
-    else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
+    if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
     {
         AMJS.Namespace.GenerateProjectFiles_VisualStudio2022(ProjectStructure);
     }
     else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.UNIX_MAKE_FILES)
     {
         AMJS.Namespace.GenerateProjectFiles_UnixMakefiles(ProjectStructure);
+    }
+    else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.NINJA)
+    {
+        AMJS.Namespace.GenerateProjectFiles_Ninja(ProjectStructure);
     }
     else
     {

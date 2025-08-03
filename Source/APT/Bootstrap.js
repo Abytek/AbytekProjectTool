@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 const AMJS = require("../../Submodules/AbytekModuleJS/Source/AMJS/.js");
 
