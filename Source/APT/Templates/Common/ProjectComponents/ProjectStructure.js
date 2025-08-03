@@ -18,20 +18,20 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.PlatformTags",
             APT.Common.GetHostPlatformTags()
         );
-        this.EnableDebug = APT.Common.TrySetPropertyByPath(
+        this.SupportDebug = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
-            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.EnableDebug",
-            APT.Templates.Common.Utilities.GetDefaultEnableDebug()
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportDebug",
+            APT.Templates.Common.Utilities.GetDefaultSupportDebug()
         );
-        this.EnableOptimization = APT.Common.TrySetPropertyByPath(
+        this.SupportOptimization = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
-            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.EnableOptimization",
-            APT.Templates.Common.Utilities.GetDefaultEnableOptimization()
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportOptimization",
+            APT.Templates.Common.Utilities.GetDefaultSupportOptimization()
         );
-        this.EnableMinSize = APT.Common.TrySetPropertyByPath(
+        this.SupportMinSize = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
-            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.EnableMinSize",
-            APT.Templates.Common.Utilities.GetDefaultEnableMinSize()
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportMinSize",
+            APT.Templates.Common.Utilities.GetDefaultSupportMinSize()
         );
     }
 }

@@ -14,19 +14,19 @@ AMJS.Namespace.Configs =
 
 AMJS.Namespace.GetDefaultDirectConfig = function()
 {
-    let DefaultEnableDebug = APT.Templates.Common.Utilities.GetDefaultEnableDebug();
-    let DefaultEnableOptimization = APT.Templates.Common.Utilities.GetDefaultEnableOptimization();
-    let DefaultEnableMinSize = APT.Templates.Common.Utilities.GetDefaultEnableMinSize();
+    let DefaultSupportDebug = APT.Templates.Common.Utilities.GetDefaultSupportDebug();
+    let DefaultSupportOptimization = APT.Templates.Common.Utilities.GetDefaultSupportOptimization();
+    let DefaultSupportMinSize = APT.Templates.Common.Utilities.GetDefaultSupportMinSize();
 
-    if (DefaultEnableOptimization || (!DefaultEnableDebug))
+    if (DefaultSupportOptimization || (!DefaultSupportDebug))
     {
-        if (DefaultEnableDebug)
+        if (DefaultSupportDebug)
         {
             return AMJS.Namespace.Configs.REL_WITH_DEB_INFO;
         }
         else
         {
-            if (DefaultEnableMinSize)
+            if (DefaultSupportMinSize)
             {
                 return AMJS.Namespace.Configs.MIN_SIZE_REL;
             }

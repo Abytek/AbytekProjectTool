@@ -1,3 +1,2 @@
 
-AMJS.Import("./Engine");
-AMJS.Import("./Project");
+AMJS.Import("./Default");
