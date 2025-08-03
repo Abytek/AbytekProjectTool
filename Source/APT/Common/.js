@@ -299,7 +299,7 @@ AMJS.Namespace.ReadCache = function(Key, Required = true)
         return false;
     }
     const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
-    return fs.readFileSync(CacheFile);
+    return fs.readFileSync(CacheFile).toString();
 }
 AMJS.Namespace.TryReadCache = function(Key)
 {
@@ -320,7 +320,7 @@ AMJS.Namespace.SmartWriteFile = function(File, Content)
         throw new Error(`The item is actually not a file`);
     }
 
-    let LastContent = fs.readFileSync(File);
+    let LastContent = fs.readFileSync(File).toString();
     if (Content != LastContent)
     {
         fs.writeFileSync(File, Content);

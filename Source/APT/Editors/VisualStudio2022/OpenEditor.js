@@ -26,7 +26,7 @@ AMJS.Namespace.OpenEditor = function(Project)
                         return;
                     }
 
-                   SolutionFile = path.join(ProjectStructure.RootDirectory, slnFiles[0]);
+                   SolutionFile = path.join(ProjectStructure.SourceDirectory, slnFiles[0]);
                 }
             }
 
@@ -36,7 +36,7 @@ AMJS.Namespace.OpenEditor = function(Project)
                 );
                 if (ProjectStructure)
                 {
-                    const files = fs.readdirSync(ProjectStructure.RootDirectory);
+                    const files = fs.readdirSync(ProjectStructure.MainDirectory);
                     const slnFiles = files.filter(file => file.endsWith('.sln'));
 
                     if (slnFiles.length === 0) {
@@ -44,7 +44,7 @@ AMJS.Namespace.OpenEditor = function(Project)
                         return;
                     }
 
-                   SolutionFile = path.join(ProjectStructure.RootDirectory, slnFiles[0]);
+                   SolutionFile = path.join(ProjectStructure.MainDirectory, slnFiles[0]);
                 }
             }
         }

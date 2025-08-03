@@ -2,32 +2,22 @@
 const path = require('path');
 const fs = require('fs');
 
-AMJS.Namespace.SearchUProjectFile = function(RootDirectory)
+AMJS.Namespace.SearchUProjectFile = function(EntryDirectory)
 {
     let UProjectFile = null;
-    fs.readdir(
-        RootDirectory, 
-        (Error, Items) => 
-        {  
-            if (Error) 
-            {
-                console.error('Error reading directory:', Error);
-                return;
-            }
-
-            for(let Item of Items)
-            {
-                const AbsoluteItem = path.join(RootDirectory, Item);
-                if (path.extname(AbsoluteItem) == 'uproject')
-                {
-                    if (fs.statSync(AbsoluteItem).isFile())
-                    {
-                        UProjectFile = AbsoluteItem;
-                        return;
-                    }
-                }
-            }
-        }
+    const Items = fs.readdirSync(
+        EntryDirectory,
+        { withFileTypes: true, recursive: false }
     );
-    return UProjectFile;
+
+    for(let Item of Items)
+    {
+        const AbsoluteItem = path.join(EntryDirectory, Item.name);
+        if (path.extname(Item.name) == '.uproject')
+        {
+            UProjectFile = AbsoluteItem;
+            return UProjectFile;
+        }
+    }
+    return null;
 }

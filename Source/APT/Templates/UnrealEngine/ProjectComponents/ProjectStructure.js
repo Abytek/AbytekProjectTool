@@ -9,9 +9,9 @@ AMJS.Import("../../Common/ProjectComponents/ProjectStructure");
 //      APT.Templates.Common.ProjectComponents.F_ProjectStructure
 //
 // Constructor-phase properties:
-//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectory
 //
 // Init-phase properties:
+//      APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.MainDirectory
 AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 {
     constructor(Project)
@@ -19,22 +19,41 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         super(Project);
 
         let CommonProjectStructure = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure);
+    
+        this.EngineProjectEntryFile = Project.AdditionalOptions.EngineProjectEntryFile;
+        this.EngineProjectAdditionalOptions = Project.AdditionalOptions.EngineProjectAdditionalOptions;
     }
 
     Init()
     {
-        this.RootDirectory = APT.Common.ForwardString(
+        this.MainDirectory = APT.Common.ForwardString(
             APT.Common.FindPropertyByPath(
                 this.Project.AdditionalOptions,
-                "InstanceData.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.RootDirectory"
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.MainDirectory"
             ) ?? this.Project.EntryDirectory
         );
 
-        this.UProjectFile = APT.Templates.UnrealEngine.Utilities.SearchUProjectFile(this.RootDirectory);
+        this.UProjectFile = APT.Templates.UnrealEngine.Utilities.SearchUProjectFile(this.Project.EntryDirectory);
         this.IsEngine = (this.UProjectFile == null);
+
+        if (this.IsEngine)
+        {
+            this.UnrealBuildToolExecutable = path.join(this.MainDirectory, "Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe");
+        }
+        else
+        {
+            if (!this.Project.AdditionalOptions.EngineProjectEntryFile)
+            {
+                throw new Error("Invalid engine project");
+            }
+        }
     }
     Start()
     {
+        if (!this.IsEngine)
+        {
+            this.EngineProject = APT.Core.System.ProjectManager.ImportProject(AMJS.Module, this.EngineProjectEntryFile, this.EngineProjectAdditionalOptions);
+        }
         APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
     }
 }
