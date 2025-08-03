@@ -23,3 +23,9 @@ AMJS.Namespace.OpenEditor = function(CommandManager)
     }
     return false;
 }
+AMJS.Namespace.OpenEditor.LogHelp = function(Logger)
+{
+    Logger.SetCommandName("OpenEditor");
+    Logger.SetDescription("clean APT cache");
+    Logger.SetDescription("import and open editor for the main project through its passed entry file CLI argument");
+}

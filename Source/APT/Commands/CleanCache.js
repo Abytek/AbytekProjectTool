@@ -15,3 +15,8 @@ AMJS.Namespace.CleanCache = function(CommandManager)
     }
     return false;
 }
+AMJS.Namespace.CleanCache.LogHelp = function(Logger)
+{
+    Logger.SetCommandName("CleanCache");
+    Logger.SetDescription("clean APT cache");
+}
