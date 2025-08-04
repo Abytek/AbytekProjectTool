@@ -37,22 +37,6 @@ APT.Templates.UnrealEngine.ProjectPrototypes.Default(Project);
 3. Configure project options
 4. Add any custom components
 
-## Template Configuration
-
-Each template supports configuration through instance data:
-
-```javascript
-// Example: Configure CMake template
-{
-    "InstanceData": {
-        "APT.Templates.CMake.ProjectComponents.ProjectStructure": {
-            "Generator": "Ninja",
-            "Config": "Debug"
-        }
-    }
-}
-```
-
 ## Creating Custom Templates
 
 Templates can be extended by:
