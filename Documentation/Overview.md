@@ -32,18 +32,11 @@ AbytekProjectTool (APT) is a modular project management and build system built o
    apt <ProjectEntryFile>
    ```
 
-## Documentation Structure
-
-- **ArchitectureAndKeyConcepts.md** - System architecture and design principles
-- **CLI.md** - Command line interface usage and examples
-- **Templates.md** - Available templates and how to use them
-
-## Project Structure
+## Common Project Structure
 
 ```
 YourProject/
   ├── APTProject.js       # Project entry file
-  ├── Source/             # Source code
   └── Build/              # Build outputs
 ```
 
