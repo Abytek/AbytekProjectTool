@@ -28,8 +28,8 @@ AbytekProjectTool (APT) is a modular project management and build system built o
    # Get help
    apt
 
-   # Import and open a project
-   apt <ProjectEntryFile> :OpenEditor
+   # Import a project
+   apt <ProjectEntryFile>
    ```
 
 ## Documentation Structure
@@ -88,6 +88,7 @@ apt Samples/AbytekCMake/APTProject.js
 
 ## Further Reading
 
+- See `ArchitectureAndKeyConcepts.md` for internal architecture details
+- See `Cache.md` for detailed command usage
 - See `CLI.md` for detailed command usage
 - See `Templates.md` for template system documentation
-- See `ArchitectureAndKeyConcepts.md` for internal architecture details
