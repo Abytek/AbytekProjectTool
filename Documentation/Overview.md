@@ -82,6 +82,6 @@ apt Samples/AbytekCMake/APTProject.js
 ## Further Reading
 
 - See `ArchitectureAndKeyConcepts.md` for internal architecture details
-- See `Cache.md` for detailed command usage
+- See `Cache.md` for cache system
 - See `CLI.md` for detailed command usage
 - See `Templates.md` for template system documentation
