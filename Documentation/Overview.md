@@ -28,7 +28,7 @@ AbytekProjectTool (APT) is a modular project management and build system built o
    # Get help
    apt
 
-   # Import a project
+   # Import a project (for specific example, you can import the HelloAPT sample project below)
    apt <ProjectEntryFile>
    ```
 

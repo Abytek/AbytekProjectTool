@@ -4,7 +4,7 @@ console.log(`HelloAPT ${APT.Project.AbsoluteEntryFile}`);
 APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default
 );
-APT.Project.TryFinalize();
+APT.Project.TryFinalize(); // for immediately generating project files before doing other stuff on it
 
 // the code below is for advanced usage
 {
