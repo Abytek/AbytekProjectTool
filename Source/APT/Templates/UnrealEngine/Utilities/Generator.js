@@ -24,10 +24,10 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
         let EngineProject = ProjectStructure.EngineProject;
         let EngineProjectStructure = EngineProject.GetComponent(APT.Templates.UnrealEngine.ProjectComponents.F_ProjectStructure);
         
-        const UnrealBuildToolExecutable = EngineProjectStructure.UnrealBuildToolExecutable;
+        const UnrealBuildToolExecutableFile = EngineProjectStructure.UnrealBuildToolExecutableFile;
 
         execSync(
-            `${UnrealBuildToolExecutable} -projectfiles -project="${ProjectStructure.UProjectFile}" -game -rocket -progress`, { 
+            `${UnrealBuildToolExecutableFile} -projectfiles -project="${ProjectStructure.UProjectFile}" -game -rocket -progress`, { 
                 stdio: 'inherit',
                 cwd: ProjectStructure.MainDirectory
             }

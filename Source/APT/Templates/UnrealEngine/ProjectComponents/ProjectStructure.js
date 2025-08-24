@@ -38,7 +38,8 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
         if (this.IsEngine)
         {
-            this.UnrealBuildToolExecutable = path.join(this.MainDirectory, "Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe");
+            this.UnrealBuildToolExecutableFile = APT.Templates.UnrealEngine.Utilities.CalculateUnrealBuildToolExecutableFile(this.MainDirectory);
+            this.UnrealEditorExecutableFile = APT.Templates.UnrealEngine.Utilities.CalculateUnrealEditorExecutableFile(this.MainDirectory);
         }
         else
         {

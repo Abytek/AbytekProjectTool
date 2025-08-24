@@ -21,3 +21,6 @@ AMJS.Namespace.SearchUProjectFile = function(EntryDirectory)
     }
     return null;
 }
+
+AMJS.Namespace.CalculateUnrealBuildToolExecutableFile = MainDirectory => path.join(MainDirectory, "Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe");
+AMJS.Namespace.CalculateUnrealEditorExecutableFile = MainDirectory => path.join(MainDirectory, "Binaries/Win64/UnrealEditor.exe");

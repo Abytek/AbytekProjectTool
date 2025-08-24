@@ -1,10 +1,21 @@
-
 const path = require("path");
 
 AMJS.Import("./ProjectComponent");
 
+/**
+ * Core project class that represents a single project instance.
+ * Each project is initialized from a JS entry file and can have multiple components.
+ * 
+ * @class F_Project
+ * @memberof APT.Core
+ */
 AMJS.Namespace.F_Project = class
 {
+    /**
+     * Creates a new project instance
+     * @param {string} AbsoluteEntryFile - Path to project entry file
+     * @param {Object} AdditionalOptions - Project configuration options
+     */
     constructor(AbsoluteEntryFile, AdditionalOptions)
     {
         this.AbsoluteEntryFile = AbsoluteEntryFile;
@@ -17,6 +28,12 @@ AMJS.Namespace.F_Project = class
         this.IsFinalized = false;
     }
 
+    /**
+     * Adds a component to the project
+     * @param {typeof APT.Core.A_ProjectComponent} ComponentClass - Component class to instantiate
+     * @param {...*} Args - Additional arguments for component constructor
+     * @returns {APT.Core.A_ProjectComponent} The created component instance
+     */
     AddComponent(ComponentClass, ...Args)
     {
         let Component = new ComponentClass(this, ...Args);
@@ -64,10 +81,17 @@ AMJS.Namespace.F_Project = class
         {
             return;
         }
+
         this.IsFinalized = true;
         this.PostLoad();
     }
 
+    /**
+     * Executes component lifecycle methods in order:
+     * 1. Init() - Initial setup
+     * 2. PostInit() - Post-initialization tasks
+     * 3. Start() - Component startup
+     */
     PostLoad()
     {
         this.Components.forEach(

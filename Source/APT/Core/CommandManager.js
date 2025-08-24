@@ -1,16 +1,38 @@
-
 AMJS.ImportNamespace("../Commands");
 
+/**
+ * Manages command-line interface and command execution.
+ * Handles parsing of CLI arguments and routing to appropriate command handlers.
+ * 
+ * CLI Format:
+ * apt [MainProjectEntryFile] [:Command] [AdditionalArguments...]
+ * 
+ * Special Input Categories:
+ * - ProjectDefault: Default settings for project instances
+ * - GlobalDefault: Global system settings
+ * 
+ * @class F_CommandManager
+ * @memberof APT.Core
+ */
 AMJS.Namespace.F_CommandManager = class
 {
+    /**
+     * Creates a new CommandManager instance
+     * @param {APT.Core.F_System} System - Parent system instance
+     */
     constructor(System)
     {
+        /** @type {APT.Core.F_System} Parent system reference */
         this.System = System;
     
+        /** @type {Map<string, Array<string>|Object>} Parsed CLI input */
         this.CLIInput = new Object();
+
+        /** @type {Array<Function>} List of available commands */
         this.Commands = [
             APT.Commands.CleanCache,
             APT.Commands.OpenEditor,
+            APT.Commands.LogCache,
             APT.Commands.ImportMainProject,
             APT.Commands.Help
         ];
@@ -18,13 +40,34 @@ AMJS.Namespace.F_CommandManager = class
         this.ParseCLIInput();
     }
 
+    /**
+     * Starts command execution
+     */
     Start()
     {
         this.ExecuteCLI();
     }
 
+    /**
+     * Parses command line arguments into structured input.
+     * 
+     * Handles:
+     * - Command arguments with ':' prefix
+     * - Default project entry file
+     * - Project and global default settings
+     * - Nested property paths (e.g. "Category.SubCategory.Setting")
+     * 
+     * @private
+     */
     ParseCLIInput()
     {
+        /**
+         * Internal helper to parse argv-style arguments
+         * @param {string[]} argv - Argument array
+         * @param {number} startIndex - Index to start parsing from
+         * @param {string} defaultKeyName - Default key for arguments without explicit key
+         * @returns {Map<string, string[]>} Parsed arguments
+         */
         function ParseArgs(argv, startIndex = 0, defaultKeyName) 
         {
             const parsed = new Map();
@@ -38,14 +81,14 @@ AMJS.Namespace.F_CommandManager = class
 
                 if (token.startsWith(':'))
                 {
-                    // New key begins (drop the `:` prefix)
+                    // New key begins (drop the ':' prefix)
                     currentKey = token.substring(1);
                     if (!parsed.has(currentKey)) {
                         parsed.set(currentKey, []);
                     }
                 } 
                 else {
-                    // Append to current key’s values
+                    // Append to current key's values
                     parsed.get(currentKey).push(token);
                 }
             }
@@ -55,6 +98,7 @@ AMJS.Namespace.F_CommandManager = class
 
         this.CLIInput = ParseArgs(process.argv, 2, 'MainProjectEntryFile');
 
+        // Handle special categories (ProjectDefault, GlobalDefault)
         let Categories = [ 
             'ProjectDefault',
             'GlobalDefault'
@@ -66,6 +110,7 @@ AMJS.Namespace.F_CommandManager = class
                 this.CLIInput.set(Category, new Object());
             }
 
+            // Process nested properties (e.g. "Category.SubCategory.Setting")
             let KeysToDelete = [];
             this.CLIInput.forEach(
                 (Value, Key, Map) =>
@@ -91,6 +136,7 @@ AMJS.Namespace.F_CommandManager = class
             }
         }
 
+        // Handle main project entry file
         {
             let MainProjectEntryFileSlot = this.CLIInput.get('MainProjectEntryFile');
             if (MainProjectEntryFileSlot.length == 1)
@@ -106,6 +152,10 @@ AMJS.Namespace.F_CommandManager = class
         console.log(`CLI input:`, this.CLIInput);
     }
 
+    /**
+     * Executes CLI commands based on parsed input
+     * @returns {boolean} true if any command was executed successfully
+     */
     ExecuteCLI()
     {
         for(let Command of this.Commands)
