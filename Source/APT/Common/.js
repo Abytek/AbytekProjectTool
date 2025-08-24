@@ -472,3 +472,12 @@ AMJS.Namespace.SmartWriteFile = function(File, Content)
         fs.writeFileSync(File, Content);
     }
 }
+
+/**
+ * Gets the project links directory path
+ * @returns {string} Absolute path to project links directory
+ */
+AMJS.Namespace.GetProjectLinksDirectory = function()
+{
+    return path.join(__dirname, "../../../Data/ProjectLinks");
+}

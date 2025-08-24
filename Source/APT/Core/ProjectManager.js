@@ -1,3 +1,7 @@
+const fs = require("fs");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+
 AMJS.Import("./Project")
 
 /**
@@ -119,9 +123,9 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return APT.Core.System.Environment.LoadEnvironmentConfig(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
                     }
-                    Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
+                    Context.APT.AsyncSetupEnvironment = async function(EnvName, ConfigDirectoryPath)
                     {
-                        return APT.Core.System.Environment.SetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                        return await APT.Core.System.Environment.AsyncSetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
                     }
                 },
                 IsAnonymous: true
@@ -137,5 +141,104 @@ AMJS.Namespace.F_ProjectManager = class
         this.Projects.set(ProjectKey, Project);
         Project.TryFinalize();
         return Project;
+    }
+
+    LoadProjectLinks()
+    {
+        const dirPath = APT.Common.GetProjectLinksDirectory();
+
+        function readAllJsonFiles(directory) {
+            const files = fs.readdirSync(directory);
+            const jsonData = [];
+
+            files.forEach(file => {
+                if (path.extname(file) === '.json') {
+                const fullPath = path.join(directory, file);
+                try {
+                    const content = fs.readFileSync(fullPath, 'utf8');
+                    const parsed = JSON.parse(content);
+                    jsonData.push(parsed);
+                } catch (err) {
+                    console.error(`❌ Error reading ${file}:`, err.message);
+                }
+                }
+            });
+
+            return jsonData;
+        }
+        if (fs.existsSync(dirPath))
+        {
+            return readAllJsonFiles(dirPath);
+        }
+        return [];
+    }
+    SearchProjectLink(ProjectLink)
+    {        
+        console.log(`Search project link:`, ProjectLink);
+        let LastProjectLinks = this.LoadProjectLinks();
+        for(let LastProjectLink of LastProjectLinks)
+        {
+            if (this.TryMatchProjectLinks(ProjectLink, LastProjectLink))
+            {
+                console.log(`Found last project link:`, LastProjectLink);
+                return LastProjectLink;
+            }
+        }
+        return null;
+    }
+    TryMatchProjectLinks(Finder, Last)
+    {
+        if ("EntryFile" in Finder)
+        {
+            if (Finder.EntryFile != Last.EntryFile)
+            {
+                return false;
+            }
+        }
+        if (("GitDetails" in Finder) && ("GitDetails" in Last))
+        {
+            let FinderGitDetails = Finder.GitDetails;
+            let LastGitDetails = Last.GitDetails;
+            if (FinderGitDetails.RemoteURL != LastGitDetails.RemoteURL)
+            {
+                return false;
+            }
+            if ("Commit" in FinderGitDetails)
+            {
+                if (FinderGitDetails.Commit != LastGitDetails.Commit)
+                {
+                    return false;
+                }
+            }
+            if ("Branch" in FinderGitDetails)
+            {
+                if (FinderGitDetails.Branch != LastGitDetails.Branch)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    UpdateProjectLink(ProjectLink)
+    {
+        console.log(`Update project link:`, ProjectLink);
+        let SearchedProjectLink = this.SearchProjectLink(ProjectLink);
+        if (!SearchedProjectLink)
+        {
+            this.AddProjectLink(ProjectLink);
+        }
+    }
+    AddProjectLink(ProjectLink)
+    {
+        console.log(`Add project link:`, ProjectLink);
+        const ProjectLinksDirectory = APT.Common.GetProjectLinksDirectory();
+        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), uuidv4() + ".json");
+        if (!fs.existsSync(ProjectLinksDirectory))
+        {
+            fs.mkdirSync(ProjectLinksDirectory, { recursive: true });
+        }
+        fs.writeFileSync(ProjectLinkFile, JSON.stringify(ProjectLink), {  });
     }
 }
