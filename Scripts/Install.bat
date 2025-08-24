@@ -1,2 +1,2 @@
 cd %0\..\..\
-npm install -g .
+npm install && npm install -g
