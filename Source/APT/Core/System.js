@@ -1,5 +1,6 @@
 AMJS.Import("./ProjectManager");
 AMJS.Import("./CommandManager");
+AMJS.Import("./Environment");
 
 /**
  * Root system class that coordinates all major subsystems.
@@ -25,6 +26,9 @@ AMJS.Namespace.F_System = class
         
         /** @type {APT.Core.F_ProjectManager} Project manager instance */
         this.ProjectManager = new AMJS.Namespace.F_ProjectManager(this);
+        
+        /** @type {APT.Core.F_Environment} Environment instance */
+        this.Environment = new AMJS.Namespace.F_Environment(this);
     }
 
     /**

@@ -115,6 +115,14 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFile2, AdditionalOptions2, Required2);
                     }
+                    Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
+                    {
+                        return APT.Core.System.Environment.LoadEnvironmentConfig(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                    }
+                    Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
+                    {
+                        return APT.Core.System.Environment.SetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                    }
                 },
                 IsAnonymous: true
             }
