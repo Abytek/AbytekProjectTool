@@ -21,7 +21,7 @@ AMJS.Import("./Project")
 
 AMJS.Namespace.GetEnvironmentDependenciesDirectory = function()
 {
-    return path.join(__dirname, "../../../Data/Dependencies");
+    return path.join(APT.Common.GetDataDirectory(), "Dependencies");
 }
 
 /**
@@ -127,23 +127,7 @@ AMJS.Namespace.F_Environment = class
             DependencyName
         );
 
-        if (fs.existsSync(DependencyDirectoryPath))
-        {
-            console.log(`Updating git repository ${Dependency.GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
-            const Git = simpleGit(DependencyDirectoryPath);
-            if ("Commit" in Dependency.GitDetails)
-            {
-                const Commit = Dependency.GitDetails.Commit;
-                await Git.reset(['--hard', `${Commit}`]);
-            }
-            else
-            if ("Branch" in Dependency.GitDetails)
-            {
-                const Branch = Dependency.GitDetails.Branch;
-                await Git.reset(['--hard', `origin/${Branch}`]);
-            }
-        }
-        else
+        if (!fs.existsSync(DependencyDirectoryPath))
         {
             console.log(`Cloning git repository ${Dependency.GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
             const Git = simpleGit();
@@ -158,6 +142,21 @@ AMJS.Namespace.F_Environment = class
                         }
                     }
                 );
+        }
+        {
+            console.log(`Updating git repository ${Dependency.GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
+            const Git = simpleGit(DependencyDirectoryPath);
+            if ("Commit" in Dependency.GitDetails)
+            {
+                const Commit = Dependency.GitDetails.Commit;
+                await Git.reset(['--hard', `${Commit}`]);
+            }
+            else
+            if ("Branch" in Dependency.GitDetails)
+            {
+                const Branch = Dependency.GitDetails.Branch;
+                await Git.reset(['--hard', `origin/${Branch}`]);
+            }
         }
         return path.join(DependencyDirectoryPath, "APTProject.js");
     }

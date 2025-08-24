@@ -1,6 +1,7 @@
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
+const { execSync } = require('child_process');
 
 /**
  * Asserts that a value is truthy, throws error if not
@@ -293,12 +294,59 @@ AMJS.Namespace.SimpleDeepCopy = function(Value)
 }
 
 /**
+ * Gets the data directory raw path
+ * @returns {string} Absolute raw path to data directory
+ */
+AMJS.Namespace.GetDataDirectoryRaw = function()
+{
+    return path.join(__dirname, "../../../Data");
+}
+
+/**
+ * Gets the data directory path
+ * @returns {string} Absolute path to data directory
+ */
+AMJS.Namespace.GetDataDirectory = function()
+{
+    const Raw = this.GetDataDirectoryRaw();
+    if (!(AMJS.Namespace.GetHostPlatformTags().includes(AMJS.Namespace.PlatformTags.WINDOWS)))
+    {
+        return Raw;
+    }
+    return path.join(path.parse(Raw).root, ".APTData");
+
+    const DriveKeys = [ 'X', 'Y', 'Z', 'G', 'H', 'I', 'K' ];
+    let UseDriveKey = null;
+    for (let DriveKey of DriveKeys)
+    {
+        try 
+        {
+            execSync(`subst ${DriveKey}: "${Raw}"`);
+            UseDriveKey = DriveKey;
+            break;
+        } 
+        catch (err) 
+        {
+            console.log(err);
+        }
+    }
+    // console.log(UseDriveKey, Raw);
+    // throw new Error("");
+    if (UseDriveKey == null)
+    {
+        console.warn("Invalid drive to use, try Z (unsafe)");
+        return `Z:`;
+    }
+    return `${UseDriveKey}:`;
+}
+
+/**
  * Gets the cache directory path
  * @returns {string} Absolute path to cache directory
  */
 AMJS.Namespace.GetCacheDirectory = function()
 {
-    return path.join(__dirname, "../../../Data/Cache");
+    return path.join(AMJS.Namespace.GetDataDirectory(), "Cache");
 }
 
 /**
@@ -479,5 +527,5 @@ AMJS.Namespace.SmartWriteFile = function(File, Content)
  */
 AMJS.Namespace.GetProjectLinksDirectory = function()
 {
-    return path.join(__dirname, "../../../Data/ProjectLinks");
+    return path.join(AMJS.Namespace.GetDataDirectory(), "ProjectLinks");
 }
