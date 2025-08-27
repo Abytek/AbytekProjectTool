@@ -172,6 +172,44 @@ app.get('/api/project-links', (req, res) => {
     }
 });
 
+// Resolve project link
+app.get('/api/resolve-project-link', (req, res) => {
+    console.log(`[API] GET /api/resolve-project-link`, req.query);
+    try {
+        // Parse GitDetails if it's a string
+        const dependency = { ...req.query };
+        if (typeof dependency.GitDetails === 'string') {
+            try {
+                dependency.GitDetails = JSON.parse(dependency.GitDetails);
+            } catch (e) {
+                console.error('[API] Failed to parse GitDetails:', e);
+            }
+        }
+        console.log('[API] Searching for project link with dependency:', dependency);
+        const projectLink = APT.Core.System.ProjectManager.SearchProjectLink(dependency);
+        
+        if (projectLink) {
+            console.log(`[API] Found project link:`, projectLink);
+            res.json({
+                success: true,
+                projectLink: {
+                    entryFile: projectLink.EntryFile,
+                    type: projectLink.Type || 'Unknown'
+                }
+            });
+        } else {
+            console.log(`[API] No project link found for:`, dependency);
+            res.json({
+                success: false,
+                error: 'No matching project link found'
+            });
+        }
+    } catch (error) {
+        console.error(`[API] Error resolving project link:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 app.listen(port, () => {
     console.log(`APT GUI Server running on port ${port}`);
 });

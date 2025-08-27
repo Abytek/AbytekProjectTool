@@ -21,6 +21,7 @@ import {
   ArrowForward as ArrowForwardIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import aptService from '../services/aptService';
 
 interface ProjectConfigViewerProps {
   config: Record<string, any>;
@@ -30,8 +31,17 @@ interface ProjectConfigViewerProps {
 const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name }) => {
   const navigate = useNavigate();
 
-  const handleVisitProject = (path: string) => {
-    navigate('/project', { state: { projectPath: path } });
+  const handleVisitProject = async (dependency: Record<string, any>) => {
+    try {
+      const resolution = await aptService.resolveProjectLink(dependency);
+      if (resolution.success && resolution.projectLink) {
+        navigate('/project', { state: { projectPath: resolution.projectLink.entryFile } });
+      } else {
+        console.error('Failed to resolve project link:', resolution.error);
+      }
+    } catch (error) {
+      console.error('Error visiting project:', error);
+    }
   };
 
   const parseGitHubUrl = (remoteUrl: string): string | null => {
@@ -85,7 +95,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
             </Typography>
             <IconButton
               size="small"
-              onClick={() => handleVisitProject(value)}
+              onClick={() => handleVisitProject({ EntryFile: value })}
               color="primary"
             >
               <LaunchIcon fontSize="small" />
@@ -206,7 +216,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
                         variant="outlined"
                         size="small"
                         endIcon={<ArrowForwardIcon />}
-                        onClick={() => handleVisitProject(details.EntryFile)}
+                        onClick={() => handleVisitProject(details)}
                       >
                         Visit Project
                       </Button>
@@ -231,7 +241,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
                       variant="outlined"
                       size="small"
                       endIcon={<ArrowForwardIcon />}
-                      onClick={() => handleVisitProject(details.EntryFile)}
+                      onClick={() => handleVisitProject(details)}
                       sx={{ mt: 1 }}
                     >
                       Visit Project
