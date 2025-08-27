@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import DataViewer from '../components/DataViewer';
 import aptService, { ProjectResponse } from '../services/aptService';
+import ProjectConfigViewer from '../components/ProjectConfigViewer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -125,7 +126,7 @@ const ProjectPage = () => {
                 </Box>
                 {Object.entries(projectData.environments).map(([envName, config], index) => (
                   <TabPanel key={envName} value={tabValue} index={index}>
-                    <pre>{JSON.stringify(config, null, 2)}</pre>
+                    <ProjectConfigViewer config={config} name={envName} />
                   </TabPanel>
                 ))}
               </Paper>
