@@ -23,7 +23,9 @@
     "deasync": "^0.1.30",
     "open": "^10.2.0",
     "simple-git": "^3.28.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "child_process": "^1.0.2",
+    "path": "^0.12.7"
   },
   "bin": {
     "apt": "Source/APT/Bootstrap.js"

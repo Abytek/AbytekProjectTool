@@ -35,7 +35,9 @@ AMJS.Namespace.F_CommandManager = class
             APT.Commands.OpenEditor,
             APT.Commands.LogCache,
             APT.Commands.ImportMainProject,
-            APT.Commands.Help
+            APT.Commands.BuildGUI,
+            APT.Commands.OpenGUI,
+            APT.Commands.Help,
         ];
 
         this.ParseCLIInput();
