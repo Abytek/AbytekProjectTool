@@ -55,6 +55,9 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             this.EngineProject = APT.Core.System.ProjectManager.ImportProject(AMJS.Module, this.EngineProjectEntryFile, this.EngineProjectAdditionalOptions);
         }
-        APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
+        if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
+        {
+            APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
+        }
     }
 }

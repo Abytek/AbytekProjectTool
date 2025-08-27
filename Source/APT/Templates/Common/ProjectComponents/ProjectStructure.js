@@ -18,6 +18,11 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.PlatformTags",
             APT.Common.GetHostPlatformTags()
         );
+        this.ShouldConfigureProject = APT.Common.TrySetPropertyByPath(
+            Project.AdditionalOptions,
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.ShouldConfigureProject",
+            APT.Templates.Common.Utilities.GetDefaultShouldConfigureProjects()
+        );
         this.SupportDebug = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
             "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportDebug",

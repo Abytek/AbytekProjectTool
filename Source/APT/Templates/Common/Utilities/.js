@@ -1,4 +1,13 @@
 
+AMJS.Namespace.GetDefaultShouldConfigureProjects = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ShouldConfigureProjects;
+    if (Result == null)
+    {
+        return true;
+    }
+    return APT.Common.ForwardBool(Result);
+}
 AMJS.Namespace.GetDefaultSupportDebug = function()
 {
     let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').SupportDebug;

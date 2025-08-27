@@ -16,6 +16,11 @@ ModuleSystem.SourceDirectories = [
 const APT = ModuleSystem.Import(null, ".js");
 const System = new APT.Core.F_System();
 APT.Core.System = System;
+
+// Configure system defaults before starting
+System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureProjects = false;
+
+// Start the system
 System.Start();
 
 const app = express();
@@ -55,16 +60,27 @@ app.get('/api/project/:projectPath', (req, res) => {
             });
         }
 
+        // Convert components to a serializable format
+        const components = [];
+        project.Components.forEach((value, key) => {
+            components.push({
+                type: key.name || key.toString(),
+                data: {
+                    ...value,
+                    // Remove any circular references or functions
+                    Components: undefined,
+                    Project: undefined
+                }
+            });
+        });
+
         const response = {
             project: {
                 name: project.Name,
                 label: project.Label,
                 entryFile: project.AbsoluteEntryFile,
                 entryDirectory: project.EntryDirectory,
-                components: Array.from(project.Components.entries()).map(([key, value]) => ({
-                    type: key.name,
-                    data: value
-                }))
+                components: components
             },
             environments: envConfigs
         };
