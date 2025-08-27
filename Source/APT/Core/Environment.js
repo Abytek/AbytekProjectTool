@@ -37,6 +37,14 @@ AMJS.Namespace.F_Environment = class
                     type: "object",
                     additionalProperties: true,
                 },
+                GlobalDefault: {
+                    type: "object",
+                    additionalProperties: true,
+                },
+                ProjectDefault: {
+                    type: "object",
+                    additionalProperties: true,
+                },
                 Parent: {
                     type: "string"
                 }
@@ -120,7 +128,50 @@ AMJS.Namespace.F_Environment = class
             }
         }
 
+        let MergeOptionParam = function(ParamName)
+        {
+            if (ParamName in A)
+            {
+                let AParam = A[ParamName];
+                if (!(ParamName in Result))
+                {
+                    Result[ParamName] = new Object();
+                }
+                let ResultParam = APT.Common.SimpleDeepCopy(Result[ParamName]);
+ 
+                let MergeFunction = function(ResultObject, AObject)
+                {
+                    for (let Key in AObject)
+                    {
+                        let AProperty = AObject[Key];
+
+                        if (typeof AProperty == "object")
+                        {
+                            if (Key in ResultObject)
+                            {
+                                let ResultPropertySrc = ResultObject[Key];
+                                if (typeof ResultPropertySrc == "object")
+                                {
+                                    let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
+                                    MergeFunction(ResultPropertyDst, AProperty);
+                                    ResultObject[Key] = ResultPropertyDst;
+                                    continue;
+                                }
+                            }
+                        }
+                        
+                        ResultObject[Key] = AProperty;
+                    }
+                }
+                MergeFunction(ResultParam, AParam);
+
+                Result[ParamName] = ResultParam;
+            }
+        }
+
         MergeMapParam("Dependencies");
+        MergeOptionParam("GlobalDefault");
+        MergeOptionParam("ProjectDefault");
         return Result;
     }
     async AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
@@ -131,13 +182,28 @@ AMJS.Namespace.F_Environment = class
             return false;
         }
 
-        console.log("APT.SetupEnvironment:\n", EnvConfig);
+        console.log("APT.SetupEnvironment:\n", APT.Common.NiceJSONStringify(EnvConfig));
+
+        this.ApplyCLIInputs(EnvConfig);
 
         if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
         {
             return false;
         }
         return true;
+    }
+    ApplyCLIInputs(EnvConfig)
+    {
+        function ApplyCLIInputList(Name)
+        {
+            if (Name in EnvConfig)
+            {
+                let CLIInput = APT.Core.System.CommandManager.CLIInput;
+                CLIInput.set(Name, EnvConfig[Name]);
+            }
+        }
+        ApplyCLIInputList("GlobalDefault", EnvConfig);
+        ApplyCLIInputList("ProjectDefault", EnvConfig);
     }
     async AsyncSetupEnvironmentDependencies(EnvConfig)
     {

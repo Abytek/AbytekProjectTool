@@ -286,21 +286,24 @@ AMJS.Namespace.F_ProjectManager = class
             EntryFile: EntryFile
         };
 
-        try 
+        if (fs.existsSync(path.join(EntryDirectory, ".git")))
         {
-            const GitRemoteURLOutput = execSync('git remote get-url origin', { cwd: EntryDirectory });
-            const GitBranchOutput = execSync('git rev-parse --abbrev-ref HEAD', { cwd: EntryDirectory });
-            const GitCommitOutput = execSync('git rev-parse HEAD', { cwd: EntryDirectory });
-            ProjectLink.GitDetails =
+            try 
             {
-                RemoteURL: GitRemoteURLOutput.toString().trim(),
-                Branch: GitBranchOutput.toString().trim(),
-                Commit: GitCommitOutput.toString().trim()
-            };
-        } 
-        catch (err) 
-        {
-            throw new Error(err);
+                const GitRemoteURLOutput = execSync('git remote get-url origin', { cwd: EntryDirectory });
+                const GitBranchOutput = execSync('git rev-parse --abbrev-ref HEAD', { cwd: EntryDirectory });
+                const GitCommitOutput = execSync('git rev-parse HEAD', { cwd: EntryDirectory });
+                ProjectLink.GitDetails =
+                {
+                    RemoteURL: GitRemoteURLOutput.toString().trim(),
+                    Branch: GitBranchOutput.toString().trim(),
+                    Commit: GitCommitOutput.toString().trim()
+                };
+            } 
+            catch (err) 
+            {
+                throw new Error(err);
+            }
         }
 
         return ProjectLink;
