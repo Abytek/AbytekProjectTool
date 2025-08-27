@@ -40,11 +40,19 @@ function TabPanel(props: TabPanelProps) {
 
 const ProjectPage = () => {
   const location = useLocation();
-  const [projectPath, setProjectPath] = useState(location.state?.projectPath || '');
+  const [projectPath, setProjectPath] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
+
+  // Update project path when location state changes
+  useEffect(() => {
+    if (location.state?.projectPath) {
+      setProjectPath(location.state.projectPath);
+      setTabValue(0); // Reset tab selection for new project
+    }
+  }, [location.state]);
 
   const loadProject = async (path: string) => {
     if (!path) return;
