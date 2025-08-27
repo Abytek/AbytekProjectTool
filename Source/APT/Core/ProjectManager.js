@@ -129,6 +129,10 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return await APT.Core.System.Environment.AsyncSetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
                     }
+                    Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
+                    {
+                        return APT.Core.System.Environment.SetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                    }
                 },
                 IsAnonymous: true
             }

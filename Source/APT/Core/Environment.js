@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const simpleGit = require('simple-git');
 const Ajv = require("ajv");
+var deasync = require('deasync');
 
 AMJS.Import("./Project")
 
@@ -25,6 +26,22 @@ AMJS.Namespace.F_Environment = class
     {
         /** @type {APT.Core.F_System} Parent system reference */
         this.System = System;
+
+        let This = this;
+        this.SetupEnvironment = (Module, EnvName, ConfigDirectoryPath) => 
+        {  
+            let Result = false;
+            let Done = false;
+            This.AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
+                .then(
+                    (TempResult) => { Result = TempResult; Done = true; }
+                );
+            while (!Done)
+            {
+                deasync.runLoopOnce();
+            }
+            return Result;
+        };
     }
 
     ValidateEnvironmentConfig(EnvConfig)
