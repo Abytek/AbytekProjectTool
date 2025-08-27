@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const simpleGit = require('simple-git');
 const Ajv = require("ajv");
+var deasync = require('deasync');
 
 AMJS.Import("./Project")
 
@@ -25,6 +26,22 @@ AMJS.Namespace.F_Environment = class
     {
         /** @type {APT.Core.F_System} Parent system reference */
         this.System = System;
+
+        let This = this;
+        this.SetupEnvironment = (Module, EnvName, ConfigDirectoryPath) => 
+        {  
+            let Result = false;
+            let Done = false;
+            This.AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
+                .then(
+                    (TempResult) => { Result = TempResult; Done = true; }
+                );
+            while (!Done)
+            {
+                deasync.runLoopOnce();
+            }
+            return Result;
+        };
     }
 
     ValidateEnvironmentConfig(EnvConfig)
@@ -34,6 +51,14 @@ AMJS.Namespace.F_Environment = class
             type: "object",
             properties: {
                 Dependencies: {
+                    type: "object",
+                    additionalProperties: true,
+                },
+                GlobalDefault: {
+                    type: "object",
+                    additionalProperties: true,
+                },
+                ProjectDefault: {
                     type: "object",
                     additionalProperties: true,
                 },
@@ -120,7 +145,50 @@ AMJS.Namespace.F_Environment = class
             }
         }
 
+        let MergeOptionParam = function(ParamName)
+        {
+            if (ParamName in A)
+            {
+                let AParam = A[ParamName];
+                if (!(ParamName in Result))
+                {
+                    Result[ParamName] = new Object();
+                }
+                let ResultParam = APT.Common.SimpleDeepCopy(Result[ParamName]);
+ 
+                let MergeFunction = function(ResultObject, AObject)
+                {
+                    for (let Key in AObject)
+                    {
+                        let AProperty = AObject[Key];
+
+                        if (typeof AProperty == "object")
+                        {
+                            if (Key in ResultObject)
+                            {
+                                let ResultPropertySrc = ResultObject[Key];
+                                if (typeof ResultPropertySrc == "object")
+                                {
+                                    let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
+                                    MergeFunction(ResultPropertyDst, AProperty);
+                                    ResultObject[Key] = ResultPropertyDst;
+                                    continue;
+                                }
+                            }
+                        }
+                        
+                        ResultObject[Key] = AProperty;
+                    }
+                }
+                MergeFunction(ResultParam, AParam);
+
+                Result[ParamName] = ResultParam;
+            }
+        }
+
         MergeMapParam("Dependencies");
+        MergeOptionParam("GlobalDefault");
+        MergeOptionParam("ProjectDefault");
         return Result;
     }
     async AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
@@ -131,13 +199,28 @@ AMJS.Namespace.F_Environment = class
             return false;
         }
 
-        console.log("APT.SetupEnvironment:\n", EnvConfig);
+        console.log("APT.SetupEnvironment:\n", APT.Common.NiceJSONStringify(EnvConfig));
+
+        this.ApplyCLIInputs(EnvConfig);
 
         if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
         {
             return false;
         }
         return true;
+    }
+    ApplyCLIInputs(EnvConfig)
+    {
+        function ApplyCLIInputList(Name)
+        {
+            if (Name in EnvConfig)
+            {
+                let CLIInput = APT.Core.System.CommandManager.CLIInput;
+                CLIInput.set(Name, EnvConfig[Name]);
+            }
+        }
+        ApplyCLIInputList("GlobalDefault", EnvConfig);
+        ApplyCLIInputList("ProjectDefault", EnvConfig);
     }
     async AsyncSetupEnvironmentDependencies(EnvConfig)
     {
