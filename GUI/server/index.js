@@ -96,6 +96,42 @@ app.get('/api/cache', (req, res) => {
     }
 });
 
+// Update cache entry
+app.put('/api/cache/:key', (req, res) => {
+    console.log(`[API] PUT /api/cache/${req.params.key}`);
+    try {
+        const { key } = req.params;
+        const value = req.body.value;
+
+        // Delete existing cache if it exists
+        if (APT.Common.HasCache(key)) {
+            APT.Common.Uncache(key, false);
+        }
+
+        // Write new cache value
+        APT.Common.Cache(key, value, false);
+        console.log(`[API] Updated cache entry: ${key}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error(`[API] Error updating cache:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete cache entry
+app.delete('/api/cache/:key', (req, res) => {
+    console.log(`[API] DELETE /api/cache/${req.params.key}`);
+    try {
+        const { key } = req.params;
+        APT.Common.Uncache(key, false);
+        console.log(`[API] Deleted cache entry: ${key}`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error(`[API] Error deleting cache:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get project links
 app.get('/api/project-links', (req, res) => {
     console.log(`[API] GET /api/project-links`);

@@ -35,24 +35,24 @@ const DataViewer: React.FC = () => {
   const [cache, setCache] = useState<Record<string, any>>({});
   const [projectLinks, setProjectLinks] = useState<ProjectLink[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [cacheData, linksData] = await Promise.all([
-          aptService.getCache(),
-          aptService.getProjectLinks()
-        ]);
-        setCache(cacheData);
-        setProjectLinks(linksData);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [cacheData, linksData] = await Promise.all([
+        aptService.getCache(),
+        aptService.getProjectLinks()
+      ]);
+      setCache(cacheData);
+      setProjectLinks(linksData);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -85,7 +85,7 @@ const DataViewer: React.FC = () => {
         </Tabs>
       </Box>
       <TabPanel value={value} index={0}>
-        <CacheViewer cache={cache} />
+        <CacheViewer cache={cache} onUpdate={fetchData} />
       </TabPanel>
       <TabPanel value={value} index={1}>
         <ProjectLinksViewer links={projectLinks} />
