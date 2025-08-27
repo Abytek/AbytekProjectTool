@@ -1,7 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const { execSync } = require('child_process');
-const { v4 } = require("uuid")
 
 AMJS.Import("./ProjectComponent");
 
@@ -30,31 +28,7 @@ AMJS.Namespace.F_Project = class
 
         this.IsFinalized = false;
 
-        // try gather git info
-        {
-            try 
-            {
-                let ThisProject = this;
-                const GitRemoteURLOutput = execSync('git remote get-url origin', { cwd: ThisProject.EntryDirectory });
-                const GitBranchOutput = execSync('git rev-parse --abbrev-ref HEAD', { cwd: ThisProject.EntryDirectory });
-                const GitCommitOutput = execSync('git rev-parse HEAD', { cwd: ThisProject.EntryDirectory });
-                this.GitDetails =
-                {
-                    RemoteURL: GitRemoteURLOutput.toString().trim(),
-                    Branch: GitBranchOutput.toString().trim(),
-                    Commit: GitCommitOutput.toString().trim()
-                };
-
-                const ProjectLink = {
-                    GitDetails: this.GitDetails,
-                    EntryFile: AbsoluteEntryFile
-                }
-                APT.Core.System.ProjectManager.UpdateProjectLink(ProjectLink);
-            } 
-            catch (err) 
-            {
-            }
-        }
+        APT.Core.System.ProjectManager.SetupProjectLink(this.AbsoluteEntryFile);
     }
 
     /**

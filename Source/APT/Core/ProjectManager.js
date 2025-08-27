@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const Ajv = require("ajv");
+const { execSync } = require('child_process');
 
 AMJS.Import("./Project")
 
@@ -167,7 +168,7 @@ AMJS.Namespace.F_ProjectManager = class
                         console.error(`❌ Error reading ${file}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
                         return;
                     }
-                    jsonData.push(parsed);
+                    jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryFile));
                 } catch (err) {
                     console.error(`❌ Error reading ${file}:`, err.message);
                 }
@@ -277,9 +278,39 @@ AMJS.Namespace.F_ProjectManager = class
         }
         return false;
     }
-    UpdateProjectLink(ProjectLink)
+    GenerateProjectLink(EntryFile)
     {
-        console.log(`Update project link:`, ProjectLink);
+        const EntryDirectory = path.dirname(EntryFile);
+        let ProjectLink = 
+        {
+            EntryFile: EntryFile
+        };
+
+        try 
+        {
+            const GitRemoteURLOutput = execSync('git remote get-url origin', { cwd: EntryDirectory });
+            const GitBranchOutput = execSync('git rev-parse --abbrev-ref HEAD', { cwd: EntryDirectory });
+            const GitCommitOutput = execSync('git rev-parse HEAD', { cwd: EntryDirectory });
+            ProjectLink.GitDetails =
+            {
+                RemoteURL: GitRemoteURLOutput.toString().trim(),
+                Branch: GitBranchOutput.toString().trim(),
+                Commit: GitCommitOutput.toString().trim()
+            };
+        } 
+        catch (err) 
+        {
+            throw new Error(err);
+        }
+
+        return ProjectLink;
+    }
+    SetupProjectLink(ProjectEntryFile)
+    {
+        const ProjectLink = this.GenerateProjectLink(ProjectEntryFile);
+
+        console.log(`Setup project link:`, ProjectLink);
+
         let SearchedProjectLink = this.SearchProjectLink(ProjectLink);
         if (!SearchedProjectLink)
         {
@@ -290,11 +321,11 @@ AMJS.Namespace.F_ProjectManager = class
     {
         console.log(`Add project link:`, ProjectLink);
         const ProjectLinksDirectory = APT.Common.GetProjectLinksDirectory();
-        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), uuidv4() + ".json");
+        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), APT.Common.StringToUUID(ProjectLink.EntryFile) + ".json");
         if (!fs.existsSync(ProjectLinksDirectory))
         {
             fs.mkdirSync(ProjectLinksDirectory, { recursive: true });
         }
-        fs.writeFileSync(ProjectLinkFile, JSON.stringify(ProjectLink), {  });
+        fs.writeFileSync(ProjectLinkFile, APT.Common.NiceJSONStringify(ProjectLink), {  });
     }
 }

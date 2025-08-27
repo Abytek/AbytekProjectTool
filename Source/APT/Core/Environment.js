@@ -2,21 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 const simpleGit = require('simple-git');
-const crypto = require('crypto');
 const Ajv = require("ajv");
-
-function StringToUUID(input) {
-  const hash = crypto.createHash('sha1').update(input).digest('hex'); // 40 chars
-
-  // Format as UUIDv4-like string: 8-4-4-4-12
-  return [
-    hash.substring(0, 8),
-    hash.substring(8, 12),
-    '4' + hash.substring(13, 16), // force version 4
-    ((parseInt(hash.substring(16, 18), 16) & 0x3f) | 0x80).toString(16) + hash.substring(18, 20), // force variant
-    hash.substring(20, 32)
-  ].join('-');
-}
 
 AMJS.Import("./Project")
 
@@ -194,7 +180,7 @@ AMJS.Namespace.F_Environment = class
             Dependency
         };
         const StoreKeyJSON = JSON.stringify(StoreKey);
-        const StoreKeyJSONEncoded = StringToUUID(StoreKeyJSON);
+        const StoreKeyJSONEncoded = APT.Common.StringToUUID(StoreKeyJSON);
 
         const DependencyDirectoryPath = path.join(
             AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
