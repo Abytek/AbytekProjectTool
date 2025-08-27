@@ -18,7 +18,11 @@
   },
   "homepage": "https://github.com/Abytek/AbytekProjectTool#readme",
   "dependencies": {
-    "open": "^10.2.0"
+    "ajv": "^8.17.1",
+    "crypto": "^1.0.1",
+    "open": "^10.2.0",
+    "simple-git": "^3.28.0",
+    "uuid": "^11.1.0"
   },
   "bin": {
     "apt": "Source/APT/Bootstrap.js"

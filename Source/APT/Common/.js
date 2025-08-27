@@ -1,6 +1,28 @@
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
+const { execSync } = require('child_process');
+const Ajv = require("ajv");
+const crypto = require('crypto');
+
+AMJS.Namespace.StringToUUID = function(input) 
+{
+  const hash = crypto.createHash('sha1').update(input).digest('hex'); // 40 chars
+
+  // Format as UUIDv4-like string: 8-4-4-4-12
+  return [
+    hash.substring(0, 8),
+    hash.substring(8, 12),
+    '4' + hash.substring(13, 16), // force version 4
+    ((parseInt(hash.substring(16, 18), 16) & 0x3f) | 0x80).toString(16) + hash.substring(18, 20), // force variant
+    hash.substring(20, 32)
+  ].join('-');
+}
+
+AMJS.Namespace.NiceJSONStringify = function(Object)
+{
+    return JSON.stringify(Object, null, 2);
+}
 
 /**
  * Asserts that a value is truthy, throws error if not
@@ -293,12 +315,35 @@ AMJS.Namespace.SimpleDeepCopy = function(Value)
 }
 
 /**
+ * Gets the data directory raw path
+ * @returns {string} Absolute raw path to data directory
+ */
+AMJS.Namespace.GetDataDirectoryRaw = function()
+{
+    return path.join(__dirname, "../../../Data");
+}
+
+/**
+ * Gets the data directory path
+ * @returns {string} Absolute path to data directory
+ */
+AMJS.Namespace.GetDataDirectory = function()
+{
+    const Raw = this.GetDataDirectoryRaw();
+    if (!(AMJS.Namespace.GetHostPlatformTags().includes(AMJS.Namespace.PlatformTags.WINDOWS)))
+    {
+        return Raw;
+    }
+    return path.join(path.parse(Raw).root, ".APTData");
+}
+
+/**
  * Gets the cache directory path
  * @returns {string} Absolute path to cache directory
  */
 AMJS.Namespace.GetCacheDirectory = function()
 {
-    return path.join(__dirname, "../../../Data/Cache");
+    return path.join(AMJS.Namespace.GetDataDirectory(), "Cache");
 }
 
 /**
@@ -471,4 +516,13 @@ AMJS.Namespace.SmartWriteFile = function(File, Content)
     {
         fs.writeFileSync(File, Content);
     }
+}
+
+/**
+ * Gets the project links directory path
+ * @returns {string} Absolute path to project links directory
+ */
+AMJS.Namespace.GetProjectLinksDirectory = function()
+{
+    return path.join(AMJS.Namespace.GetDataDirectory(), "ProjectLinks");
 }

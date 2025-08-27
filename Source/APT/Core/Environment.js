@@ -1,0 +1,241 @@
+
+const path = require("path");
+const fs = require("fs");
+const simpleGit = require('simple-git');
+const Ajv = require("ajv");
+
+AMJS.Import("./Project")
+
+AMJS.Namespace.GetEnvironmentDependenciesDirectory = function()
+{
+    return path.join(APT.Common.GetDataDirectory(), "Dependencies");
+}
+
+/**
+ * @class F_Environment
+ * @memberof APT.Core
+ */
+AMJS.Namespace.F_Environment = class
+{
+    /**
+     * Creates a new F_Environment instance
+     * @param {APT.Core.F_System} System - Parent system instance
+     */
+    constructor(System)
+    {
+        /** @type {APT.Core.F_System} Parent system reference */
+        this.System = System;
+    }
+
+    ValidateEnvironmentConfig(EnvConfig)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                Dependencies: {
+                    type: "object",
+                    additionalProperties: true,
+                },
+                Parent: {
+                    type: "string"
+                }
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(EnvConfig)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+
+        let ProjectManager = APT.Core.System.ProjectManager;
+
+        if ("Dependencies" in EnvConfig)
+        {
+            let Dependencies = EnvConfig.Dependencies;
+            for(let DependencyName in Dependencies)
+            {
+                let Dependency = Dependencies[DependencyName];
+                const DependencyValidatedResult = ProjectManager.ValidateProjectLink(Dependency);
+                if (!DependencyValidatedResult.Status)
+                {
+                    Result.Status = false;
+                    Result.Errors.push({
+                        Message: `Invalid dependency "${DependencyName}"`,
+                        ChildErrors: DependencyValidatedResult.Errors
+                    });
+                }
+            }
+        }
+        return Result;
+    }
+    LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath)
+    {
+        const EnvConfigFile = path.join(ConfigDirectoryPath, EnvName);
+        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile);
+        const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
+        if (!ValidatedResult.Status)
+        {
+            console.error(`Invalid environment config ${EnvConfigFile}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+            return null;
+        }
+        if ("Parent" in EnvConfig)
+        {
+            let ParentEnvName = EnvConfig.Parent;
+            let ParentEnvConfig = this.LoadEnvironmentConfig(Module, ParentEnvName, ConfigDirectoryPath);
+            EnvConfig = this.MergeEnvironmentConfigs(EnvConfig, ParentEnvConfig);
+        }
+        return EnvConfig;
+    }
+    MergeEnvironmentConfigs(A, Base)
+    {
+        let Result = APT.Common.SimpleDeepCopy(Base);
+
+        let MergeMapParam = function(ParamName)
+        {
+            if (ParamName in A)
+            {
+                let AParam = A[ParamName];
+                if (!(ParamName in Result))
+                {
+                    Result[ParamName] = new Object();
+                }
+                let ResultParam = Result[ParamName];
+                for (let Key in AParam)
+                {
+                    ResultParam[Key] = APT.Common.SimpleDeepCopy(AParam[Key]);
+                }
+            }
+        }
+
+        MergeMapParam("Dependencies");
+        return Result;
+    }
+    async AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
+    {
+        let EnvConfig = this.LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath);
+        if (!EnvConfig)
+        {
+            return false;
+        }
+
+        console.log("APT.SetupEnvironment:\n", EnvConfig);
+
+        if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
+        {
+            return false;
+        }
+        return true;
+    }
+    async AsyncSetupEnvironmentDependencies(EnvConfig)
+    {
+        for(let DependencyName in EnvConfig.Dependencies)
+        {
+            let Dependency = EnvConfig.Dependencies[DependencyName];
+
+            let ProjectManager = APT.Core.System.ProjectManager;
+            let ProjectLink = ProjectManager.SearchProjectLink(Dependency);
+            if (ProjectLink)
+            {
+                if (fs.existsSync(ProjectLink.EntryFile))
+                {
+                    this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
+                    continue;
+                }
+            }
+
+            {
+                let TestProjectEntryFile = await this.AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency);
+                if (TestProjectEntryFile)
+                {
+                    this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
+                }
+            }
+        }
+        return true;
+    }
+    async AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency)
+    {
+        if (!("GitDetails" in Dependency))
+        {
+            return null;
+        }
+
+        let GitDetails = Dependency.GitDetails;
+
+        const StoreKey = { 
+            DependencyName,
+            Dependency
+        };
+        const StoreKeyJSON = JSON.stringify(StoreKey);
+        const StoreKeyJSONEncoded = APT.Common.StringToUUID(StoreKeyJSON);
+
+        const DependencyDirectoryPath = path.join(
+            AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
+            StoreKeyJSONEncoded,
+            DependencyName
+        );
+
+        if (!fs.existsSync(DependencyDirectoryPath))
+        {
+            console.log(`Cloning git repository ${GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
+            const Git = simpleGit();
+            await Git.clone(GitDetails.RemoteURL, DependencyDirectoryPath)
+                .then(() => console.log(`✅ Repo cloned to ${DependencyDirectoryPath}`))
+                .catch(
+                    err => {
+                        console.error('❌ Clone failed:', err)
+                        if (fs.existsSync(DependencyDirectoryPath))
+                        {
+                            fs.rmdirSync(DependencyDirectoryPath);
+                        }
+                    }
+                );
+        }
+        {
+            console.log(`Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
+            const Git = simpleGit(DependencyDirectoryPath);
+            if ("Commit" in GitDetails)
+            {
+                const Commit = GitDetails.Commit;
+                await Git.reset(['--hard', `${Commit}`]);
+            }
+            else
+            if ("Branch" in GitDetails)
+            {
+                const Branch = GitDetails.Branch;
+                await Git.reset(['--hard', `origin/${Branch}`]);
+            }
+        }
+        return path.join(DependencyDirectoryPath, "APTProject.js");
+    }
+    ImportDependentProject(EntryFile, DependencyName, Dependency)
+    {
+        let ProjectManager = APT.Core.System.ProjectManager;
+        
+        let AdditionalOptions = new Object();
+        if ("AdditionalOptions" in Dependency)
+        {
+            AdditionalOptions = Dependency.AdditionalOptions;
+        }
+        let Required = true;
+        if ("Required" in Dependency)
+        {
+            Required = Dependency.Required;
+        }
+        let DependentProject = ProjectManager.ImportProject(null, EntryFile, AdditionalOptions, Required);
+        return DependentProject;
+    }
+}

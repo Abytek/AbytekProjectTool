@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 
 AMJS.Import("./ProjectComponent");
 
@@ -26,6 +27,8 @@ AMJS.Namespace.F_Project = class
         this.Components = new Map();
 
         this.IsFinalized = false;
+
+        APT.Core.System.ProjectManager.SetupProjectLink(this.AbsoluteEntryFile);
     }
 
     /**

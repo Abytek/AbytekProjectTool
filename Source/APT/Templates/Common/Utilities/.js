@@ -45,3 +45,13 @@ AMJS.Namespace.GetDefaultProjectEntryFile = function()
     }
     return APT.Common.ForwardString(Result);
 }
+
+AMJS.Namespace.GetDefaultEnvironmentName = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').GetDefaultEnvironmentName;
+    if (Result == null)
+    {
+        return "Development";
+    }
+    return APT.Common.ForwardString(Result);
+}

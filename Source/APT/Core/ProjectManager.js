@@ -1,3 +1,9 @@
+const fs = require("fs");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
+const Ajv = require("ajv");
+const { execSync } = require('child_process');
+
 AMJS.Import("./Project")
 
 /**
@@ -115,6 +121,14 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFile2, AdditionalOptions2, Required2);
                     }
+                    Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
+                    {
+                        return APT.Core.System.Environment.LoadEnvironmentConfig(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                    }
+                    Context.APT.AsyncSetupEnvironment = async function(EnvName, ConfigDirectoryPath)
+                    {
+                        return await APT.Core.System.Environment.AsyncSetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
+                    }
                 },
                 IsAnonymous: true
             }
@@ -129,5 +143,189 @@ AMJS.Namespace.F_ProjectManager = class
         this.Projects.set(ProjectKey, Project);
         Project.TryFinalize();
         return Project;
+    }
+
+    LoadProjectLinks()
+    {
+        const dirPath = APT.Common.GetProjectLinksDirectory();
+
+        const ThisProjectManager = this;
+
+        function readAllJsonFiles(directory) {
+            const files = fs.readdirSync(directory);
+            const jsonData = [];
+
+            files.forEach(file => {
+                if (path.extname(file) === '.json') {
+                const fullPath = path.join(directory, file);
+                try {
+                    const content = fs.readFileSync(fullPath, 'utf8');
+                    const parsed = JSON.parse(content);
+
+                    const ValidatedResult = ThisProjectManager.ValidateProjectLink(parsed);
+                    if (!ValidatedResult.Status)
+                    {
+                        console.error(`❌ Error reading ${file}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+                        return;
+                    }
+                    jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryFile));
+                } catch (err) {
+                    console.error(`❌ Error reading ${file}:`, err.message);
+                }
+                }
+            });
+
+            return jsonData;
+        }
+        if (fs.existsSync(dirPath))
+        {
+            return readAllJsonFiles(dirPath);
+        }
+        return [];
+    }
+    ValidateProjectLink(ProjectLink)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                GitDetails : {
+                    type: "object",
+                    properties: {
+                        RemoteURL: {
+                            type: "string"
+                        },
+                        Commit: {
+                            type: "string"
+                        },
+                        Branch: {
+                            type: "string"
+                        }
+                    },
+                    required: ["RemoteURL"],
+                    additionalProperties: false
+                },
+                EntryFile: {
+                    type: "string"
+                }
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(ProjectLink)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+        return Result;
+    }
+    SearchProjectLink(ProjectLink)
+    {        
+        console.log(`Search project link:`, ProjectLink);
+        let LastProjectLinks = this.LoadProjectLinks();
+        for(let LastProjectLink of LastProjectLinks)
+        {
+            if (this.TryMatchProjectLinks(ProjectLink, LastProjectLink))
+            {
+                console.log(`Found last project link:`, LastProjectLink);
+                return LastProjectLink;
+            }
+        }
+        return null;
+    }
+    TryMatchProjectLinks(Finder, Last)
+    {
+        if ("EntryFile" in Finder)
+        {
+            if (Finder.EntryFile != Last.EntryFile)
+            {
+                return false;
+            }
+        }
+        if (("GitDetails" in Finder) && ("GitDetails" in Last))
+        {
+            let FinderGitDetails = Finder.GitDetails;
+            let LastGitDetails = Last.GitDetails;
+            if (FinderGitDetails.RemoteURL != LastGitDetails.RemoteURL)
+            {
+                return false;
+            }
+            if ("Commit" in FinderGitDetails)
+            {
+                if (FinderGitDetails.Commit != LastGitDetails.Commit)
+                {
+                    return false;
+                }
+            }
+            if ("Branch" in FinderGitDetails)
+            {
+                if (FinderGitDetails.Branch != LastGitDetails.Branch)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+    GenerateProjectLink(EntryFile)
+    {
+        const EntryDirectory = path.dirname(EntryFile);
+        let ProjectLink = 
+        {
+            EntryFile: EntryFile
+        };
+
+        try 
+        {
+            const GitRemoteURLOutput = execSync('git remote get-url origin', { cwd: EntryDirectory });
+            const GitBranchOutput = execSync('git rev-parse --abbrev-ref HEAD', { cwd: EntryDirectory });
+            const GitCommitOutput = execSync('git rev-parse HEAD', { cwd: EntryDirectory });
+            ProjectLink.GitDetails =
+            {
+                RemoteURL: GitRemoteURLOutput.toString().trim(),
+                Branch: GitBranchOutput.toString().trim(),
+                Commit: GitCommitOutput.toString().trim()
+            };
+        } 
+        catch (err) 
+        {
+            throw new Error(err);
+        }
+
+        return ProjectLink;
+    }
+    SetupProjectLink(ProjectEntryFile)
+    {
+        const ProjectLink = this.GenerateProjectLink(ProjectEntryFile);
+
+        console.log(`Setup project link:`, ProjectLink);
+
+        let SearchedProjectLink = this.SearchProjectLink(ProjectLink);
+        if (!SearchedProjectLink)
+        {
+            this.AddProjectLink(ProjectLink);
+        }
+    }
+    AddProjectLink(ProjectLink)
+    {
+        console.log(`Add project link:`, ProjectLink);
+        const ProjectLinksDirectory = APT.Common.GetProjectLinksDirectory();
+        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), APT.Common.StringToUUID(ProjectLink.EntryFile) + ".json");
+        if (!fs.existsSync(ProjectLinksDirectory))
+        {
+            fs.mkdirSync(ProjectLinksDirectory, { recursive: true });
+        }
+        fs.writeFileSync(ProjectLinkFile, APT.Common.NiceJSONStringify(ProjectLink), {  });
     }
 }
