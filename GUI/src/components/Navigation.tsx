@@ -6,12 +6,22 @@ const Navigation = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography 
+          variant="h6" 
+          component={RouterLink} 
+          to="/"
+          sx={{ 
+            flexGrow: 1,
+            textDecoration: 'none',
+            color: 'inherit',
+            '&:hover': {
+              opacity: 0.8
+            },
+            cursor: 'pointer'
+          }}
+        >
           Abytek Project Tool
         </Typography>
-        <Button color="inherit" component={RouterLink} to="/">
-          Home
-        </Button>
         <Button color="inherit" component={RouterLink} to="/project">
           Project
         </Button>
