@@ -13,6 +13,12 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
     if (ProjectStructure.IsEngine)
     {
         execSync(
+            `Setup.bat`, { 
+                stdio: 'inherit',
+                cwd: Project.EntryDirectory
+            }
+        );
+        execSync(
             `GenerateProjectFiles.bat`, { 
                 stdio: 'inherit',
                 cwd: Project.EntryDirectory
