@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const simpleGit = require('simple-git');
 const crypto = require('crypto');
+const Ajv = require("ajv");
 
 function StringToUUID(input) {
   const hash = crypto.createHash('sha1').update(input).digest('hex'); // 40 chars
@@ -40,9 +41,70 @@ AMJS.Namespace.F_Environment = class
         this.System = System;
     }
 
+    ValidateEnvironmentConfig(EnvConfig)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                Dependencies: {
+                    type: "object",
+                    additionalProperties: true,
+                },
+                Parent: {
+                    type: "string"
+                }
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(EnvConfig)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+
+        let ProjectManager = APT.Core.System.ProjectManager;
+
+        if ("Dependencies" in EnvConfig)
+        {
+            let Dependencies = EnvConfig.Dependencies;
+            for(let DependencyName in Dependencies)
+            {
+                let Dependency = Dependencies[DependencyName];
+                const DependencyValidatedResult = ProjectManager.ValidateProjectLink(Dependency);
+                if (!DependencyValidatedResult.Status)
+                {
+                    Result.Status = false;
+                    Result.Errors.push({
+                        Message: `Invalid dependency "${DependencyName}"`,
+                        ChildErrors: DependencyValidatedResult.Errors
+                    });
+                }
+            }
+        }
+        return Result;
+    }
     LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath)
     {
-        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, path.join(ConfigDirectoryPath, EnvName));
+        const EnvConfigFile = path.join(ConfigDirectoryPath, EnvName);
+        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile);
+        const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
+        if (!ValidatedResult.Status)
+        {
+            console.error(`Invalid environment config ${EnvConfigFile}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+            return null;
+        }
         if ("Parent" in EnvConfig)
         {
             let ParentEnvName = EnvConfig.Parent;
@@ -78,8 +140,18 @@ AMJS.Namespace.F_Environment = class
     async AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
     {
         let EnvConfig = this.LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath);
+        if (!EnvConfig)
+        {
+            return false;
+        }
+
         console.log("APT.SetupEnvironment:\n", EnvConfig);
-        await this.AsyncSetupEnvironmentDependencies(EnvConfig);
+
+        if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
+        {
+            return false;
+        }
+        return true;
     }
     async AsyncSetupEnvironmentDependencies(EnvConfig)
     {
@@ -93,7 +165,7 @@ AMJS.Namespace.F_Environment = class
             {
                 if (fs.existsSync(ProjectLink.EntryFile))
                 {
-                    this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
+                    // this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
                     continue;
                 }
             }
@@ -102,10 +174,11 @@ AMJS.Namespace.F_Environment = class
                 let TestProjectEntryFile = await this.AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency);
                 if (TestProjectEntryFile)
                 {
-                    this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
+                    // this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
                 }
             }
         }
+        return true;
     }
     async AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency)
     {
@@ -113,6 +186,8 @@ AMJS.Namespace.F_Environment = class
         {
             return null;
         }
+
+        let GitDetails = Dependency.GitDetails;
 
         const StoreKey = { 
             DependencyName,
@@ -129,9 +204,9 @@ AMJS.Namespace.F_Environment = class
 
         if (!fs.existsSync(DependencyDirectoryPath))
         {
-            console.log(`Cloning git repository ${Dependency.GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
+            console.log(`Cloning git repository ${GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
             const Git = simpleGit();
-            await Git.clone(Dependency.GitDetails.RemoteURL, DependencyDirectoryPath)
+            await Git.clone(GitDetails.RemoteURL, DependencyDirectoryPath)
                 .then(() => console.log(`✅ Repo cloned to ${DependencyDirectoryPath}`))
                 .catch(
                     err => {
@@ -144,17 +219,17 @@ AMJS.Namespace.F_Environment = class
                 );
         }
         {
-            console.log(`Updating git repository ${Dependency.GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
+            console.log(`Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
             const Git = simpleGit(DependencyDirectoryPath);
-            if ("Commit" in Dependency.GitDetails)
+            if ("Commit" in GitDetails)
             {
-                const Commit = Dependency.GitDetails.Commit;
+                const Commit = GitDetails.Commit;
                 await Git.reset(['--hard', `${Commit}`]);
             }
             else
-            if ("Branch" in Dependency.GitDetails)
+            if ("Branch" in GitDetails)
             {
-                const Branch = Dependency.GitDetails.Branch;
+                const Branch = GitDetails.Branch;
                 await Git.reset(['--hard', `origin/${Branch}`]);
             }
         }

@@ -2,6 +2,12 @@ const os = require("os");
 const path = require("path");
 const fs = require("fs");
 const { execSync } = require('child_process');
+const Ajv = require("ajv");
+
+AMJS.Namespace.NiceJSONStringify = function(Object)
+{
+    return JSON.stringify(Object, null, 2);
+}
 
 /**
  * Asserts that a value is truthy, throws error if not
@@ -314,30 +320,6 @@ AMJS.Namespace.GetDataDirectory = function()
         return Raw;
     }
     return path.join(path.parse(Raw).root, ".APTData");
-
-    const DriveKeys = [ 'X', 'Y', 'Z', 'G', 'H', 'I', 'K' ];
-    let UseDriveKey = null;
-    for (let DriveKey of DriveKeys)
-    {
-        try 
-        {
-            execSync(`subst ${DriveKey}: "${Raw}"`);
-            UseDriveKey = DriveKey;
-            break;
-        } 
-        catch (err) 
-        {
-            console.log(err);
-        }
-    }
-    // console.log(UseDriveKey, Raw);
-    // throw new Error("");
-    if (UseDriveKey == null)
-    {
-        console.warn("Invalid drive to use, try Z (unsafe)");
-        return `Z:`;
-    }
-    return `${UseDriveKey}:`;
 }
 
 /**

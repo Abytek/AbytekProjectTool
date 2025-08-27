@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
+const Ajv = require("ajv");
 
 AMJS.Import("./Project")
 
@@ -147,6 +148,8 @@ AMJS.Namespace.F_ProjectManager = class
     {
         const dirPath = APT.Common.GetProjectLinksDirectory();
 
+        const ThisProjectManager = this;
+
         function readAllJsonFiles(directory) {
             const files = fs.readdirSync(directory);
             const jsonData = [];
@@ -157,6 +160,13 @@ AMJS.Namespace.F_ProjectManager = class
                 try {
                     const content = fs.readFileSync(fullPath, 'utf8');
                     const parsed = JSON.parse(content);
+
+                    const ValidatedResult = ThisProjectManager.ValidateProjectLink(parsed);
+                    if (!ValidatedResult.Status)
+                    {
+                        console.error(`❌ Error reading ${file}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+                        return;
+                    }
                     jsonData.push(parsed);
                 } catch (err) {
                     console.error(`❌ Error reading ${file}:`, err.message);
@@ -171,6 +181,52 @@ AMJS.Namespace.F_ProjectManager = class
             return readAllJsonFiles(dirPath);
         }
         return [];
+    }
+    ValidateProjectLink(ProjectLink)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                GitDetails : {
+                    type: "object",
+                    properties: {
+                        RemoteURL: {
+                            type: "string"
+                        },
+                        Commit: {
+                            type: "string"
+                        },
+                        Branch: {
+                            type: "string"
+                        }
+                    },
+                    required: ["RemoteURL"],
+                    additionalProperties: false
+                },
+                EntryFile: {
+                    type: "string"
+                }
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(ProjectLink)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+        return Result;
     }
     SearchProjectLink(ProjectLink)
     {        

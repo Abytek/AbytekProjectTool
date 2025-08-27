@@ -9,7 +9,7 @@ AMJS.Namespace.CleanCache = function(CommandManager)
         const CacheDir = APT.Common.GetCacheDirectory();
         if (fs.existsSync(CacheDir))
         {
-            fs.rmdirSync(CacheDir, { recursive: true });
+            fs.rmSync(CacheDir, { recursive: true });
         }
         return true;
     }
