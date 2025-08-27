@@ -34,6 +34,32 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
     navigate('/project', { state: { projectPath: path } });
   };
 
+  const parseGitHubUrl = (remoteUrl: string): string | null => {
+    // Skip local paths
+    if (remoteUrl.startsWith('/') || remoteUrl.includes(':\\')) {
+      return null;
+    }
+
+    try {
+      // Handle SSH format: git@github.com:username/repo.git
+      if (remoteUrl.startsWith('git@github.com:')) {
+        const path = remoteUrl.replace('git@github.com:', '').replace(/\.git$/, '');
+        return `https://github.com/${path}`;
+      }
+      
+      // Handle HTTPS/HTTP formats
+      if (remoteUrl.includes('github.com')) {
+        // Convert any http to https and clean up the URL
+        return remoteUrl
+          .replace(/^git:\/\//, 'https://')
+          .replace(/^http:\/\//, 'https://')
+          .replace(/\.git$/, '');
+      }
+    } catch {}
+    
+    return null;
+  };
+
   const renderValue = (value: any): React.ReactNode => {
     if (value === null || value === undefined) {
       return <Chip size="small" label="null" color="default" />;
@@ -69,7 +95,8 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
       }
 
       // Check if it's a Git URL
-      if (value.includes('github.com')) {
+      const githubUrl = parseGitHubUrl(value);
+      if (githubUrl) {
         return (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
@@ -78,7 +105,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
             <IconButton
               size="small"
               component="a"
-              href={value}
+              href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
               color="primary"
@@ -138,48 +165,82 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
           Dependencies
         </Typography>
         <Grid container spacing={2}>
-          {Object.entries(config.Dependencies).map(([name, details]: [string, any]) => (
-            <Grid item xs={12} md={6} key={name}>
-              <Paper sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LinkIcon color="action" />
-                  <Typography variant="subtitle1">{name}</Typography>
-                </Box>
-                {details.GitDetails && (
-                  <>
-                    <Typography variant="body2" color="text.secondary">
-                      Repository
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <GitHubIcon fontSize="small" color="action" />
-                      <Link
-                        href={details.GitDetails.RemoteURL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
+          {Object.entries(config.Dependencies).map(([name, details]: [string, any]) => {
+            const githubUrl = details.GitDetails ? parseGitHubUrl(details.GitDetails.RemoteURL) : null;
+            
+            return (
+              <Grid item xs={12} md={6} key={name}>
+                <Paper sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LinkIcon color="action" />
+                    <Typography variant="subtitle1">{name}</Typography>
+                  </Box>
+                  {details.GitDetails && (
+                    <>
+                      <Typography variant="body2" color="text.secondary">
+                        Repository
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <GitHubIcon fontSize="small" color="action" />
+                        <Link
+                          href={githubUrl || details.GitDetails.RemoteURL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
+                        >
+                          {details.GitDetails.RemoteURL}
+                        </Link>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Branch: {details.GitDetails.Branch}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Commit: {details.GitDetails.Commit?.substring(0, 8)}
+                      </Typography>
+                    </>
+                  )}
+                  {/* Visit button for Git projects */}
+                  {details.GitDetails && (
+                    <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        endIcon={<ArrowForwardIcon />}
+                        onClick={() => handleVisitProject(details.EntryFile)}
                       >
-                        {details.GitDetails.RemoteURL}
-                      </Link>
+                        Visit Project
+                      </Button>
+                      {githubUrl && (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          component="a"
+                          href={githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          startIcon={<GitHubIcon />}
+                        >
+                          GitHub
+                        </Button>
+                      )}
                     </Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Branch: {details.GitDetails.Branch}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      Commit: {details.GitDetails.Commit?.substring(0, 8)}
-                    </Typography>
-                  </>
-                )}
-                <Button
-                  variant="outlined"
-                  size="small"
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => handleVisitProject(details.EntryFile)}
-                >
-                  Visit Project
-                </Button>
-              </Paper>
-            </Grid>
-          ))}
+                  )}
+                  {/* Visit button for local projects */}
+                  {!details.GitDetails && details.EntryFile && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      endIcon={<ArrowForwardIcon />}
+                      onClick={() => handleVisitProject(details.EntryFile)}
+                      sx={{ mt: 1 }}
+                    >
+                      Visit Project
+                    </Button>
+                  )}
+                </Paper>
+              </Grid>
+            );
+          })}
         </Grid>
       </Box>
     );

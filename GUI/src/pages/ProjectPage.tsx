@@ -50,10 +50,15 @@ const ProjectPage = () => {
   // Update project path when location state changes
   useEffect(() => {
     if (location.state?.projectPath) {
-      setProjectPath(location.state.projectPath);
-      setTabValue(0); // Reset tab selection for new project
+      const newPath = location.state.projectPath;
+      // Only update if path actually changed
+      if (newPath !== projectPath) {
+        setProjectPath(newPath);
+        setTabValue(0); // Reset tab selection for new project
+        setProjectData(null); // Clear old project data
+      }
     }
-  }, [location.state]);
+  }, [location.state, projectPath]);
 
   const loadProject = async (path: string) => {
     if (!path) return;
