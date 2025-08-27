@@ -165,7 +165,7 @@ AMJS.Namespace.F_Environment = class
             {
                 if (fs.existsSync(ProjectLink.EntryFile))
                 {
-                    // this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
+                    this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
                     continue;
                 }
             }
@@ -174,7 +174,7 @@ AMJS.Namespace.F_Environment = class
                 let TestProjectEntryFile = await this.AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency);
                 if (TestProjectEntryFile)
                 {
-                    // this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
+                    this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
                 }
             }
         }
