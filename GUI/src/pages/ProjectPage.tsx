@@ -123,15 +123,28 @@ const ProjectPage = () => {
             <Grid item xs={12}>
               <Paper>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <Tabs value={tabValue} onChange={handleTabChange}>
-                    {Object.keys(projectData.environments).map((envName, index) => (
-                      <Tab key={envName} label={`${envName} Config`} />
-                    ))}
-                  </Tabs>
+                                   <Tabs value={tabValue} onChange={handleTabChange}>
+                   {Object.keys(projectData.environments).map((envName, index) => (
+                     <Tab 
+                       key={envName} 
+                       label={`${envName} Config`}
+                       data-config-name={envName}
+                     />
+                   ))}
+                 </Tabs>
                 </Box>
                 {Object.entries(projectData.environments).map(([envName, config], index) => (
                   <TabPanel key={envName} value={tabValue} index={index}>
-                    <ProjectConfigViewer config={config} name={envName} />
+                    <ProjectConfigViewer 
+                      config={config} 
+                      name={envName}
+                      onParentClick={(parentName) => {
+                        const parentIndex = Object.keys(projectData.environments).indexOf(parentName);
+                        if (parentIndex !== -1) {
+                          setTabValue(parentIndex);
+                        }
+                      }}
+                    />
                   </TabPanel>
                 ))}
               </Paper>

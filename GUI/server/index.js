@@ -49,13 +49,27 @@ app.get('/api/project/:projectPath', (req, res) => {
         let envConfigs = {};
         const configPath = path.join(path.dirname(absolutePath), 'Config/Environment');
         if (fs.existsSync(configPath)) {
-            const envFiles = ['Base.json', 'Development.json', 'Shipping.json'];
+            // Read all JSON files in the Environment directory
+            const files = fs.readdirSync(configPath);
+            const envFiles = files.filter(file => file.endsWith('.json'));
+            
             envFiles.forEach(file => {
                 const envPath = path.join(configPath, file);
-                if (fs.existsSync(envPath)) {
-                    const envName = path.parse(file).name;
-                    envConfigs[envName] = JSON.parse(fs.readFileSync(envPath, 'utf8'));
+                const envName = path.parse(file).name;
+                try {
+                    const config = JSON.parse(fs.readFileSync(envPath, 'utf8'));
+                    // If config has a Parent field, add it to the response
+                    if (config.Parent) {
+                        envConfigs[envName] = {
+                            ...config,
+                            _parentConfig: config.Parent // Add special field for UI
+                        };
+                    } else {
+                        envConfigs[envName] = config;
+                    }
                     console.log(`[API] Loaded environment config: ${envName}`);
+                } catch (err) {
+                    console.error(`[API] Error loading environment config ${envName}:`, err);
                 }
             });
         }

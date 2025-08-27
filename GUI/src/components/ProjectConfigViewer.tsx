@@ -26,9 +26,10 @@ import aptService from '../services/aptService';
 interface ProjectConfigViewerProps {
   config: Record<string, any>;
   name: string;
+  onParentClick?: (parentName: string) => void;
 }
 
-const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name }) => {
+const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name, onParentClick }) => {
   const navigate = useNavigate();
 
   const handleVisitProject = async (dependency: Record<string, any>) => {
@@ -258,9 +259,21 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        {name} Configuration
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Typography variant="h6">
+          {name} Configuration
+        </Typography>
+        {config._parentConfig && (
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => onParentClick?.(config._parentConfig)}
+            startIcon={<ArrowForwardIcon />}
+          >
+            Parent: {config._parentConfig}
+          </Button>
+        )}
+      </Box>
       
       {renderDependencies()}
 
@@ -270,7 +283,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name 
         </Typography>
         <Paper sx={{ p: 2 }}>
           {Object.entries(config)
-            .filter(([key]) => key !== 'Dependencies')
+            .filter(([key]) => key !== 'Dependencies' && key !== '_parentConfig' && key !== 'Parent')
             .map(([key, value]) => (
               <Box key={key} sx={{ mb: 2 }}>
                 <Typography variant="subtitle1" color="primary">
