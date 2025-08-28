@@ -170,12 +170,12 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name,
   const renderDependencies = () => {
     if (!config.Dependencies) return null;
 
-    return (
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Dependencies
-        </Typography>
-        <Grid container spacing={2}>
+          return (
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            Dependencies
+          </Typography>
+          <Grid container spacing={2}>
           {Object.entries(config.Dependencies).map(([name, details]: [string, any]) => {
             const githubUrl = details.GitDetails ? parseGitHubUrl(details.GitDetails.RemoteURL) : null;
             
@@ -259,11 +259,8 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name,
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <Typography variant="h6">
-          {name} Configuration
-        </Typography>
-        {config._parentConfig && (
+      {config._parentConfig && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <Button
             size="small"
             variant="outlined"
@@ -272,8 +269,8 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name,
           >
             Parent: {config._parentConfig}
           </Button>
-        )}
-      </Box>
+        </Box>
+      )}
       
       {renderDependencies()}
 
