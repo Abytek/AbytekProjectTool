@@ -35,6 +35,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import aptService, { DependencyDetails, ProjectLink } from '../services/aptService';
 import DependencyDialog from './DependencyDialog';
+import TreeObjectEditor from './TreeObjectEditor';
 
 interface ProjectConfigViewerProps {
   config: Record<string, any>;
@@ -58,6 +59,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
   const [editingDependency, setEditingDependency] = useState<{ name: string; details: DependencyDetails } | null>(null);
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedDependency, setSelectedDependency] = useState<string | null>(null);
+
 
 
   const handleVisitProject = async (dependency: Record<string, any>) => {
@@ -485,23 +487,42 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
       {renderDependencies()}
 
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Settings
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6">Settings</Typography>
+        </Box>
         <Paper sx={{ p: 2 }}>
-          {Object.entries(config)
-            .filter(([key]) => key !== 'Dependencies' && key !== '_parentConfig' && key !== 'Parent')
-            .map(([key, value]) => (
-              <Box key={key} sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" color="primary">
-                  {key}
-                </Typography>
-                {renderValue(value)}
-                <Divider sx={{ mt: 2 }} />
-              </Box>
-            ))}
+          {/* Global Default */}
+          <Box sx={{ mb: 3 }}>
+            <TreeObjectEditor
+              name="GlobalDefault"
+              value={config['GlobalDefault'] || {}}
+              onChange={async (newValue) => {
+                const updatedConfig = { ...config };
+                updatedConfig.GlobalDefault = newValue;
+                await aptService.addConfig(projectPath, name, updatedConfig);
+                await refreshConfig();
+              }}
+            />
+            <Divider sx={{ mt: 2 }} />
+          </Box>
+
+          {/* Project Default */}
+          <Box>
+            <TreeObjectEditor
+              name="ProjectDefault"
+              value={config['ProjectDefault'] || {}}
+              onChange={async (newValue) => {
+                const updatedConfig = { ...config };
+                updatedConfig.ProjectDefault = newValue;
+                await aptService.addConfig(projectPath, name, updatedConfig);
+                await refreshConfig();
+              }}
+            />
+          </Box>
         </Paper>
       </Box>
+
+
     </Box>
   );
 };
