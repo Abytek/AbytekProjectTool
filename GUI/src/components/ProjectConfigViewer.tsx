@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -12,25 +12,53 @@ import {
   Grid,
   IconButton,
   Tooltip,
-  Link
+  Link,
+  Menu,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from '@mui/material';
 import {
   Launch as LaunchIcon,
   Link as LinkIcon,
   GitHub as GitHubIcon,
-  ArrowForward as ArrowForwardIcon
+  ArrowForward as ArrowForwardIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
+  Settings as SettingsIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import aptService from '../services/aptService';
+import aptService, { DependencyDetails, ProjectLink } from '../services/aptService';
+import DependencyDialog from './DependencyDialog';
 
 interface ProjectConfigViewerProps {
   config: Record<string, any>;
   name: string;
+  projectPath: string;
+  projectLinks: ProjectLink[];
   onParentClick?: (parentName: string) => void;
+  onEditConfig?: (name: string, parent: string, currentConfig: Record<string, any>) => void;
+  onAddConfig?: () => void;
 }
 
-const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name, onParentClick }) => {
+const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initialConfig, name, projectPath, projectLinks, onParentClick, onEditConfig, onAddConfig }) => {
+  const [config, setConfig] = useState(initialConfig);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setConfig(initialConfig);
+  }, [initialConfig]);
   const navigate = useNavigate();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingDependency, setEditingDependency] = useState<{ name: string; details: DependencyDetails } | null>(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedDependency, setSelectedDependency] = useState<string | null>(null);
+
 
   const handleVisitProject = async (dependency: Record<string, any>) => {
     try {
@@ -167,24 +195,143 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name,
     return String(value);
   };
 
-  const renderDependencies = () => {
-    if (!config.Dependencies) return null;
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, dependencyName: string) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedDependency(dependencyName);
+  };
 
-          return (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            Dependencies
-          </Typography>
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setSelectedDependency(null);
+  };
+
+  const handleAddDependency = () => {
+    setEditingDependency(null);
+    setDialogOpen(true);
+  };
+
+  const handleEditDependency = () => {
+    if (selectedDependency && config.Dependencies[selectedDependency]) {
+      setEditingDependency({
+        name: selectedDependency,
+        details: config.Dependencies[selectedDependency]
+      });
+      setDialogOpen(true);
+      handleMenuClose();
+    }
+  };
+
+  const handleDeleteDependency = async () => {
+    if (selectedDependency) {
+      try {
+        // Get current config
+        const updatedConfig = { ...config };
+        
+        // Delete the dependency
+        if (updatedConfig.Dependencies) {
+          delete updatedConfig.Dependencies[selectedDependency];
+        }
+
+        // Save the updated config
+        await aptService.addConfig(projectPath, name, updatedConfig);
+        
+        // Refresh the config data
+        await refreshConfig();
+      } catch (error) {
+        console.error('Error deleting dependency:', error);
+      }
+      handleMenuClose();
+    }
+  };
+
+  const refreshConfig = async () => {
+    try {
+      const updatedConfig = await aptService.getConfig(projectPath, name);
+      setConfig(updatedConfig);
+    } catch (error) {
+      console.error('Error refreshing config:', error);
+    }
+  };
+
+  const handleSaveDependency = async (dependencyName: string, details: DependencyDetails) => {
+    try {
+      // Get current config
+      const updatedConfig = { ...config };
+      
+      // Initialize Dependencies if it doesn't exist
+      if (!updatedConfig.Dependencies) {
+        updatedConfig.Dependencies = {};
+      }
+
+      // If editing and name changed, delete the old dependency
+      if (editingDependency && editingDependency.name !== dependencyName) {
+        delete updatedConfig.Dependencies[editingDependency.name];
+      }
+
+      // Update or add the dependency
+      updatedConfig.Dependencies[dependencyName] = details;
+
+      // Save the updated config
+      await aptService.addConfig(projectPath, name, updatedConfig);
+      
+      // Refresh the config data
+      await refreshConfig();
+      
+      // Close the dialog
+      setDialogOpen(false);
+    } catch (error) {
+      console.error('Error saving dependency:', error);
+      throw error;
+    }
+  };
+
+  const renderDependencies = () => {
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="h6">Dependencies</Typography>
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={handleAddDependency}
+            size="small"
+          >
+            Add Dependency
+          </Button>
+        </Box>
+        {!config.Dependencies || Object.keys(config.Dependencies).length === 0 ? (
+          <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'background.default' }}>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              No dependencies added yet
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={handleAddDependency}
+              size="small"
+            >
+              Add Your First Dependency
+            </Button>
+          </Paper>
+        ) : (
           <Grid container spacing={2}>
-          {Object.entries(config.Dependencies).map(([name, details]: [string, any]) => {
+            {Object.entries(config.Dependencies).map(([name, details]: [string, any]) => {
             const githubUrl = details.GitDetails ? parseGitHubUrl(details.GitDetails.RemoteURL) : null;
             
             return (
               <Grid item xs={12} md={6} key={name}>
                 <Paper sx={{ p: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <LinkIcon color="action" />
-                    <Typography variant="subtitle1">{name}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <LinkIcon color="action" />
+                      <Typography variant="subtitle1">{name}</Typography>
+                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleMenuOpen(e, name)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
                   </Box>
                   {details.GitDetails && (
                     <>
@@ -252,25 +399,88 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config, name,
               </Grid>
             );
           })}
-        </Grid>
+          </Grid>
+        )}
       </Box>
     );
   };
 
+  const handleDeleteConfig = async () => {
+    try {
+      await aptService.deleteConfig(projectPath, name);
+      // Let parent component handle navigation since this component will be unmounted
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting config:', error);
+    }
+  };
+
   return (
     <Box>
-      {config._parentConfig && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => onParentClick?.(config._parentConfig)}
-            startIcon={<ArrowForwardIcon />}
-          >
-            Parent: {config._parentConfig}
-          </Button>
-        </Box>
-      )}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={handleEditDependency}>
+          <EditIcon fontSize="small" sx={{ mr: 1 }} />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={handleDeleteDependency}>
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+          Delete
+        </MenuItem>
+      </Menu>
+
+                    <DependencyDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onSave={handleSaveDependency}
+        projectLinks={projectLinks}
+        initialName={editingDependency?.name || ''}
+        initialDetails={editingDependency?.details || {}}
+        isEdit={!!editingDependency}
+      />
+
+             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+           <SettingsIcon color="primary" />
+           <Typography variant="h5">{name} Config</Typography>
+         </Box>
+         <Box sx={{ display: 'flex', gap: 1 }}>
+           <Box sx={{ display: 'flex', gap: 1 }}>
+             {config._parentConfig && (
+               <Button
+                 size="small"
+                 variant="outlined"
+                 onClick={() => onParentClick?.(config._parentConfig)}
+                 startIcon={<ArrowForwardIcon />}
+               >
+                 Parent: {config._parentConfig}
+               </Button>
+             )}
+             <Button
+               size="small"
+               variant="outlined"
+               onClick={() => onEditConfig?.(name, config._parentConfig || '', config)}
+               startIcon={<EditIcon />}
+             >
+               {config._parentConfig ? 'Change Parent' : 'Set Parent'}
+             </Button>
+           </Box>
+           <Button
+             size="small"
+             variant="outlined"
+             color="error"
+             onClick={handleDeleteConfig}
+             startIcon={<DeleteIcon />}
+           >
+             Delete Config
+           </Button>
+         </Box>
+       </Box>
+
+
       
       {renderDependencies()}
 

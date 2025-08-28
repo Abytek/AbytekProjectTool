@@ -58,15 +58,11 @@ app.get('/api/project/:projectPath', (req, res) => {
                 const envName = path.parse(file).name;
                 try {
                     const config = JSON.parse(fs.readFileSync(envPath, 'utf8'));
-                    // If config has a Parent field, add it to the response
-                    if (config.Parent) {
-                        envConfigs[envName] = {
-                            ...config,
-                            _parentConfig: config.Parent // Add special field for UI
-                        };
-                    } else {
-                        envConfigs[envName] = config;
-                    }
+                    // Add _parentConfig field for UI if Parent exists
+                    envConfigs[envName] = {
+                        ...config,
+                        _parentConfig: config.Parent // Add special field for UI
+                    };
                     console.log(`[API] Loaded environment config: ${envName}`);
                 } catch (err) {
                     console.error(`[API] Error loading environment config ${envName}:`, err);
@@ -204,6 +200,103 @@ app.get('/api/resolve-project-link', (req, res) => {
         }
     } catch (error) {
         console.error(`[API] Error resolving project link:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+// Get config
+app.get('/api/project/:projectPath/configs/:name', (req, res) => {
+    console.log(`[API] GET /api/project/${req.params.projectPath}/configs/${req.params.name}`);
+    try {
+        const projectPath = decodeURIComponent(req.params.projectPath);
+        const absolutePath = path.resolve(projectPath);
+        const { name } = req.params;
+        
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).json({ error: 'Project file not found' });
+        }
+
+        // Read the config file
+        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment', `${name}.json`);
+        if (fs.existsSync(configPath)) {
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            // Add _parentConfig field for UI if Parent exists
+            res.json({
+                ...config,
+                _parentConfig: config.Parent // Add special field for UI
+            });
+        } else {
+            res.status(404).json({ error: 'Config file not found' });
+        }
+    } catch (error) {
+        console.error(`[API] Error getting config:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Add config
+app.post('/api/project/:projectPath/configs/:name', (req, res) => {
+    console.log(`[API] POST /api/project/${req.params.projectPath}/configs/${req.params.name}`, req.body);
+    try {
+        const projectPath = decodeURIComponent(req.params.projectPath);
+        const absolutePath = path.resolve(projectPath);
+        const { name } = req.params;
+        const { config } = req.body;
+        
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).json({ error: 'Project file not found' });
+        }
+
+        if (!config) {
+            return res.status(400).json({ error: 'Missing required field: config' });
+        }
+
+        // Create config directory if it doesn't exist
+        const configDir = path.join(path.dirname(absolutePath), 'Config/Environment');
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+
+        // Write the new config file, converting _parentConfig to Parent if it exists
+        const configPath = path.join(configDir, `${name}.json`);
+        const configToSave = { ...config };
+        if ('_parentConfig' in configToSave) {
+            configToSave.Parent = configToSave._parentConfig;
+            delete configToSave._parentConfig;
+        }
+        fs.writeFileSync(configPath, JSON.stringify(configToSave, null, 2));
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error(`[API] Error adding config:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete config
+app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
+    console.log(`[API] DELETE /api/project/${req.params.projectPath}/configs/${req.params.name}`);
+    try {
+        const projectPath = decodeURIComponent(req.params.projectPath);
+        const absolutePath = path.resolve(projectPath);
+        const { name } = req.params;
+        
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).json({ error: 'Project file not found' });
+        }
+
+        // Delete the config file
+        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment', `${name}.json`);
+        if (fs.existsSync(configPath)) {
+            fs.unlinkSync(configPath);
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ error: 'Config file not found' });
+        }
+    } catch (error) {
+        console.error(`[API] Error deleting config:`, error);
         res.status(500).json({ error: error.message });
     }
 });

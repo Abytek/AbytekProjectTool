@@ -43,16 +43,34 @@ export interface ProjectLinkResolution {
     error?: string;
 }
 
+export interface DependencyDetails {
+    GitDetails?: {
+        RemoteURL: string;
+        Branch: string;
+        Commit?: string;
+    };
+    EntryFile?: string;
+}
+
 export interface APTService {
+    getConfig(projectPath: string, configName: string): Promise<Record<string, any>>;
     getProject(projectPath: string): Promise<ProjectResponse>;
     getCache(): Promise<Record<string, any>>;
     updateCache(key: string, value: any): Promise<void>;
     deleteCache(key: string): Promise<void>;
     getProjectLinks(): Promise<ProjectLink[]>;
     resolveProjectLink(dependency: Record<string, any>): Promise<ProjectLinkResolution>;
+
+    addConfig(projectPath: string, configName: string, config: Record<string, any>): Promise<void>;
+    deleteConfig(projectPath: string, configName: string): Promise<void>;
 }
 
 const aptService: APTService = {
+    async getConfig(projectPath: string, configName: string): Promise<Record<string, any>> {
+        const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs/${encodeURIComponent(configName)}`;
+        const response = await axios.get(url);
+        return response.data;
+    },
     async resolveProjectLink(dependency: Record<string, any>): Promise<ProjectLinkResolution> {
         // Convert nested objects to JSON strings
         const params = new URLSearchParams();
@@ -91,6 +109,18 @@ const aptService: APTService = {
     async getProjectLinks(): Promise<ProjectLink[]> {
         const response = await axios.get(`${API_BASE_URL}/project-links`);
         return response.data;
+    },
+
+
+
+    async addConfig(projectPath: string, configName: string, config: Record<string, any>): Promise<void> {
+        const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs/${encodeURIComponent(configName)}`;
+        await axios.post(url, { config });
+    },
+
+    async deleteConfig(projectPath: string, configName: string): Promise<void> {
+        const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs/${encodeURIComponent(configName)}`;
+        await axios.delete(url);
     }
 };
 

@@ -9,11 +9,20 @@ import {
   Tab,
   Tabs,
   CircularProgress,
-  Alert
+  Alert,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import DataViewer from '../components/DataViewer';
-import aptService, { ProjectResponse } from '../services/aptService';
+import aptService, { ProjectResponse, ProjectLink } from '../services/aptService';
 import ProjectConfigViewer from '../components/ProjectConfigViewer';
+import ConfigDialog from '../components/ConfigDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,6 +57,9 @@ const ProjectPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
+  const [projectLinks, setProjectLinks] = useState<ProjectLink[]>([]);
+  const [configDialogOpen, setConfigDialogOpen] = useState(false);
+  const [editingConfig, setEditingConfig] = useState<{ name: string; parent: string; config: Record<string, any> } | null>(null);
 
   // Function to encode project path for URL
   const encodeProjectPath = (path: string) => {
@@ -93,11 +105,16 @@ const ProjectPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await aptService.getProject(path);
+      const [data, links] = await Promise.all([
+        aptService.getProject(path),
+        aptService.getProjectLinks()
+      ]);
       setProjectData(data);
+      setProjectLinks(links);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load project');
       setProjectData(null);
+      setProjectLinks([]);
     } finally {
       setLoading(false);
     }
@@ -149,27 +166,91 @@ const ProjectPage = () => {
           {projectData && (
             <Grid item xs={12}>
               <Paper>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                                   <Tabs value={tabValue} onChange={handleTabChange}>
-                   {Object.keys(projectData.environments).map((envName, index) => (
-                     <Tab 
-                       key={envName} 
-                       label={`${envName} Config`}
-                       data-config-name={envName}
-                     />
-                   ))}
-                 </Tabs>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Tabs value={tabValue} onChange={handleTabChange}>
+                      {Object.keys(projectData.environments).map((envName, index) => (
+                        <Tab 
+                          key={envName} 
+                          label={`${envName} Config`}
+                          data-config-name={envName}
+                        />
+                      ))}
+                    </Tabs>
+                  </Box>
+                  <Tooltip title="Add New Config">
+                    <IconButton
+                      color="primary"
+                      onClick={() => setConfigDialogOpen(true)}
+                      sx={{ mr: 2 }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
+
+                <ConfigDialog
+                  open={configDialogOpen}
+                  onClose={() => {
+                    setConfigDialogOpen(false);
+                    setEditingConfig(null);
+                  }}
+                  onSave={async (name, parent) => {
+                    try {
+                      if (editingConfig) {
+                        // Update config parent
+                        const updatedConfig = {
+                          ...editingConfig.config
+                        };
+                        if (parent === '') {
+                          // Remove Parent field when "None" is selected
+                          delete updatedConfig.Parent;
+                          delete updatedConfig._parentConfig;
+                        } else {
+                          updatedConfig.Parent = parent;
+                        }
+                        await aptService.addConfig(projectPath, editingConfig.name, updatedConfig);
+                      } else {
+                        // Add new config
+                        const newConfig: Record<string, any> = {
+                          Dependencies: {}
+                        };
+                        if (parent !== '') {
+                          newConfig.Parent = parent;
+                        }
+                        await aptService.addConfig(projectPath, name, newConfig);
+                      }
+                      loadProject(projectPath);
+                    } catch (error) {
+                      console.error('Error saving config:', error);
+                      throw error;
+                    }
+                  }}
+                  availableConfigs={Object.keys(projectData.environments)}
+                  configParents={Object.fromEntries(
+                    Object.entries(projectData.environments)
+                      .map(([name, config]) => [name, (config as any)._parentConfig || ''])
+                  )}
+                  initialName={editingConfig?.name || ''}
+                  initialParent={editingConfig ? editingConfig.parent : Object.keys(projectData.environments)[tabValue]}
+                  isEdit={!!editingConfig}
+                />
                 {Object.entries(projectData.environments).map(([envName, config], index) => (
                   <TabPanel key={envName} value={tabValue} index={index}>
                     <ProjectConfigViewer 
                       config={config} 
                       name={envName}
+                      projectPath={projectPath}
+                      projectLinks={projectLinks}
                       onParentClick={(parentName) => {
                         const parentIndex = Object.keys(projectData.environments).indexOf(parentName);
                         if (parentIndex !== -1) {
                           setTabValue(parentIndex);
                         }
+                      }}
+                      onEditConfig={(name, parent, currentConfig) => {
+                        setEditingConfig({ name, parent, config: currentConfig });
+                        setConfigDialogOpen(true);
                       }}
                     />
                   </TabPanel>
