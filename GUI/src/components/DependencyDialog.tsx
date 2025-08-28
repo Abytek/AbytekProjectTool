@@ -80,7 +80,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
         ? {
             GitDetails: {
               RemoteURL: gitUrl.trim(),
-              Branch: gitBranch.trim(),
+              ...(gitBranch.trim() && { Branch: gitBranch.trim() }),
               ...(gitCommit.trim() && { Commit: gitCommit.trim() })
             }
           }

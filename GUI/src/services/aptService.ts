@@ -46,7 +46,7 @@ export interface ProjectLinkResolution {
 export interface DependencyDetails {
     GitDetails?: {
         RemoteURL: string;
-        Branch: string;
+        Branch?: string;
         Commit?: string;
     };
     EntryFile?: string;
