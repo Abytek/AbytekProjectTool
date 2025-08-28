@@ -64,8 +64,8 @@ const TreeNode: React.FC<TreeNodeProps> = ({
   };
 
   return (
-    <Box sx={{ mb: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ mb: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         {/* Name field (editable if not root) */}
         {isRoot ? (
           <Typography variant="subtitle1" color="primary" sx={{ minWidth: 150 }}>
@@ -77,6 +77,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             onChange={(e) => onNameChange?.(e.target.value)}
             size="small"
             sx={{ minWidth: 150 }}
+            inputProps={{ style: { padding: '4px 8px', fontSize: '0.875rem' } }}
           />
         )}
 
@@ -87,29 +88,31 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             onChange={handleValueChange}
             size="small"
             fullWidth
+            inputProps={{ style: { padding: '4px 8px', fontSize: '0.875rem' } }}
           />
         )}
 
         {/* Delete button (if not root) */}
         {!isRoot && (
-          <IconButton size="small" onClick={onDelete} color="error">
-            <DeleteIcon />
+          <IconButton size="small" onClick={onDelete} color="error" sx={{ p: 0.5 }}>
+            <DeleteIcon fontSize="small" />
           </IconButton>
         )}
       </Box>
 
       {/* Add child button and menu (if object) */}
       {isObject && (
-        <Box sx={{ mt: 1, ml: 2 }}>
-          <Box sx={{ mb: 1 }}>
+        <Box sx={{ mt: 0.5, ml: 2 }}>
+          <Box sx={{ mb: 0.5 }}>
             <Tooltip title="Add Child">
               <IconButton
                 size="small"
                 onClick={handleAddClick}
                 color="primary"
+                sx={{ p: 0.5 }}
               >
-                <AddIcon />
-                <ArrowDropDownIcon />
+                <AddIcon fontSize="small" />
+                <ArrowDropDownIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Box>
@@ -125,7 +128,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({
           </Menu>
 
           {/* Children */}
-          <Box sx={{ pl: 2 }}>
+          <Box sx={{ pl: 1.5 }}>
             {Object.entries(value).map(([childName, childValue]) => (
               <TreeNode
                 key={childName}
@@ -180,7 +183,7 @@ const TreeObjectEditor: React.FC<TreeObjectEditorProps> = ({
   onChange
 }) => {
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
+    <Paper variant="outlined" sx={{ p: 1 }}>
       <TreeNode
         name={name}
         value={value}
