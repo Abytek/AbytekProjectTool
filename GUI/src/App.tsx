@@ -13,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/project" element={<ProjectPage />} />
+          <Route path="/project/:encodedPath" element={<ProjectPage />} />
         </Routes>
       </Container>
     </>

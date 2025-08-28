@@ -1,35 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Paper, Typography, Tabs, Tab, CircularProgress } from '@mui/material';
+import { Box, Paper, Typography, CircularProgress, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CacheViewer from './CacheViewer';
 import ProjectLinksViewer from './ProjectLinksViewer';
 import aptService, { ProjectLink } from '../services/aptService';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
+interface DataViewerProps {
+  initialExpanded?: string[];
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
-const DataViewer: React.FC = () => {
-  const [value, setValue] = useState(0);
+const DataViewer: React.FC<DataViewerProps> = ({ initialExpanded = ['project-links'] }) => {
+  const [expandedSections, setExpandedSections] = useState<string[]>(initialExpanded);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cache, setCache] = useState<Record<string, any>>({});
@@ -56,8 +37,12 @@ const DataViewer: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  const handleAccordionChange = (section: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedSections(prev => 
+      isExpanded 
+        ? [...prev, section]
+        : prev.filter(s => s !== section)
+    );
   };
 
   if (loading) {
@@ -77,19 +62,46 @@ const DataViewer: React.FC = () => {
   }
 
   return (
-    <Paper elevation={3}>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange}>
-          <Tab label="Cache" />
-          <Tab label="Project Links" />
-        </Tabs>
-      </Box>
-      <TabPanel value={value} index={0}>
-        <CacheViewer cache={cache} onUpdate={fetchData} />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <ProjectLinksViewer links={projectLinks} />
-      </TabPanel>
+    <Paper elevation={3} sx={{ p: 2 }}>
+      <Accordion 
+        expanded={expandedSections.includes('project-links')}
+        onChange={handleAccordionChange('project-links')}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            '&.Mui-expanded': {
+              minHeight: 48,
+              '& .MuiAccordionSummary-content': { margin: '12px 0' }
+            }
+          }}
+        >
+          <Typography>Project Links</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ProjectLinksViewer links={projectLinks} />
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion 
+        expanded={expandedSections.includes('cache')}
+        onChange={handleAccordionChange('cache')}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            '&.Mui-expanded': {
+              minHeight: 48,
+              '& .MuiAccordionSummary-content': { margin: '12px 0' }
+            }
+          }}
+        >
+          <Typography>Cache</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <CacheViewer cache={cache} onUpdate={fetchData} />
+        </AccordionDetails>
+      </Accordion>
     </Paper>
   );
 };

@@ -73,9 +73,6 @@ const CacheViewer: React.FC<CacheViewerProps> = ({ cache, onUpdate }) => {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Cache Contents
-      </Typography>
       <Paper sx={{ maxHeight: '400px', overflow: 'auto' }}>
         <List>
           {Object.entries(cache).map(([key, value]) => (

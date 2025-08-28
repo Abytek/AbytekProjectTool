@@ -41,9 +41,9 @@ app.get('/api/project/:projectPath', (req, res) => {
             return res.status(404).json({ error: 'Project file not found' });
         }
 
-        // Import the project
-        const project = APT.Core.System.ProjectManager.ImportProject(null, absolutePath);
-        console.log(`[API] Imported project: ${project.Name}`);
+        // Get project name from directory
+        const projectName = path.basename(path.dirname(absolutePath));
+        console.log(`[API] Reading project: ${projectName}`);
         
         // Get environment configs if they exist
         let envConfigs = {};
@@ -74,31 +74,15 @@ app.get('/api/project/:projectPath', (req, res) => {
             });
         }
 
-        // Convert components to a serializable format
-        const components = [];
-        project.Components.forEach((value, key) => {
-            components.push({
-                type: key.name || key.toString(),
-                data: {
-                    ...value,
-                    // Remove any circular references or functions
-                    Components: undefined,
-                    Project: undefined
-                }
-            });
-        });
-
         const response = {
             project: {
-                name: project.Name,
-                label: project.Label,
-                entryFile: project.AbsoluteEntryFile,
-                entryDirectory: project.EntryDirectory,
-                components: components
+                name: projectName,
+                entryFile: absolutePath,
+                entryDirectory: path.dirname(absolutePath)
             },
             environments: envConfigs
         };
-        console.log(`[API] Sending project response for: ${project.Name}`);
+        console.log(`[API] Sending project response for: ${projectName}`);
         res.json(response);
     } catch (error) {
         console.error(`[API] Error in /api/project:`, error);

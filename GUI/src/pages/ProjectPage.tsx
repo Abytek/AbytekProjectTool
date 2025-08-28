@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -41,24 +41,51 @@ function TabPanel(props: TabPanelProps) {
 
 const ProjectPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { encodedPath } = useParams<{ encodedPath?: string }>();
   const [projectPath, setProjectPath] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
 
-  // Update project path when location state changes
-  useEffect(() => {
-    if (location.state?.projectPath) {
-      const newPath = location.state.projectPath;
-      // Only update if path actually changed
-      if (newPath !== projectPath) {
-        setProjectPath(newPath);
-        setTabValue(0); // Reset tab selection for new project
-        setProjectData(null); // Clear old project data
+  // Function to encode project path for URL
+  const encodeProjectPath = (path: string) => {
+    // Convert backslashes to forward slashes and encode
+    return encodeURIComponent(path.replace(/\\/g, '/'));
+  };
+
+  // Function to update project path and URL
+  const updateProjectPath = (newPath: string) => {
+    if (newPath !== projectPath) {
+      setProjectPath(newPath);
+      setTabValue(0); // Reset tab selection for new project
+      setProjectData(null); // Clear old project data
+      
+      // Update URL without triggering a navigation
+      const encodedProjectPath = encodeProjectPath(newPath);
+      if (encodedProjectPath !== encodedPath) {
+        navigate(`/project/${encodedProjectPath}`, { 
+          replace: true,
+          state: { projectPath: newPath }
+        });
       }
     }
-  }, [location.state, projectPath]);
+  };
+
+  // Handle URL parameter
+  useEffect(() => {
+    if (encodedPath && location.state?.projectPath) {
+      updateProjectPath(location.state.projectPath);
+    }
+  }, [encodedPath, location.state]);
+
+  // Handle direct state changes
+  useEffect(() => {
+    if (location.state?.projectPath) {
+      updateProjectPath(location.state.projectPath);
+    }
+  }, [location.state]);
 
   const loadProject = async (path: string) => {
     if (!path) return;
@@ -116,7 +143,7 @@ const ProjectPage = () => {
       ) : (
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <DataViewer />
+            <DataViewer initialExpanded={[]} />
           </Grid>
 
           {projectData && (

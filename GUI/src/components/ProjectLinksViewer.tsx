@@ -30,7 +30,11 @@ const ProjectLinksViewer: React.FC<ProjectLinksViewerProps> = ({ links }) => {
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
 
   const handleVisitProject = (path: string) => {
-    navigate('/project', { state: { projectPath: path } });
+    // Convert backslashes to forward slashes and encode
+    const encodedPath = encodeURIComponent(path.replace(/\\/g, '/'));
+    navigate(`/project/${encodedPath}`, { 
+      state: { projectPath: path }
+    });
   };
 
   const handleToggleExpand = (path: string) => {
@@ -57,9 +61,6 @@ const ProjectLinksViewer: React.FC<ProjectLinksViewerProps> = ({ links }) => {
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Project Links
-      </Typography>
       <Paper>
         <List>
           {links.map((link) => {
