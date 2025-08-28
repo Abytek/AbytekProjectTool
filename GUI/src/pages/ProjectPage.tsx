@@ -57,6 +57,7 @@ const ProjectPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
+  const [configNames, setConfigNames] = useState<string[]>([]);
   const [projectLinks, setProjectLinks] = useState<ProjectLink[]>([]);
   const [configDialogOpen, setConfigDialogOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<{ name: string; parent: string; config: Record<string, any> } | null>(null);
@@ -99,6 +100,16 @@ const ProjectPage = () => {
     }
   }, [location.state]);
 
+  const refreshConfigNames = async (path: string) => {
+    if (!path) return;
+    try {
+      const names = await aptService.getConfigNames(path);
+      setConfigNames(names);
+    } catch (err) {
+      console.error('Failed to load config names:', err);
+    }
+  };
+
   const loadProject = async (path: string) => {
     if (!path) return;
     
@@ -111,10 +122,12 @@ const ProjectPage = () => {
       ]);
       setProjectData(data);
       setProjectLinks(links);
+      await refreshConfigNames(path);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load project');
       setProjectData(null);
       setProjectLinks([]);
+      setConfigNames([]);
     } finally {
       setLoading(false);
     }
@@ -169,7 +182,7 @@ const ProjectPage = () => {
                 <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
                   <Box sx={{ flex: 1 }}>
                     <Tabs value={tabValue} onChange={handleTabChange}>
-                      {Object.keys(projectData.environments).map((envName, index) => (
+                      {configNames.map((envName, index) => (
                         <Tab 
                           key={envName} 
                           label={`${envName} Config`}
@@ -220,13 +233,13 @@ const ProjectPage = () => {
                         }
                         await aptService.addConfig(projectPath, name, newConfig);
                       }
-                      loadProject(projectPath);
+                      refreshConfigNames(projectPath);
                     } catch (error) {
                       console.error('Error saving config:', error);
                       throw error;
                     }
                   }}
-                  availableConfigs={Object.keys(projectData.environments)}
+                  availableConfigs={configNames}
                   configParents={Object.fromEntries(
                     Object.entries(projectData.environments)
                       .map(([name, config]) => [name, (config as any)._parentConfig || ''])

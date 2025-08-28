@@ -53,6 +53,7 @@ export interface DependencyDetails {
 }
 
 export interface APTService {
+    getConfigNames(projectPath: string): Promise<string[]>;
     getConfig(projectPath: string, configName: string): Promise<Record<string, any>>;
     getProject(projectPath: string): Promise<ProjectResponse>;
     getCache(): Promise<Record<string, any>>;
@@ -66,6 +67,11 @@ export interface APTService {
 }
 
 const aptService: APTService = {
+    async getConfigNames(projectPath: string): Promise<string[]> {
+        const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs`;
+        const response = await axios.get(url);
+        return response.data;
+    },
     async getConfig(projectPath: string, configName: string): Promise<Record<string, any>> {
         const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs/${encodeURIComponent(configName)}`;
         const response = await axios.get(url);

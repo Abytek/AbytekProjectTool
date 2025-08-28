@@ -206,6 +206,34 @@ app.get('/api/resolve-project-link', (req, res) => {
 
 
 
+// Get config names
+app.get('/api/project/:projectPath/configs', (req, res) => {
+    console.log(`[API] GET /api/project/${req.params.projectPath}/configs`);
+    try {
+        const projectPath = decodeURIComponent(req.params.projectPath);
+        const absolutePath = path.resolve(projectPath);
+        
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).json({ error: 'Project file not found' });
+        }
+
+        // Read config directory
+        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment');
+        if (fs.existsSync(configPath)) {
+            const files = fs.readdirSync(configPath);
+            const configNames = files
+                .filter(file => file.endsWith('.json'))
+                .map(file => path.parse(file).name);
+            res.json(configNames);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.error(`[API] Error getting config names:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get config
 app.get('/api/project/:projectPath/configs/:name', (req, res) => {
     console.log(`[API] GET /api/project/${req.params.projectPath}/configs/${req.params.name}`);
