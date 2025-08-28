@@ -57,7 +57,7 @@ AMJS.Namespace.GetDefaultProjectEntryFile = function()
 
 AMJS.Namespace.GetDefaultEnvironmentName = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').GetDefaultEnvironmentName;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnvironmentName;
     if (Result == null)
     {
         return "Development";

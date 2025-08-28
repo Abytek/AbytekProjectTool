@@ -109,7 +109,11 @@ AMJS.Namespace.F_Environment = class
     LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath)
     {
         const EnvConfigFile = path.join(ConfigDirectoryPath, EnvName);
-        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile);
+        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile, false);
+        if (!EnvConfig)
+        {
+            return null;
+        }
         const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
         if (!ValidatedResult.Status)
         {
@@ -155,34 +159,7 @@ AMJS.Namespace.F_Environment = class
                     Result[ParamName] = new Object();
                 }
                 let ResultParam = APT.Common.SimpleDeepCopy(Result[ParamName]);
- 
-                let MergeFunction = function(ResultObject, AObject)
-                {
-                    for (let Key in AObject)
-                    {
-                        let AProperty = AObject[Key];
-
-                        if (typeof AProperty == "object")
-                        {
-                            if (Key in ResultObject)
-                            {
-                                let ResultPropertySrc = ResultObject[Key];
-                                if (typeof ResultPropertySrc == "object")
-                                {
-                                    let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
-                                    MergeFunction(ResultPropertyDst, AProperty);
-                                    ResultObject[Key] = ResultPropertyDst;
-                                    continue;
-                                }
-                            }
-                        }
-                        
-                        ResultObject[Key] = AProperty;
-                    }
-                }
-                MergeFunction(ResultParam, AParam);
-
-                Result[ParamName] = ResultParam;
+                Result[ParamName] = APT.Common.MergeData(ResultParam, AParam);
             }
         }
 
@@ -199,7 +176,7 @@ AMJS.Namespace.F_Environment = class
             return false;
         }
 
-        console.log("APT.SetupEnvironment:\n", APT.Common.NiceJSONStringify(EnvConfig));
+        console.log(`APT.SetupEnvironment(${Module.AbsoluteFile}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
 
         this.ApplyCLIInputs(EnvConfig);
 

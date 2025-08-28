@@ -1,3 +1,5 @@
+const path = require("path");
+
 AMJS.ImportNamespace("../Commands");
 
 /**
@@ -144,7 +146,7 @@ AMJS.Namespace.F_CommandManager = class
             let MainProjectEntryFileSlot = this.CLIInput.get('MainProjectEntryFile');
             if (MainProjectEntryFileSlot.length == 1)
             {
-                this.CLIInput.get("GlobalDefault").ProjectEntryFile = MainProjectEntryFileSlot[0];
+                this.CLIInput.get("GlobalDefault").ProjectEntryFile = path.resolve(MainProjectEntryFileSlot[0]);
             }
             if (MainProjectEntryFileSlot.length > 1)
             {

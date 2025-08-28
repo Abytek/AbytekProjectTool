@@ -23,6 +23,14 @@ System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureProjects = fa
 // Start the system
 System.Start();
 
+// Helper function to get environment config directory
+const getEnvironmentConfigDir = (projectPath) => {
+    const absolutePath = path.resolve(projectPath);
+    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(absolutePath);
+    console.log(projectPreset);
+    return path.join(path.dirname(absolutePath), projectPreset.EnvironmentConfigDirectory);
+};
+
 const app = express();
 const port = 3001; // Different from React dev server port
 
@@ -47,7 +55,7 @@ app.get('/api/project/:projectPath', (req, res) => {
         
         // Get environment configs if they exist
         let envConfigs = {};
-        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment');
+        const configPath = getEnvironmentConfigDir(projectPath);
         if (fs.existsSync(configPath)) {
             // Read all JSON files in the Environment directory
             const files = fs.readdirSync(configPath);
@@ -218,7 +226,7 @@ app.get('/api/project/:projectPath/configs', (req, res) => {
         }
 
         // Read config directory
-        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment');
+        const configPath = getEnvironmentConfigDir(projectPath);
         if (fs.existsSync(configPath)) {
             const files = fs.readdirSync(configPath);
             const configNames = files
@@ -247,7 +255,7 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
         }
 
         // Read the config file
-        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment', `${name}.json`);
+        const configPath = path.join(getEnvironmentConfigDir(projectPath), `${name}.json`);
         if (fs.existsSync(configPath)) {
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
             // Add _parentConfig field for UI if Parent exists
@@ -282,7 +290,7 @@ app.post('/api/project/:projectPath/configs/:name', (req, res) => {
         }
 
         // Create config directory if it doesn't exist
-        const configDir = path.join(path.dirname(absolutePath), 'Config/Environment');
+        const configDir = getEnvironmentConfigDir(projectPath);
         if (!fs.existsSync(configDir)) {
             fs.mkdirSync(configDir, { recursive: true });
         }
@@ -316,7 +324,7 @@ app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
         }
 
         // Delete the config file
-        const configPath = path.join(path.dirname(absolutePath), 'Config/Environment', `${name}.json`);
+        const configPath = path.join(getEnvironmentConfigDir(projectPath), `${name}.json`);
         if (fs.existsSync(configPath)) {
             fs.unlinkSync(configPath);
             res.json({ success: true });

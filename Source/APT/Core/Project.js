@@ -28,7 +28,8 @@ AMJS.Namespace.F_Project = class
 
         this.IsFinalized = false;
 
-        APT.Core.System.ProjectManager.SetupProjectLink(this.AbsoluteEntryFile);
+        this.Preset = APT.Core.System.ProjectManager.GenerateProjectPreset(this.AbsoluteEntryFile);
+        this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.AbsoluteEntryFile);
     }
 
     /**

@@ -526,3 +526,33 @@ AMJS.Namespace.GetProjectLinksDirectory = function()
 {
     return path.join(AMJS.Namespace.GetDataDirectory(), "ProjectLinks");
 }
+
+AMJS.Namespace.MergeData = function(ResultObject, AObject)
+{
+    if (typeof ResultObject != "object")
+    {
+        return APT.Common.SimpleDeepCopy(AObject);
+    }
+    for (let Key in AObject)
+    {
+        let AProperty = AObject[Key];
+
+        if (typeof AProperty == "object")
+        {
+            if (Key in ResultObject)
+            {
+                let ResultPropertySrc = ResultObject[Key];
+                if (typeof ResultPropertySrc == "object")
+                {
+                    let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
+                    AMJS.Namespace.MergeData(ResultPropertyDst, AProperty);
+                    ResultObject[Key] = ResultPropertyDst;
+                    continue;
+                }
+            }
+        }
+        
+        ResultObject[Key] = AProperty;
+    }
+    return ResultObject;
+}

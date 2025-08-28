@@ -133,6 +133,11 @@ AMJS.Namespace.F_ProjectManager = class
                     {
                         return APT.Core.System.Environment.SetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
                     }
+
+                    Context.APT.SetupEnvironment(
+                        APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
+                        Project.Preset.EnvironmentConfigDirectory
+                    );
                 },
                 IsAnonymous: true
             }
@@ -322,7 +327,9 @@ AMJS.Namespace.F_ProjectManager = class
         if (!SearchedProjectLink)
         {
             this.AddProjectLink(ProjectLink);
+            return ProjectLink;
         }
+        return SearchedProjectLink;
     }
     AddProjectLink(ProjectLink)
     {
@@ -334,5 +341,56 @@ AMJS.Namespace.F_ProjectManager = class
             fs.mkdirSync(ProjectLinksDirectory, { recursive: true });
         }
         fs.writeFileSync(ProjectLinkFile, APT.Common.NiceJSONStringify(ProjectLink), {  });
+    }
+
+    ValidateProjectPreset(Preset)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                EnvironmentConfigDirectory: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(Preset)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+        return Result;
+    }
+    GenerateProjectPreset(ProjectEntryFile)
+    {
+        const ProjectEntryDirectory = path.dirname(ProjectEntryFile);
+        const PresetFile = path.join(ProjectEntryDirectory, "APTPreset.json");
+        let Result = {
+            EnvironmentConfigDirectory: "Config/Environment",
+        };
+        if (fs.existsSync(PresetFile))
+        {
+            let Preset = require(PresetFile);
+            const ValidatedResult = this.ValidateProjectPreset(Preset);
+            if (!ValidatedResult.Status)
+            {
+                console.error(`❌ Invalid preset file ${PresetFile}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+                return null;
+            }
+            Result = APT.Common.MergeData(Result, Preset);
+        }
+        return Result;
     }
 }
