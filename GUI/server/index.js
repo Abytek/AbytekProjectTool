@@ -232,9 +232,9 @@ app.get('/api/project/:projectPath/configs', (req, res) => {
             const configNames = files
                 .filter(file => file.endsWith('.json'))
                 .map(file => path.parse(file).name);
-            res.json(configNames);
+            res.json(configNames.length > 0 ? configNames : ['Base']);
         } else {
-            res.json([]);
+            res.json(['Base']);
         }
     } catch (error) {
         console.error(`[API] Error getting config names:`, error);
@@ -263,6 +263,14 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
                 ...config,
                 _parentConfig: config.Parent // Add special field for UI
             });
+        } else if (name === 'Base') {
+            // Return default Base config
+            const defaultConfig = {
+                Dependencies: {},
+                GlobalDefault: {},
+                ProjectDefault: {}
+            };
+            res.json(defaultConfig);
         } else {
             res.status(404).json({ error: 'Config file not found' });
         }

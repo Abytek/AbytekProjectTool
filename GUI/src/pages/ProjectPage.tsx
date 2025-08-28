@@ -105,6 +105,17 @@ const ProjectPage = () => {
     try {
       const names = await aptService.getConfigNames(path);
       setConfigNames(names);
+
+      // If Base config is in names but not in environments, fetch it
+      if (names.includes('Base') && !projectData?.environments?.Base) {
+        const baseConfig = await aptService.getConfig(path, 'Base');
+        if (projectData) {
+          const updatedData = { ...projectData };
+          updatedData.environments = updatedData.environments || {};
+          updatedData.environments.Base = baseConfig;
+          setProjectData(updatedData);
+        }
+      }
     } catch (err) {
       console.error('Failed to load config names:', err);
     }
@@ -116,13 +127,22 @@ const ProjectPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const [data, links] = await Promise.all([
+      const [data, links, configNames] = await Promise.all([
         aptService.getProject(path),
-        aptService.getProjectLinks()
+        aptService.getProjectLinks(),
+        aptService.getConfigNames(path)
       ]);
+
+      // If Base config is in configNames but not in environments, fetch it
+      if (configNames.includes('Base') && !data.environments?.Base) {
+        const baseConfig = await aptService.getConfig(path, 'Base');
+        data.environments = data.environments || {};
+        data.environments.Base = baseConfig;
+      }
+
       setProjectData(data);
       setProjectLinks(links);
-      await refreshConfigNames(path);
+      setConfigNames(configNames);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load project');
       setProjectData(null);

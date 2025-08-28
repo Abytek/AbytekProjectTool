@@ -112,7 +112,7 @@ AMJS.Namespace.F_Environment = class
         let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile, false);
         if (!EnvConfig)
         {
-            return null;
+            return LoadEnvironmentConfig(Module, "Base", ConfigDirectoryPath);
         }
         const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
         if (!ValidatedResult.Status)

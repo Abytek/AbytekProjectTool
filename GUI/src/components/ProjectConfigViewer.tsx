@@ -49,11 +49,40 @@ interface ProjectConfigViewerProps {
 
 const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initialConfig, name, projectPath, projectLinks, onParentClick, onEditConfig, onAddConfig }) => {
   const [config, setConfig] = useState(initialConfig);
+  const [resolvedUrls, setResolvedUrls] = useState<Record<string, string>>({});
 
   // Update local state when prop changes
   useEffect(() => {
     setConfig(initialConfig);
   }, [initialConfig]);
+  
+  // Resolve Git dependency URLs when config changes
+  useEffect(() => {
+    const resolveGitDependencies = async () => {
+      if (!config.Dependencies) return;
+      
+      const newResolvedUrls: Record<string, string> = {};
+      
+      for (const [depName, details] of Object.entries(config.Dependencies)) {
+        if ((details as any).GitDetails) {
+          try {
+            const resolution = await aptService.resolveProjectLink(details as Record<string, any>);
+            if (resolution.success && resolution.projectLink) {
+              const encodedPath = encodeURIComponent(resolution.projectLink.entryFile.replace(/\\/g, '/'));
+              newResolvedUrls[depName] = `/project/${encodedPath}`;
+            }
+          } catch (error) {
+            console.error(`Failed to resolve ${depName}:`, error);
+          }
+        }
+      }
+      
+      setResolvedUrls(newResolvedUrls);
+    };
+    
+    resolveGitDependencies();
+  }, [config.Dependencies]);
+  
   const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDependency, setEditingDependency] = useState<{ name: string; details: DependencyDetails } | null>(null);
@@ -73,6 +102,25 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
     } catch (error) {
       console.error('Error visiting project:', error);
     }
+  };
+
+  const getProjectUrl = (dependencyName: string, dependency: Record<string, any>): string => {
+    // Check if we have a pre-resolved URL for Git dependencies
+    if (resolvedUrls[dependencyName]) {
+      return resolvedUrls[dependencyName];
+    }
+    
+    // For local dependencies, encode the entry file path
+    if (!dependency.GitDetails && dependency.EntryFile) {
+      let entryPath = dependency.EntryFile;
+      // Convert backslashes to forward slashes for URL
+      entryPath = entryPath.replace(/\\/g, '/');
+      const encodedPath = encodeURIComponent(entryPath);
+      return `/project/${encodedPath}`;
+    }
+    
+    // Fallback for unresolved dependencies
+    return '#';
   };
 
   const parseGitHubUrl = (remoteUrl: string): string | null => {
@@ -365,8 +413,13 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
                       <Button
                         variant="outlined"
                         size="small"
+                        component="a"
+                        href={getProjectUrl(name, details)}
+                        onClick={(e) => {
+                          // Let the browser handle the URL for both Git and local dependencies
+                          // since we now pre-resolve Git dependencies to proper URLs
+                        }}
                         endIcon={<ArrowForwardIcon />}
-                        onClick={() => handleVisitProject(details)}
                       >
                         Visit Project
                       </Button>
@@ -390,8 +443,14 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
                     <Button
                       variant="outlined"
                       size="small"
+                      component="a"
+                      href={getProjectUrl(name, details)}
+                      onClick={(e) => {
+                        // For local dependencies, let the browser handle the URL directly
+                        // This allows right-click "Open in new tab" to work properly
+                        // Don't prevent default - let the browser navigate
+                      }}
                       endIcon={<ArrowForwardIcon />}
-                      onClick={() => handleVisitProject(details)}
                       sx={{ mt: 1 }}
                     >
                       Visit Project
