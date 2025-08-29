@@ -11,7 +11,7 @@ function App() {
     <ThemeProviderWrapper>
       <CssBaseline />
       <Navigation />
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 4, pb: 4, minHeight: '100vh' }}>
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/project" element={<ProjectPage />} />

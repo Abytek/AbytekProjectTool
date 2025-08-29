@@ -51,6 +51,20 @@ export interface DependencyDetails {
     EntryDirectory?: string;
 }
 
+export interface CommandExecutionRequest {
+    command: string;
+    commandType: string;
+    projectPath: string;
+}
+
+export interface CommandExecutionResponse {
+    output: string;
+    exitCode: number;
+    command: string;
+    commandType: string;
+    error?: string;
+}
+
 export interface APTService {
     getConfigNames(projectPath: string): Promise<string[]>;
     getConfig(projectPath: string, configName: string): Promise<Record<string, any>>;
@@ -63,6 +77,7 @@ export interface APTService {
 
     addConfig(projectPath: string, configName: string, config: Record<string, any>): Promise<void>;
     deleteConfig(projectPath: string, configName: string): Promise<void>;
+    executeCommand(request: CommandExecutionRequest): Promise<CommandExecutionResponse>;
 }
 
 const aptService: APTService = {
@@ -126,6 +141,11 @@ const aptService: APTService = {
     async deleteConfig(projectPath: string, configName: string): Promise<void> {
         const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/configs/${encodeURIComponent(configName)}`;
         await axios.delete(url);
+    },
+
+    async executeCommand(request: CommandExecutionRequest): Promise<CommandExecutionResponse> {
+        const response = await axios.post(`${API_BASE_URL}/execute-command`, request);
+        return response.data;
     }
 };
 

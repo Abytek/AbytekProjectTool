@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { spawn, exec } = require('child_process');
 
 // Import APT modules
 const AMJS = require("../../Submodules/AbytekModuleJS/Source/AMJS/.js");
@@ -369,6 +370,102 @@ app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
     } catch (error) {
         console.error(`[API] Error deleting config:`, error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Execute command
+app.post('/api/execute-command', (req, res) => {
+    console.log(`[API] POST /api/execute-command`, req.body);
+    
+    const { command, commandType, projectPath } = req.body;
+    
+    if (!commandType) {
+        return res.status(400).json({ error: 'Missing required field: commandType' });
+    }
+
+    let fullCommand;
+    const execOptions = {
+        cwd: projectPath && fs.existsSync(projectPath) ? projectPath : process.cwd(),
+        env: { ...process.env },
+        // No timeout - infinite timeout
+        maxBuffer: 1024 * 1024 // 1MB buffer
+    };
+
+    try {
+        // Build the full command with specific prefixes: apt:, node:, python:, native (no prefix)
+        switch (commandType) {
+            case 'apt':
+                if (command.trim()) {
+                    fullCommand = `apt ${command}`;
+                } else {
+                    // Empty APT command - run help
+                    fullCommand = 'apt';
+                }
+                break;
+            
+            case 'node':
+                if (command.trim()) {
+                    fullCommand = `node ${command}`;
+                } else {
+                    // Empty node command - show version
+                    fullCommand = 'node';
+                }
+                break;
+            
+            case 'python':
+                if (command.trim()) {
+                    fullCommand = `python ${command}`;
+                } else {
+                    // Empty python command - show version
+                    fullCommand = 'python';
+                }
+                break;
+            
+            case 'native':
+            default:
+                if (command.trim()) {
+                    // Native commands have no prefix
+                    fullCommand = command;
+                } else {
+                    // Empty native command - show current directory
+                    fullCommand = process.platform === 'win32' ? 'cd' : 'pwd';
+                }
+                break;
+        }
+
+        console.log(`[API] Executing: ${fullCommand}`);
+        console.log(`[API] Working directory: ${execOptions.cwd}`);
+
+        exec(fullCommand, execOptions, (error, stdout, stderr) => {
+            const output = stdout || stderr || '';
+            const response = {
+                output: output,
+                exitCode: error ? error.code || 1 : 0,
+                command: command,
+                commandType: commandType
+            };
+
+            if (error) {
+                console.log(`[API] Command failed:`, { error: error.message, ...response });
+                
+                // Handle errors (no timeout since we have infinite timeout)
+                res.status(500).json({ 
+                    error: stderr || error.message || `Command failed with exit code ${error.code}`,
+                    ...response
+                });
+            } else {
+                console.log(`[API] Command completed successfully:`, response);
+                res.json(response);
+            }
+        });
+
+    } catch (error) {
+        console.error(`[API] Error setting up command execution:`, error);
+        res.status(500).json({ 
+            error: `Failed to setup command: ${error.message}`,
+            command: command,
+            commandType: commandType
+        });
     }
 });
 

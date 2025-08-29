@@ -18,6 +18,7 @@ import DataViewer from '../components/DataViewer';
 import aptService, { ProjectResponse, ProjectLink } from '../services/aptService';
 import ProjectConfigViewer from '../components/ProjectConfigViewer';
 import ConfigDialog from '../components/ConfigDialog';
+import ConsolePanel from '../components/ConsolePanel';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -297,6 +298,23 @@ const ProjectPage = () => {
               </Paper>
             </Grid>
           )}
+
+          {/* Console Panel */}
+          {projectPath && (
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Console
+                </Typography>
+                <ConsolePanel projectPath={projectPath} />
+              </Paper>
+            </Grid>
+          )}
+
+          {/* Empty space at page bottom for console resizer dragging */}
+          <Grid item xs={12}>
+            <Box sx={{ height: 150, minHeight: 150 }} />
+          </Grid>
         </Grid>
       )}
     </Box>
