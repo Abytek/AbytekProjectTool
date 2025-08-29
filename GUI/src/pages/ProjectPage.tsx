@@ -19,6 +19,7 @@ import aptService, { ProjectResponse, ProjectLink } from '../services/aptService
 import ProjectConfigViewer from '../components/ProjectConfigViewer';
 import ConfigDialog from '../components/ConfigDialog';
 import ConsolePanel from '../components/ConsolePanel';
+import ProjectDetailsViewer from '../components/ProjectDetailsViewer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -199,6 +200,15 @@ const ProjectPage = () => {
         <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
       ) : (
         <Grid container spacing={3}>
+          {/* Project Details */}
+          {projectData && (
+            <Grid item xs={12}>
+              <ProjectDetailsViewer 
+                project={projectData.project}
+              />
+            </Grid>
+          )}
+
           <Grid item xs={12}>
             <DataViewer initialExpanded={[]} />
           </Grid>
@@ -313,7 +323,7 @@ const ProjectPage = () => {
 
           {/* Empty space at page bottom for console resizer dragging */}
           <Grid item xs={12}>
-            <Box sx={{ height: 150, minHeight: 150 }} />
+            <Box sx={{ height: 120, minHeight: 120 }} />
           </Grid>
         </Grid>
       )}

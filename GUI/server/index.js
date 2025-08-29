@@ -81,11 +81,62 @@ app.get('/api/project/:projectPath', (req, res) => {
             });
         }
 
+        // Try to load APT project metadata
+        let projectMetadata = {
+            name: projectName,
+            entryDirectory: absoluteDirectoryPath
+        };
+
+        try {
+            // Use APT system to generate project link for git details
+            const projectLink = APT.Core.System.ProjectManager.GenerateProjectLink(absoluteDirectoryPath);
+            console.log(`[API] Generated project link:`, APT.Common.NiceJSONStringify(projectLink));
+            
+            // Extract git details if available
+            if (projectLink.GitDetails) {
+                projectMetadata.gitDetails = {
+                    remoteUrl: projectLink.GitDetails.RemoteURL,
+                    branch: projectLink.GitDetails.Branch,
+                    commit: projectLink.GitDetails.Commit
+                };
+            }
+
+            // Try to get additional metadata from project preset if APTProject.js exists
+            if (fs.existsSync(projectFilePath)) {
+                try {
+                    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(projectFilePath);
+                    console.log(`[API] Generated project preset:`, APT.Common.NiceJSONStringify(projectPreset));
+                    
+                    // Extract template information
+                    if (projectPreset.TemplateInfo) {
+                        projectMetadata.templateInfo = projectPreset.TemplateInfo;
+                    }
+
+                    // Extract prototype information  
+                    if (projectPreset.PrototypeInfo) {
+                        projectMetadata.prototypeInfo = projectPreset.PrototypeInfo;
+                    }
+
+                    // Extract components if available
+                    if (projectPreset.Components && Array.isArray(projectPreset.Components)) {
+                        projectMetadata.components = projectPreset.Components.map(component => ({
+                            type: component.Type || 'Unknown',
+                            data: component.Data || {}
+                        }));
+                    }
+                } catch (presetError) {
+                    console.warn(`[API] Could not extract project preset:`, presetError.message);
+                }
+            }
+
+            console.log(`[API] Extracted project metadata:`, APT.Common.NiceJSONStringify(projectMetadata));
+        } catch (error) {
+            console.warn(`[API] Could not extract APT project metadata:`, error.message);
+            // Continue with basic metadata
+        }
+
         const response = {
-            project: {
-                name: projectName,
-                entryDirectory: absoluteDirectoryPath
-            },
+            project: projectMetadata,
             environments: envConfigs
         };
         console.log(`[API] Sending project response for: ${projectName}`, APT.Common.NiceJSONStringify(response));

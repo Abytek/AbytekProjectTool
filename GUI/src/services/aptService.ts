@@ -10,6 +10,13 @@ export interface ProjectData {
         type: string;
         data: any;
     }[];
+    gitDetails?: {
+        remoteUrl: string;
+        branch?: string;
+        commit?: string;
+    };
+    templateInfo?: string;
+    prototypeInfo?: string;
 }
 
 export interface ProjectResponse {
