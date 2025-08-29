@@ -51,11 +51,6 @@ app.get('/api/project/:projectPath', (req, res) => {
             return res.status(404).json({ error: 'Project directory not found' });
         }
 
-        if (!fs.existsSync(projectFilePath)) {
-            console.log(`[API] APTProject.js not found in: ${absoluteDirectoryPath}`);
-            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
-        }
-
         // Get project name from directory
         const projectName = path.basename(absoluteDirectoryPath);
         console.log(`[API] Reading project: ${projectName}`);
@@ -245,10 +240,6 @@ app.get('/api/project/:projectPath/configs', (req, res) => {
             return res.status(404).json({ error: 'Project directory not found' });
         }
 
-        if (!fs.existsSync(projectFilePath)) {
-            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
-        }
-
         // Read config directory
         const configPath = getEnvironmentConfigDir(projectDirectoryPath);
         if (fs.existsSync(configPath)) {
@@ -281,10 +272,6 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
             return res.status(404).json({ error: 'Project directory not found' });
-        }
-
-        if (!fs.existsSync(projectFilePath)) {
-            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Read the config file
@@ -332,10 +319,6 @@ app.post('/api/project/:projectPath/configs/:name', (req, res) => {
             return res.status(404).json({ error: 'Project directory not found' });
         }
 
-        if (!fs.existsSync(projectFilePath)) {
-            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
-        }
-
         if (!config) {
             return res.status(400).json({ error: 'Missing required field: config' });
         }
@@ -373,10 +356,6 @@ app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
             return res.status(404).json({ error: 'Project directory not found' });
-        }
-
-        if (!fs.existsSync(projectFilePath)) {
-            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Delete the config file
