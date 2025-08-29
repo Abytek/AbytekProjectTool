@@ -9,7 +9,7 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
     let Project = ProjectStructure.Project;
 
-    console.log(`<APT.Templates.UnrealEngine> Begin generating project files for ${Project.AbsoluteEntryFile}`);
+    console.log(`<APT.Templates.UnrealEngine> Begin generating project files for ${Project.EntryDirectory}`);
     if (ProjectStructure.IsEngine)
     {
         execSync(
@@ -39,5 +39,5 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
             }
         );
     }
-    console.log(`<APT.Templates.UnrealEngine> Generated project files for ${Project.AbsoluteEntryFile} successfully`);
+    console.log(`<APT.Templates.UnrealEngine> Generated project files for ${Project.EntryDirectory} successfully`);
 }

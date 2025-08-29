@@ -32,7 +32,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
         let CalculateBuildDirectoryParams =
         {
-            AbsoluteProjectEntryFile: Project.AbsoluteEntryFile,
+            ProjectEntryDirectory: Project.EntryDirectory,
             PlatformTags,
             AProjectType,
             Config,

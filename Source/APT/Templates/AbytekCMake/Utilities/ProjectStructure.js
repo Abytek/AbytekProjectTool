@@ -11,13 +11,13 @@ AMJS.Namespace.GetDefaultAProjectType = function(PlatformTags)
     return AMJS.Namespace.AProjectTypes.STANDALONE;
 }
 
-AMJS.Namespace.CalculateTopmostBuildDirectory = function(AbsoluteProjectEntryFile)
+AMJS.Namespace.CalculateTopmostBuildDirectory = function(ProjectEntryDirectory)
 {
-    return path.join(path.dirname(AbsoluteProjectEntryFile), "Build");
+    return path.join(ProjectEntryDirectory, "Build");
 }
 
 // Options
-// - AbsoluteProjectEntryFile
+// - ProjectEntryDirectory
 // - PlatformTags
 // - AProjectType
 // - Generator
@@ -25,13 +25,13 @@ AMJS.Namespace.CalculateTopmostBuildDirectory = function(AbsoluteProjectEntryFil
 AMJS.Namespace.CalculateBuildDirectory = function(Options)
 {
     APT.Common.Assert(Options);
-    const AbsoluteProjectEntryFile = APT.Common.Assert(Options.AbsoluteProjectEntryFile);
+    const ProjectEntryDirectory = APT.Common.Assert(Options.ProjectEntryDirectory);
     const PlatformTags = APT.Common.Assert(Options.PlatformTags);
     const AProjectType = APT.Common.Assert(Options.AProjectType);
     const Config = APT.Common.Assert(Options.Config);
     const Generator = APT.Common.Assert(Options.Generator);
 
-    const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(AbsoluteProjectEntryFile);
+    const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectEntryDirectory);
 
     return path.join(TopmostBuildDirectory, AProjectType, PlatformTags.sort().join("."), Generator, Config);
 }

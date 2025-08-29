@@ -13,7 +13,7 @@ ModuleSystem.SourceDirectories = [
 ];
 
 // Import and initialize APT
-const APT = ModuleSystem.Import(null, ".js");
+const APT = ModuleSystem.Import([], ".js");
 const System = new APT.Core.F_System();
 APT.Core.System = System;
 

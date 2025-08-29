@@ -80,6 +80,6 @@ AMJS.Namespace.OpenGUI.LogHelp = function(Logger)
 {
     Logger.SetCommandName("OpenGUI");
     Logger.SetAutomaticDetect(false);
-    Logger.SetNeedMainProjectEntryFile(false);
+    Logger.SetNeedMainProjectEntryDirectory(false);
     Logger.SetDescription("launch the APT GUI web interface");
 }

@@ -33,6 +33,6 @@ AMJS.Namespace.BuildGUI.LogHelp = function(Logger)
 {
     Logger.SetCommandName("BuildGUI");
     Logger.SetAutomaticDetect(false);
-    Logger.SetNeedMainProjectEntryFile(false);
+    Logger.SetNeedMainProjectEntryDirectory(false);
     Logger.SetDescription("build the APT GUI web interface for production use");
 }

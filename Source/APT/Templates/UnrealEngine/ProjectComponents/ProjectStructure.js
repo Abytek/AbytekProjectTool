@@ -20,7 +20,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
         let CommonProjectStructure = Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure);
     
-        this.EngineProjectEntryFile = Project.AdditionalOptions.EngineProjectEntryFile;
+        this.EngineProjectEntryDirectory = Project.AdditionalOptions.EngineProjectEntryDirectory;
         this.EngineProjectAdditionalOptions = Project.AdditionalOptions.EngineProjectAdditionalOptions;
     }
 
@@ -43,7 +43,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         }
         else
         {
-            if (!this.Project.AdditionalOptions.EngineProjectEntryFile)
+            if (!this.Project.AdditionalOptions.EngineProjectEntryDirectory)
             {
                 throw new Error("Invalid engine project");
             }
@@ -53,7 +53,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
     {
         if (!this.IsEngine)
         {
-            this.EngineProject = APT.Core.System.ProjectManager.ImportProject(AMJS.Module, this.EngineProjectEntryFile, this.EngineProjectAdditionalOptions);
+            this.EngineProject = APT.Core.System.ProjectManager.ImportProject(AMJS.Module, this.EngineProjectEntryDirectory, this.EngineProjectAdditionalOptions);
         }
         if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
         {

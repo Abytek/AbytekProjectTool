@@ -3,17 +3,17 @@ AMJS.Import("../Templates/Common/Utilities");
 
 AMJS.Namespace.ImportMainProject = function(CommandManager)
 {
-    if (CommandManager.CLIInput.has("MainProjectEntryFile"))
+    if (CommandManager.CLIInput.has("MainProjectEntryDirectory"))
     {
-        const MainProjectEntryFile = APT.Templates.Common.Utilities.GetDefaultProjectEntryFile();
-        if (MainProjectEntryFile == null)
+        const MainProjectEntryDirectory = APT.Templates.Common.Utilities.GetDefaultProjectEntryDirectory();
+        if (MainProjectEntryDirectory == null)
         {
             console.warn("No main project entry file specified");
             return false;
         }
         
         let ProjectManager = CommandManager.System.ProjectManager;
-        ProjectManager.ImportProject(null, MainProjectEntryFile);
+        ProjectManager.ImportProject([], MainProjectEntryDirectory);
         return true;
     }
     return false;

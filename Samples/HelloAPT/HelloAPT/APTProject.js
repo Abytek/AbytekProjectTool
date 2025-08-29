@@ -1,5 +1,5 @@
 
-console.log(`HelloAPT ${APT.Project.AbsoluteEntryFile}`);
+console.log(`HelloAPT ${APT.Project.EntryDirectory}`);
 
 APT.Project.ApplyPrototype(
     APT.Templates.AbytekCMake.ProjectPrototypes.Default
@@ -15,7 +15,7 @@ APT.Project.TryFinalize(); // for immediately generating project files before do
             "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator",
             [ APT.Templates.CMake.Utilities.Generators.VS2022 ]
         );
-        APT.ImportProject("../HelloAPT2/APTProject", AdditionalOptions);
+        APT.ImportProject("../HelloAPT2", AdditionalOptions);
     }
     {
         let AdditionalOptions = new Object();

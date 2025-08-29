@@ -7,7 +7,7 @@ AMJS.ImportNamespace("../Commands");
  * Handles parsing of CLI arguments and routing to appropriate command handlers.
  * 
  * CLI Format:
- * apt [MainProjectEntryFile] [:Command] [AdditionalArguments...]
+ * apt [MainProjectEntryDirectory] [:Command] [AdditionalArguments...]
  * 
  * Special Input Categories:
  * - ProjectDefault: Default settings for project instances
@@ -101,7 +101,7 @@ AMJS.Namespace.F_CommandManager = class
             return parsed;
         }
 
-        this.CLIInput = ParseArgs(process.argv, 2, 'MainProjectEntryFile');
+        this.CLIInput = ParseArgs(process.argv, 2, 'MainProjectEntryDirectory');
 
         // Handle special categories (ProjectDefault, GlobalDefault)
         let Categories = [ 
@@ -143,14 +143,14 @@ AMJS.Namespace.F_CommandManager = class
 
         // Handle main project entry file
         {
-            let MainProjectEntryFileSlot = this.CLIInput.get('MainProjectEntryFile');
-            if (MainProjectEntryFileSlot.length == 1)
+            let MainProjectEntryDirectorySlot = this.CLIInput.get('MainProjectEntryDirectory');
+            if (MainProjectEntryDirectorySlot.length == 1)
             {
-                this.CLIInput.get("GlobalDefault").ProjectEntryFile = path.resolve(MainProjectEntryFileSlot[0]);
+                this.CLIInput.get("GlobalDefault").ProjectEntryDirectory = path.resolve(MainProjectEntryDirectorySlot[0]);
             }
-            if (MainProjectEntryFileSlot.length > 1)
+            if (MainProjectEntryDirectorySlot.length > 1)
             {
-                throw new Error(`Too much argument for MainProjectEntryFile`);
+                throw new Error(`Too much argument for MainProjectEntryDirectory`);
             }
         }
 

@@ -45,9 +45,9 @@ AMJS.Namespace.GetDefaultEnableTest = function()
     return APT.Common.ForwardBool(Result);
 }
 
-AMJS.Namespace.GetDefaultProjectEntryFile = function()
+AMJS.Namespace.GetDefaultProjectEntryDirectory = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryFile;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryDirectory;
     if (Result == null)
     {
         return null;

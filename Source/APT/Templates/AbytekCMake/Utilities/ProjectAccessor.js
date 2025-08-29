@@ -52,7 +52,7 @@ AMJS.Namespace.F_ProjectAccessor = class
             let ImportJSFile = this.GetImportJSFile(Project);
             if (!fs.existsSync(ImportJSFile))
             {
-                throw new Error(`Not found AbytekCMake/Import.js for ${Project.AbsoluteEntryFile}`);
+                throw new Error(`Not found AbytekCMake/Import.js for ${Project.EntryDirectory}`);
             }
 
             let JSListFiles = require(ImportJSFile);
@@ -147,6 +147,6 @@ AMJS.Namespace.F_ProjectAccessor = class
                 stdio: 'inherit' 
             }
         );
-        console.log(`Built ${Project.AbsoluteEntryFile} (Config: ${this.Config})`);
+        console.log(`Built ${Project.EntryDirectory} (Config: ${this.Config})`);
     }
 }

@@ -86,10 +86,21 @@ const ProjectPage = () => {
     }
   };
 
-  // Handle URL parameter
+  // Handle URL parameters
   useEffect(() => {
-    if (encodedPath && location.state?.projectPath) {
-      updateProjectPath(location.state.projectPath);
+    if (encodedPath) {
+      // Handle direct encoded path URL or state-based navigation
+      if (location.state?.projectPath) {
+        updateProjectPath(location.state.projectPath);
+      } else {
+        // Direct URL navigation - decode the path
+        try {
+          const decodedPath = decodeURIComponent(encodedPath).replace(/\//g, '\\');
+          updateProjectPath(decodedPath);
+        } catch (error) {
+          setError('Invalid project path in URL');
+        }
+      }
     }
   }, [encodedPath, location.state]);
 

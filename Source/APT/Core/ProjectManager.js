@@ -39,14 +39,14 @@ AMJS.Namespace.F_ProjectManager = class
 
     /**
      * Calculates a unique key for a project based on its file and instance data
-     * @param {string} AbsoluteProjectEntryFile - Absolute path to project entry file
+     * @param {string} EntryDirectory - Path to project entry directory
      * @param {Object} [InstanceData={}] - Project instance configuration
      * @returns {Object} Project key object
      * @private
      */
-    CalculateProjectKey(AbsoluteProjectEntryFile, InstanceData = new Object())
+    CalculateProjectKey(EntryDirectory, InstanceData = new Object())
     {
-        return { AbsoluteProjectEntryFile, InstanceData };
+        return { EntryDirectory, InstanceData };
     }
 
     /**
@@ -59,15 +59,17 @@ AMJS.Namespace.F_ProjectManager = class
      * 4. Sets up project context
      * 5. Finalizes project setup
      * 
-     * @param {AMJS.Module} BaseModule - Base module for relative path resolution
-     * @param {string} ProjectEntryFile - Path to project entry file
+     * @param {string[]} BaseDirectories - Base directories for relative path resolution
+     * @param {string} RelativeProjectEntryDirectory - Relative path to project entry directory
      * @param {Object} [AdditionalOptions={}] - Additional project options
      * @param {boolean} [Required=true] - Whether the project is required
      * @returns {APT.Core.F_Project|false} Project instance or false if not found/required
      * @throws {Error} If Required is true and project entry file is not found
      */
-    ImportProject(BaseModule, ProjectEntryFile, AdditionalOptions = new Object(), Required = true)
+    ImportProject(BaseDirectories, RelativeProjectEntryDirectory, AdditionalOptions = new Object(), Required = true)
     {
+        console.log(`Import project ${RelativeProjectEntryDirectory}`);
+
         // Parse additional options and merge instance data
         let ParsedAdditionalOptions = { ...AdditionalOptions };
 
@@ -81,71 +83,90 @@ AMJS.Namespace.F_ProjectManager = class
         }
         ParsedAdditionalOptions.InstanceData = InstanceData;
 
-        // Resolve absolute project file path
-        let AbsoluteProjectEntryFile = AMJS.ModuleSystem.SearchModuleAbsoluteFile(BaseModule, ProjectEntryFile);
-        if (!AbsoluteProjectEntryFile)
+        // Resolve absolute project directory path
+        let AbsoluteProjectEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeProjectEntryDirectory);
+        if (!AbsoluteProjectEntryDirectory)
         {
             if (Required)
             {
-                throw new Error(`Project entry file ${ProjectEntryFile} not found`);
+                throw new Error(`Project entry directory ${RelativeProjectEntryDirectory} not found`);
             }
             return false;
         }
 
+        console.log(`Found project entry directory ${AbsoluteProjectEntryDirectory}`);
+
         // Check for existing project instance
-        const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryFile, InstanceData);
+        const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryDirectory, InstanceData);
         if (this.Projects.has(ProjectKey))
         {
+            console.log(`Found imported project ${AbsoluteProjectEntryDirectory}`);
             return this.Projects.get(ProjectKey);
         }
 
+        console.log(`Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
+
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryFile, ParsedAdditionalOptions);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions);
 
         let ProjectManager = this;
 
-        // Import project module and set up context
-        let ProjectContext = AMJS.ModuleSystem.Import(
-            BaseModule,
-            ProjectEntryFile,
-            Required,
-            {
-                ModifyContext(Context)
-                {
-                    Context.APT = {
-                        ...Context.APT
-                    };
-                    Project.Context = Context;
-                    Context.APT.Project = Project;
-                    Context.APT.ImportProject = function(ProjectEntryFile2, AdditionalOptions2 = new Object(), Required2 = true)
-                    {
-                        return ProjectManager.ImportProject(Context.AMJS.Module, ProjectEntryFile2, AdditionalOptions2, Required2);
-                    }
-                    Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
-                    {
-                        return APT.Core.System.Environment.LoadEnvironmentConfig(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
-                    }
-                    Context.APT.AsyncSetupEnvironment = async function(EnvName, ConfigDirectoryPath)
-                    {
-                        return await APT.Core.System.Environment.AsyncSetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
-                    }
-                    Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
-                    {
-                        return APT.Core.System.Environment.SetupEnvironment(Context.AMJS.Module, EnvName, ConfigDirectoryPath);
-                    }
-
-                    Context.APT.SetupEnvironment(
-                        APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
-                        Project.Preset.EnvironmentConfigDirectory
-                    );
-                },
-                IsAnonymous: true
-            }
-        );
-
-        if (!ProjectContext)
+        let PostImportProject = function()
         {
-            return false;
+            console.log(`Post import project ${AbsoluteProjectEntryDirectory}`);
+            APT.Core.System.Environment.SetupEnvironment(
+                [ AbsoluteProjectEntryDirectory ],
+                APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
+                Project.Preset.EnvironmentConfigDirectory
+            );
+        };
+
+        if (Project.HasEntryFile)
+        {
+            // Import project module and set up context
+            let ProjectContext = AMJS.ModuleSystem.Import(
+                BaseDirectories,
+                Project.EntryFile,
+                Required,
+                {
+                    ModifyContext(Context)
+                    {
+                        Context.APT = {
+                            ...Context.APT
+                        };
+                        Project.Context = Context;
+                        Context.APT.Project = Project;
+                        Context.APT.ImportProject = function(RelativeProjectEntryDirectory2, AdditionalOptions2 = new Object(), Required2 = true)
+                        {
+                            return ProjectManager.ImportProject([ AbsoluteProjectEntryDirectory ], RelativeProjectEntryDirectory2, AdditionalOptions2, Required2);
+                        }
+                        Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
+                        {
+                            return APT.Core.System.Environment.LoadEnvironmentConfig([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
+                        }
+                        Context.APT.AsyncSetupEnvironment = async function(EnvName, ConfigDirectoryPath)
+                        {
+                            return await APT.Core.System.Environment.AsyncSetupEnvironment([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
+                        }
+                        Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
+                        {
+                            return APT.Core.System.Environment.SetupEnvironment([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
+                        }
+
+                        PostImportProject();
+                    },
+                    IsAnonymous: true
+                }
+            );
+
+            if (!ProjectContext)
+            {
+                return false;
+            }
+        }
+        else
+        {
+            PostImportProject();
         }
 
         // Store and finalize project
@@ -177,7 +198,7 @@ AMJS.Namespace.F_ProjectManager = class
                         console.error(`❌ Error reading ${file}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
                         return;
                     }
-                    jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryFile));
+                    jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryDirectory));
                 } catch (err) {
                     console.error(`❌ Error reading ${file}:`, err.message);
                 }
@@ -214,7 +235,7 @@ AMJS.Namespace.F_ProjectManager = class
                     required: ["RemoteURL"],
                     additionalProperties: false
                 },
-                EntryFile: {
+                EntryDirectory: {
                     type: "string"
                 }
             },
@@ -254,9 +275,9 @@ AMJS.Namespace.F_ProjectManager = class
     }
     TryMatchProjectLinks(Finder, Last)
     {
-        if ("EntryFile" in Finder)
+        if ("EntryDirectory" in Finder)
         {
-            if (Finder.EntryFile != Last.EntryFile)
+            if (Finder.EntryDirectory != Last.EntryDirectory)
             {
                 return false;
             }
@@ -287,12 +308,11 @@ AMJS.Namespace.F_ProjectManager = class
         }
         return false;
     }
-    GenerateProjectLink(EntryFile)
+    GenerateProjectLink(EntryDirectory)
     {
-        const EntryDirectory = path.dirname(EntryFile);
         let ProjectLink = 
         {
-            EntryFile: EntryFile
+            EntryDirectory: EntryDirectory
         };
 
         if (fs.existsSync(path.join(EntryDirectory, ".git")))
@@ -317,9 +337,9 @@ AMJS.Namespace.F_ProjectManager = class
 
         return ProjectLink;
     }
-    SetupProjectLink(ProjectEntryFile)
+    SetupProjectLink(ProjectEntryDirectory)
     {
-        const ProjectLink = this.GenerateProjectLink(ProjectEntryFile);
+        const ProjectLink = this.GenerateProjectLink(ProjectEntryDirectory);
 
         console.log(`Setup project link:`, ProjectLink);
 
@@ -335,7 +355,7 @@ AMJS.Namespace.F_ProjectManager = class
     {
         console.log(`Add project link:`, ProjectLink);
         const ProjectLinksDirectory = APT.Common.GetProjectLinksDirectory();
-        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), APT.Common.StringToUUID(ProjectLink.EntryFile) + ".json");
+        const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), APT.Common.StringToUUID(ProjectLink.EntryDirectory) + ".json");
         if (!fs.existsSync(ProjectLinksDirectory))
         {
             fs.mkdirSync(ProjectLinksDirectory, { recursive: true });
@@ -373,9 +393,8 @@ AMJS.Namespace.F_ProjectManager = class
         }
         return Result;
     }
-    GenerateProjectPreset(ProjectEntryFile)
+    GenerateProjectPreset(ProjectEntryDirectory)
     {
-        const ProjectEntryDirectory = path.dirname(ProjectEntryFile);
         const PresetFile = path.join(ProjectEntryDirectory, "APTPreset.json");
         let Result = {
             EnvironmentConfigDirectory: "Config/Environment",
