@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -10,11 +10,6 @@ import {
   Tabs,
   CircularProgress,
   Alert,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   IconButton,
   Tooltip
 } from '@mui/material';
@@ -63,13 +58,13 @@ const ProjectPage = () => {
   const [editingConfig, setEditingConfig] = useState<{ name: string; parent: string; config: Record<string, any> } | null>(null);
 
   // Function to encode project path for URL
-  const encodeProjectPath = (path: string) => {
+  const encodeProjectPath = useCallback((path: string) => {
     // Convert backslashes to forward slashes and encode
     return encodeURIComponent(path.replace(/\\/g, '/'));
-  };
+  }, []);
 
   // Function to update project path and URL
-  const updateProjectPath = (newPath: string) => {
+  const updateProjectPath = useCallback((newPath: string) => {
     if (newPath !== projectPath) {
       setProjectPath(newPath);
       setTabValue(0); // Reset tab selection for new project
@@ -84,7 +79,7 @@ const ProjectPage = () => {
         });
       }
     }
-  };
+  }, [projectPath, encodedPath, navigate, encodeProjectPath]);
 
   // Handle URL parameters
   useEffect(() => {
@@ -102,14 +97,14 @@ const ProjectPage = () => {
         }
       }
     }
-  }, [encodedPath, location.state]);
+  }, [encodedPath, location.state, updateProjectPath]);
 
   // Handle direct state changes
   useEffect(() => {
     if (location.state?.projectPath) {
       updateProjectPath(location.state.projectPath);
     }
-  }, [location.state]);
+  }, [location.state, updateProjectPath]);
 
   const refreshConfigNames = async (path: string) => {
     if (!path) return;
@@ -186,11 +181,11 @@ const ProjectPage = () => {
         </Typography>
         <TextField
           fullWidth
-          label="APTProject.js Path"
+          label="Project Directory"
           value={projectPath}
           onChange={handleProjectPathChange}
           variant="outlined"
-          placeholder="Enter path to APTProject.js"
+          placeholder="Enter path to project directory"
           sx={{ mb: 2 }}
         />
       </Paper>

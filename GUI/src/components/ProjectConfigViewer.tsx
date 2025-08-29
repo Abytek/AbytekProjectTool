@@ -11,15 +11,9 @@ import {
   Divider,
   Grid,
   IconButton,
-  Tooltip,
   Link,
   Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField
+  MenuItem
 } from '@mui/material';
 import {
   Launch as LaunchIcon,
@@ -68,7 +62,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
           try {
             const resolution = await aptService.resolveProjectLink(details as Record<string, any>);
             if (resolution.success && resolution.projectLink) {
-              const encodedPath = encodeURIComponent(resolution.projectLink.entryFile.replace(/\\/g, '/'));
+              const encodedPath = encodeURIComponent(resolution.projectLink.entryDirectory.replace(/\\/g, '/'));
               newResolvedUrls[depName] = `/project/${encodedPath}`;
             }
           } catch (error) {
@@ -95,7 +89,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
     try {
       const resolution = await aptService.resolveProjectLink(dependency);
       if (resolution.success && resolution.projectLink) {
-        navigate('/project', { state: { projectPath: resolution.projectLink.entryFile } });
+        navigate('/project', { state: { projectPath: resolution.projectLink.entryDirectory } });
       } else {
         console.error('Failed to resolve project link:', resolution.error);
       }
@@ -110,9 +104,9 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
       return resolvedUrls[dependencyName];
     }
     
-    // For local dependencies, encode the entry file path
-    if (!dependency.GitDetails && dependency.EntryFile) {
-      let entryPath = dependency.EntryFile;
+    // For local dependencies, encode the entry directory path
+    if (!dependency.GitDetails && dependency.EntryDirectory) {
+      let entryPath = dependency.EntryDirectory;
       // Convert backslashes to forward slashes for URL
       entryPath = entryPath.replace(/\\/g, '/');
       const encodedPath = encodeURIComponent(entryPath);
@@ -149,7 +143,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
     return null;
   };
 
-  const renderValue = (value: any): React.ReactNode => {
+  const renderValue = (value: any): React.ReactNode => { // eslint-disable-line @typescript-eslint/no-unused-vars
     if (value === null || value === undefined) {
       return <Chip size="small" label="null" color="default" />;
     }
@@ -174,7 +168,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
             </Typography>
             <IconButton
               size="small"
-              onClick={() => handleVisitProject({ EntryFile: value })}
+              onClick={() => handleVisitProject({ EntryDirectory: value })}
               color="primary"
             >
               <LaunchIcon fontSize="small" />
@@ -439,7 +433,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
                     </Box>
                   )}
                   {/* Visit button for local projects */}
-                  {!details.GitDetails && details.EntryFile && (
+                  {!details.GitDetails && details.EntryDirectory && (
                     <Button
                       variant="outlined"
                       size="small"

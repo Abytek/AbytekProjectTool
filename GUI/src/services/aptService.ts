@@ -4,10 +4,9 @@ const API_BASE_URL = 'http://localhost:3001/api';
 
 export interface ProjectData {
     name: string;
-    label: string;
-    entryFile: string;
+    label?: string;
     entryDirectory: string;
-    components: {
+    components?: {
         type: string;
         data: any;
     }[];
@@ -24,7 +23,7 @@ export interface ProjectLink {
     path: string;
     name: string;
     type: string;
-    entryFile: string;
+    entryDirectory: string;
     gitDetails?: {
         RemoteURL: string;
         Branch: string;
@@ -33,7 +32,7 @@ export interface ProjectLink {
 }
 
 export interface ResolvedProjectLink {
-    entryFile: string;
+    entryDirectory: string;
     type: string;
 }
 
@@ -49,7 +48,7 @@ export interface DependencyDetails {
         Branch?: string;
         Commit?: string;
     };
-    EntryFile?: string;
+    EntryDirectory?: string;
 }
 
 export interface APTService {

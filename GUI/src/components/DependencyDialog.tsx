@@ -26,7 +26,6 @@ import {
   GitHub as GitHubIcon
 } from '@mui/icons-material';
 import { DependencyDetails, ProjectLink } from '../services/aptService';
-import { validateDependency } from '../utils/dependencyValidation';
 
 interface DependencyDialogProps {
   open: boolean;
@@ -52,7 +51,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
   const [gitUrl, setGitUrl] = useState(initialDetails.GitDetails?.RemoteURL || '');
   const [gitBranch, setGitBranch] = useState(initialDetails.GitDetails?.Branch || '');
   const [gitCommit, setGitCommit] = useState(initialDetails.GitDetails?.Commit || '');
-  const [entryFile, setEntryFile] = useState(initialDetails.EntryFile || '');
+  const [entryDirectory, setEntryDirectory] = useState(initialDetails.EntryDirectory || '');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(!!initialDetails.GitDetails?.Commit);
@@ -64,7 +63,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
       setGitUrl(initialDetails.GitDetails?.RemoteURL || '');
       setGitBranch(initialDetails.GitDetails?.Branch || '');
       setGitCommit(initialDetails.GitDetails?.Commit || '');
-      setEntryFile(initialDetails.EntryFile || '');
+      setEntryDirectory(initialDetails.EntryDirectory || '');
       setShowAdvanced(!!initialDetails.GitDetails?.Commit);
       setError(null);
     }
@@ -85,7 +84,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
             }
           }
         : {
-            EntryFile: entryFile.trim()
+            EntryDirectory: entryDirectory.trim()
           };
 
       await onSave(name.trim(), details);
@@ -134,7 +133,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
                     setGitCommit(selectedLink.gitDetails.Commit || '');
                   } else {
                     setIsGitDependency(false);
-                    setEntryFile(selectedLink.entryFile);
+                    setEntryDirectory(selectedLink.entryDirectory);
                   }
                 }
               }}
@@ -158,7 +157,7 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
                       </Box>
                     ) : (
                       <Typography variant="caption" sx={{ fontFamily: 'monospace', display: 'block', mt: 0.5 }}>
-                        {link.entryFile}
+                        {link.entryDirectory}
                       </Typography>
                     )}
                   </Box>
@@ -248,12 +247,12 @@ const DependencyDialog: React.FC<DependencyDialogProps> = ({
             </>
           ) : (
             <TextField
-              label="Entry File Path"
-              value={entryFile}
-              onChange={(e) => setEntryFile(e.target.value)}
+              label="Project Directory Path"
+              value={entryDirectory}
+              onChange={(e) => setEntryDirectory(e.target.value)}
               fullWidth
               margin="normal"
-              placeholder="e.g., /path/to/APTProject.js"
+              placeholder="e.g., /path/to/project"
               required
             />
           )}

@@ -24,11 +24,12 @@ System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureProjects = fa
 System.Start();
 
 // Helper function to get environment config directory
-const getEnvironmentConfigDir = (projectPath) => {
-    const absolutePath = path.resolve(projectPath);
-    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(absolutePath);
+const getEnvironmentConfigDir = (projectDirectoryPath) => {
+    const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+    const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(projectFilePath);
     console.log(projectPreset);
-    return path.join(path.dirname(absolutePath), projectPreset.EnvironmentConfigDirectory);
+    return path.join(absoluteDirectoryPath, projectPreset.EnvironmentConfigDirectory);
 };
 
 const app = express();
@@ -41,21 +42,27 @@ app.use(express.json());
 app.get('/api/project/:projectPath', (req, res) => {
     console.log(`[API] GET /api/project/${req.params.projectPath}`);
     try {
-        const projectPath = decodeURIComponent(req.params.projectPath);
-        const absolutePath = path.resolve(projectPath);
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
         
-        if (!fs.existsSync(absolutePath)) {
-            console.log(`[API] Project not found: ${absolutePath}`);
-            return res.status(404).json({ error: 'Project file not found' });
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            console.log(`[API] Project directory not found: ${absoluteDirectoryPath}`);
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        if (!fs.existsSync(projectFilePath)) {
+            console.log(`[API] APTProject.js not found in: ${absoluteDirectoryPath}`);
+            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Get project name from directory
-        const projectName = path.basename(path.dirname(absolutePath));
+        const projectName = path.basename(absoluteDirectoryPath);
         console.log(`[API] Reading project: ${projectName}`);
         
         // Get environment configs if they exist
         let envConfigs = {};
-        const configPath = getEnvironmentConfigDir(projectPath);
+        const configPath = getEnvironmentConfigDir(projectDirectoryPath);
         if (fs.existsSync(configPath)) {
             // Read all JSON files in the Environment directory
             const files = fs.readdirSync(configPath);
@@ -81,12 +88,11 @@ app.get('/api/project/:projectPath', (req, res) => {
         const response = {
             project: {
                 name: projectName,
-                entryFile: absolutePath,
-                entryDirectory: path.dirname(absolutePath)
+                entryDirectory: absoluteDirectoryPath
             },
             environments: envConfigs
         };
-        console.log(`[API] Sending project response for: ${projectName}`);
+        console.log(`[API] Sending project response for: ${projectName}`, APT.Common.NiceJSONStringify(response));
         res.json(response);
     } catch (error) {
         console.error(`[API] Error in /api/project:`, error);
@@ -101,15 +107,20 @@ app.get('/api/cache', (req, res) => {
         // Use APT's built-in cache gathering function
         const cacheData = APT.Common.GatherCache();
         console.log(`[API] Found ${Object.keys(cacheData).length} cache entries`);
+        console.log(`[API] Cache response data:`, APT.Common.NiceJSONStringify(cacheData));
         res.json(cacheData);
     } catch (error) {
         // If cache directory doesn't exist, return empty object
         if (error.message && error.message.includes('no such file or directory')) {
             console.log(`[API] Cache directory does not exist yet`);
-            res.json({});
+            const emptyResponse = {};
+            console.log(`[API] Cache response data (empty):`, APT.Common.NiceJSONStringify(emptyResponse));
+            res.json(emptyResponse);
         } else {
             console.error(`[API] Error in /api/cache:`, error);
-            res.status(500).json({ error: error.message });
+            const errorResponse = { error: error.message };
+            console.log(`[API] Cache error response:`, APT.Common.NiceJSONStringify(errorResponse));
+            res.status(500).json(errorResponse);
         }
     }
 });
@@ -157,16 +168,19 @@ app.get('/api/project-links', (req, res) => {
         // Use the proper method to load project links
         const projectLinks = APT.Core.System.ProjectManager.LoadProjectLinks();
         
-        // Transform the links into our API format
-        const formattedLinks = projectLinks.map(link => ({
-            path: link.EntryFile,
-            name: path.basename(path.dirname(link.EntryFile)),
-            type: link.GitDetails ? 'Git' : 'Local',
-            entryFile: link.EntryFile,
-            gitDetails: link.GitDetails
-        }));
+        // Transform the links into our API format, filtering out invalid entries
+        const formattedLinks = projectLinks
+            .filter(link => link.EntryDirectory && typeof link.EntryDirectory === 'string')
+            .map(link => ({
+                path: link.EntryDirectory,
+                name: path.basename(link.EntryDirectory),
+                type: link.GitDetails ? 'Git' : 'Local',
+                entryDirectory: link.EntryDirectory,
+                gitDetails: link.GitDetails
+            }));
 
         console.log(`[API] Found ${formattedLinks.length} project links`);
+        console.log(`[API] Project links response data:`, APT.Common.NiceJSONStringify(formattedLinks));
         res.json(formattedLinks);
     } catch (error) {
         console.error(`[API] Error in /api/project-links:`, error);
@@ -188,23 +202,28 @@ app.get('/api/resolve-project-link', (req, res) => {
             }
         }
         console.log('[API] Searching for project link with dependency:', dependency);
+        
         const projectLink = APT.Core.System.ProjectManager.SearchProjectLink(dependency);
         
-        if (projectLink) {
+        if (projectLink && projectLink.EntryDirectory && typeof projectLink.EntryDirectory === 'string') {
             console.log(`[API] Found project link:`, projectLink);
-            res.json({
+            const response = {
                 success: true,
                 projectLink: {
-                    entryFile: projectLink.EntryFile,
+                    entryDirectory: projectLink.EntryDirectory,
                     type: projectLink.Type || 'Unknown'
                 }
-            });
+            };
+            console.log(`[API] Resolve project link response:`, APT.Common.NiceJSONStringify(response));
+            res.json(response);
         } else {
             console.log(`[API] No project link found for:`, dependency);
-            res.json({
+            const response = {
                 success: false,
                 error: 'No matching project link found'
-            });
+            };
+            console.log(`[API] Resolve project link response:`, APT.Common.NiceJSONStringify(response));
+            res.json(response);
         }
     } catch (error) {
         console.error(`[API] Error resolving project link:`, error);
@@ -218,23 +237,32 @@ app.get('/api/resolve-project-link', (req, res) => {
 app.get('/api/project/:projectPath/configs', (req, res) => {
     console.log(`[API] GET /api/project/${req.params.projectPath}/configs`);
     try {
-        const projectPath = decodeURIComponent(req.params.projectPath);
-        const absolutePath = path.resolve(projectPath);
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
         
-        if (!fs.existsSync(absolutePath)) {
-            return res.status(404).json({ error: 'Project file not found' });
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        if (!fs.existsSync(projectFilePath)) {
+            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Read config directory
-        const configPath = getEnvironmentConfigDir(projectPath);
+        const configPath = getEnvironmentConfigDir(projectDirectoryPath);
         if (fs.existsSync(configPath)) {
             const files = fs.readdirSync(configPath);
             const configNames = files
                 .filter(file => file.endsWith('.json'))
                 .map(file => path.parse(file).name);
-            res.json(configNames.length > 0 ? configNames : ['Base']);
+            const response = configNames.length > 0 ? configNames : ['Base'];
+            console.log(`[API] Config names response:`, APT.Common.NiceJSONStringify(response));
+            res.json(response);
         } else {
-            res.json(['Base']);
+            const response = ['Base'];
+            console.log(`[API] Config names response (default):`, APT.Common.NiceJSONStringify(response));
+            res.json(response);
         }
     } catch (error) {
         console.error(`[API] Error getting config names:`, error);
@@ -246,23 +274,30 @@ app.get('/api/project/:projectPath/configs', (req, res) => {
 app.get('/api/project/:projectPath/configs/:name', (req, res) => {
     console.log(`[API] GET /api/project/${req.params.projectPath}/configs/${req.params.name}`);
     try {
-        const projectPath = decodeURIComponent(req.params.projectPath);
-        const absolutePath = path.resolve(projectPath);
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
         const { name } = req.params;
         
-        if (!fs.existsSync(absolutePath)) {
-            return res.status(404).json({ error: 'Project file not found' });
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        if (!fs.existsSync(projectFilePath)) {
+            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Read the config file
-        const configPath = path.join(getEnvironmentConfigDir(projectPath), `${name}.json`);
+        const configPath = path.join(getEnvironmentConfigDir(projectDirectoryPath), `${name}.json`);
         if (fs.existsSync(configPath)) {
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
             // Add _parentConfig field for UI if Parent exists
-            res.json({
+            const response = {
                 ...config,
                 _parentConfig: config.Parent // Add special field for UI
-            });
+            };
+            console.log(`[API] Config '${name}' response:`, APT.Common.NiceJSONStringify(response));
+            res.json(response);
         } else if (name === 'Base') {
             // Return default Base config
             const defaultConfig = {
@@ -270,9 +305,12 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
                 GlobalDefault: {},
                 ProjectDefault: {}
             };
+            console.log(`[API] Config '${name}' response (default):`, APT.Common.NiceJSONStringify(defaultConfig));
             res.json(defaultConfig);
         } else {
-            res.status(404).json({ error: 'Config file not found' });
+            const errorResponse = { error: 'Config file not found' };
+            console.log(`[API] Config '${name}' error response:`, APT.Common.NiceJSONStringify(errorResponse));
+            res.status(404).json(errorResponse);
         }
     } catch (error) {
         console.error(`[API] Error getting config:`, error);
@@ -284,13 +322,18 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
 app.post('/api/project/:projectPath/configs/:name', (req, res) => {
     console.log(`[API] POST /api/project/${req.params.projectPath}/configs/${req.params.name}`, req.body);
     try {
-        const projectPath = decodeURIComponent(req.params.projectPath);
-        const absolutePath = path.resolve(projectPath);
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
         const { name } = req.params;
         const { config } = req.body;
         
-        if (!fs.existsSync(absolutePath)) {
-            return res.status(404).json({ error: 'Project file not found' });
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        if (!fs.existsSync(projectFilePath)) {
+            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         if (!config) {
@@ -298,7 +341,7 @@ app.post('/api/project/:projectPath/configs/:name', (req, res) => {
         }
 
         // Create config directory if it doesn't exist
-        const configDir = getEnvironmentConfigDir(projectPath);
+        const configDir = getEnvironmentConfigDir(projectDirectoryPath);
         if (!fs.existsSync(configDir)) {
             fs.mkdirSync(configDir, { recursive: true });
         }
@@ -323,16 +366,21 @@ app.post('/api/project/:projectPath/configs/:name', (req, res) => {
 app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
     console.log(`[API] DELETE /api/project/${req.params.projectPath}/configs/${req.params.name}`);
     try {
-        const projectPath = decodeURIComponent(req.params.projectPath);
-        const absolutePath = path.resolve(projectPath);
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
         const { name } = req.params;
         
-        if (!fs.existsSync(absolutePath)) {
-            return res.status(404).json({ error: 'Project file not found' });
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        if (!fs.existsSync(projectFilePath)) {
+            return res.status(404).json({ error: 'APTProject.js not found in project directory' });
         }
 
         // Delete the config file
-        const configPath = path.join(getEnvironmentConfigDir(projectPath), `${name}.json`);
+        const configPath = path.join(getEnvironmentConfigDir(projectDirectoryPath), `${name}.json`);
         if (fs.existsSync(configPath)) {
             fs.unlinkSync(configPath);
             res.json({ success: true });

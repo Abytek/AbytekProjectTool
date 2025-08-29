@@ -55,21 +55,21 @@ export const validateGitDetails = (details: DependencyDetails): ValidationResult
 };
 
 export const validateLocalDependency = (details: DependencyDetails): ValidationResult => {
-  if (!details.EntryFile) {
-    return { isValid: false, error: 'Entry file path is required for local dependencies' };
+  if (!details.EntryDirectory) {
+    return { isValid: false, error: 'Project directory path is required for local dependencies' };
   }
 
-  const entryFile = details.EntryFile.trim();
+  const projectDirectory = details.EntryDirectory.trim();
 
-  if (!entryFile) {
-    return { isValid: false, error: 'Entry file path is required' };
+  if (!projectDirectory) {
+    return { isValid: false, error: 'Project directory path is required' };
   }
 
-  // Check if the path ends with APTProject.js
-  if (!entryFile.endsWith('APTProject.js')) {
+  // Basic path validation - should be a valid directory path
+  if (!projectDirectory || projectDirectory.includes('..') || projectDirectory.includes('*')) {
     return {
       isValid: false,
-      error: 'Entry file must be named APTProject.js'
+      error: 'Invalid project directory path'
     };
   }
 

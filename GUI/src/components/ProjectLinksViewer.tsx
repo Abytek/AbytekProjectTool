@@ -125,7 +125,7 @@ const ProjectLinksViewer: React.FC<ProjectLinksViewerProps> = ({ links }) => {
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => handleVisitProject(link.entryFile)}
+                      onClick={() => handleVisitProject(link.entryDirectory)}
                     >
                       Visit
                     </Button>

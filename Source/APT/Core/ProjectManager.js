@@ -177,6 +177,8 @@ AMJS.Namespace.F_ProjectManager = class
 
     LoadProjectLinks()
     {
+        console.log(`Load project links`);
+
         const dirPath = APT.Common.GetProjectLinksDirectory();
 
         const ThisProjectManager = this;
@@ -191,6 +193,8 @@ AMJS.Namespace.F_ProjectManager = class
                 try {
                     const content = fs.readFileSync(fullPath, 'utf8');
                     const parsed = JSON.parse(content);
+
+                    console.log(`Check project link for loading:`, APT.Common.NiceJSONStringify(parsed));
 
                     const ValidatedResult = ThisProjectManager.ValidateProjectLink(parsed);
                     if (!ValidatedResult.Status)
