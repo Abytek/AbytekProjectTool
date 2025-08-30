@@ -13,9 +13,16 @@ AMJS.Namespace.OpenEditor = function(ProjectStructure)
         }
     );
 
+    let OpenEditorArgs = [];
+    if (!ProjectStructure.IsEngine)
+    {
+        OpenEditorArgs.push(`"${ProjectStructure.UProjectFile}"`);
+    }
+    OpenEditorArgs.push('-skipcompile');
+
     execFile(
         UnrealEditorExecutableFile, 
-        ['-skipcompile'], 
+        OpenEditorArgs, 
         { 
             stdio: 'inherit',
             cwd: ProjectStructure.MainDirectory
