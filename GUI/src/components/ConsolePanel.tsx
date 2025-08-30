@@ -31,13 +31,15 @@ interface ConsolePanelProps {
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
   showMaximizeButton?: boolean;
+  onLogEntry?: (setLogs: React.Dispatch<React.SetStateAction<LogEntry[]>>) => void;
 }
 
 const ConsolePanel: React.FC<ConsolePanelProps> = ({ 
   projectPath, 
   isMaximized = false, 
   onToggleMaximize, 
-  showMaximizeButton = true 
+  showMaximizeButton = true,
+  onLogEntry 
 }) => {
   console.log('🎯 ConsolePanel rendered with props:', { 
     projectPath, 
@@ -55,6 +57,13 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
   
   console.log('🎯 Current command state:', `"${command}"`);
   const [logs, setLogs] = useState<LogEntry[]>([]);
+
+  // Expose setLogs to parent component for action logging
+  useEffect(() => {
+    if (onLogEntry) {
+      onLogEntry(setLogs);
+    }
+  }, [onLogEntry]);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [consoleHeight, setConsoleHeight] = useState<number>(400); // Fixed height for console output
   const [isResizing, setIsResizing] = useState<boolean>(false);

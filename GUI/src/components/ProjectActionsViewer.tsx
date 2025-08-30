@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -32,11 +32,21 @@ import {
 import aptService, { ProjectAction } from '../services/aptService';
 import ConsolePanel from './ConsolePanel';
 
+interface LogEntry {
+  id: string;
+  timestamp: Date;
+  command: string;
+  commandType: string;
+  output: string;
+  error: boolean;
+}
+
 interface ProjectActionsViewerProps {
   projectPath: string;
 }
 
 const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath }) => {
+  const consoleSetLogs = useRef<React.Dispatch<React.SetStateAction<LogEntry[]>> | null>(null);
   const [actions, setActions] = useState<ProjectAction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,21 +81,96 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
     setExecutingActions(prev => new Set(prev).add(actionKey));
 
     try {
+      // Log action start
+      if (consoleSetLogs.current) {
+        consoleSetLogs.current(prev => [...prev, {
+          id: `action-${Date.now()}-start`,
+          timestamp: new Date(),
+          command: `Running action: ${action.Name}`,
+          commandType: 'action',
+          output: `🚀 Starting action: ${action.Name}\n📝 Description: ${action.Description}\n📋 Commands: ${action.Commands.length}`,
+          error: false
+        }]);
+      }
+
       for (const command of action.Commands) {
         // Parse command to determine type (apt commands vs native commands)
         const isAptCommand = command.trim().startsWith('apt ');
         const commandType = isAptCommand ? 'apt' : 'native';
         const actualCommand = isAptCommand ? command.trim().substring(4) : command.trim();
 
-        await aptService.executeCommand({
-          command: actualCommand,
-          commandType: commandType,
-          projectPath: projectPath
-        });
+        const commandId = `action-${Date.now()}-${Math.random()}`;
+
+        // Log command start
+        if (consoleSetLogs.current) {
+          consoleSetLogs.current(prev => [...prev, {
+            id: commandId,
+            timestamp: new Date(),
+            command: command.trim(),
+            commandType: commandType,
+            output: '',
+            error: false
+          }]);
+        }
+
+        try {
+          const response = await aptService.executeCommand({
+            command: actualCommand,
+            commandType: commandType,
+            projectPath: projectPath
+          });
+
+          // Log command output
+          if (consoleSetLogs.current && (response.output || response.error)) {
+            consoleSetLogs.current(prev => [...prev, {
+              id: `${commandId}-output`,
+              timestamp: new Date(),
+              command: '',
+              commandType: '',
+              output: response.error || response.output,
+              error: !!response.error
+            }]);
+          }
+        } catch (cmdErr: any) {
+          // Log command error
+          if (consoleSetLogs.current) {
+            consoleSetLogs.current(prev => [...prev, {
+              id: `${commandId}-error`,
+              timestamp: new Date(),
+              command: '',
+              commandType: '',
+              output: cmdErr.response?.data?.error || cmdErr.message || 'Command execution failed',
+              error: true
+            }]);
+          }
+        }
+      }
+
+      // Log action completion
+      if (consoleSetLogs.current) {
+        consoleSetLogs.current(prev => [...prev, {
+          id: `action-${Date.now()}-complete`,
+          timestamp: new Date(),
+          command: '',
+          commandType: '',
+          output: `✅ Action "${action.Name}" completed successfully`,
+          error: false
+        }]);
       }
     } catch (err) {
       console.error('Error executing action:', err);
-      // Note: We're not showing error UI here since the console will show the output
+      
+      // Log action error
+      if (consoleSetLogs.current) {
+        consoleSetLogs.current(prev => [...prev, {
+          id: `action-${Date.now()}-error`,
+          timestamp: new Date(),
+          command: '',
+          commandType: '',
+          output: `❌ Action "${action.Name}" failed: ${err}`,
+          error: true
+        }]);
+      }
     } finally {
       setExecutingActions(prev => {
         const newSet = new Set(prev);
@@ -291,12 +376,16 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
         minHeight: 0, // Allow flex child to shrink
         height: isMaximized ? 'calc(70vh - 100px)' : 'auto' // Give console most of the space in maximized mode
       }}>
-        <ConsolePanel 
-          projectPath={projectPath} 
-          isMaximized={isMaximized}
-          onToggleMaximize={toggleMaximize}
-          showMaximizeButton={false}
-        />
+                 <ConsolePanel 
+           projectPath={projectPath} 
+           isMaximized={isMaximized}
+           onToggleMaximize={toggleMaximize}
+           showMaximizeButton={false}
+           onLogEntry={(setLogs) => {
+             // Store the setLogs function for action execution
+             consoleSetLogs.current = setLogs;
+           }}
+         />
       </Box>
     </>
   );
