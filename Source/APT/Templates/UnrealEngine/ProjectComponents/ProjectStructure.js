@@ -86,16 +86,21 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
     GenerateActions(Actions)
     {
+        if (this.IsEngine)
+        {
+            Actions.push(
+                {
+                    Name: "SetupEngine",
+                    Description: "Setup engine",
+                    Commands: [
+                        `${this.Project.GenerateAPTCommandOnThis()} `
+                        + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine true `
+                        + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
+                    ]
+                }
+            );
+        }
         Actions.push(
-            {
-                Name: "SetupEngine",
-                Description: "Setup engine",
-                Commands: [
-                    `${this.Project.GenerateAPTCommandOnThis()} `
-                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine true `
-                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
-                ]
-            },
             {
                 Name: "GenerateProjectFiles",
                 Description: "Generate project files",
