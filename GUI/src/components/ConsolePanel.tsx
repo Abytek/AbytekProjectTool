@@ -212,7 +212,7 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
               timestamp: new Date(),
               command: '',
               commandType: '',
-              output: data.output,
+              output: data.output, // Raw ANSI output - will be converted in display
               error: data.error
             };
             setLogs(prev => [...prev, outputEntry]);

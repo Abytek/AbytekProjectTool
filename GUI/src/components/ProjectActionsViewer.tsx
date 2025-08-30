@@ -134,7 +134,7 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
                     timestamp: new Date(),
                     command: '',
                     commandType: '',
-                    output: data.output,
+                    output: data.output, // Raw ANSI output - console will handle parsing
                     error: data.error
                   }]);
                 }

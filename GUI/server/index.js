@@ -631,7 +631,7 @@ io.on('connection', (socket) => {
         console.log(`[Socket.IO] stdout chunk:`, output);
         socket.emit('command-output', { 
           sessionId, 
-          output: convert.toHtml(output),
+          output: output, // Send raw ANSI output, let client handle conversion
           error: false 
         });
       });
@@ -642,7 +642,7 @@ io.on('connection', (socket) => {
         console.log(`[Socket.IO] stderr chunk:`, output);
         socket.emit('command-output', { 
           sessionId, 
-          output: convert.toHtml(output),
+          output: output, // Send raw ANSI output, let client handle conversion
           error: true 
         });
       });
