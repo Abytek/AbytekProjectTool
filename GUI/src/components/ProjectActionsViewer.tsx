@@ -47,7 +47,7 @@ interface ProjectActionsViewerProps {
 }
 
 const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath }) => {
-  const consoleSetLogs = useRef<React.Dispatch<React.SetStateAction<LogEntry[]>> | null>(null);
+  const [consoleLogs, setConsoleLogs] = useState<LogEntry[]>([]);
   const [actions, setActions] = useState<ProjectAction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,16 +83,14 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
 
     try {
       // Log action start
-      if (consoleSetLogs.current) {
-        consoleSetLogs.current(prev => [...prev, {
-          id: `action-${Date.now()}-start`,
-          timestamp: new Date(),
-          command: `Running action: ${action.Name}`,
-          commandType: 'action',
-          output: `🚀 Starting action: ${action.Name}\n📝 Description: ${action.Description}\n📋 Commands: ${action.Commands.length}`,
-          error: false
-        }]);
-      }
+      setConsoleLogs(prev => [...prev, {
+        id: `action-${Date.now()}-start`,
+        timestamp: new Date(),
+        command: `Running action: ${action.Name}`,
+        commandType: 'action',
+        output: `🚀 Starting action: ${action.Name}\n📝 Description: ${action.Description}\n📋 Commands: ${action.Commands.length}`,
+        error: false
+      }]);
 
       for (const command of action.Commands) {
         // Parse command to determine type (apt commands vs native commands)
@@ -114,44 +112,38 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
             {
               onStart: (data) => {
                 console.log('🚀 Action command started:', data);
-                if (consoleSetLogs.current) {
-                  consoleSetLogs.current(prev => [...prev, {
-                    id: `${sessionId}-start`,
-                    timestamp: new Date(),
-                    command: data.command,
-                    commandType: data.commandType,
-                    output: '',
-                    error: false
-                  }]);
-                }
+                setConsoleLogs(prev => [...prev, {
+                  id: `${sessionId}-start`,
+                  timestamp: new Date(),
+                  command: data.command,
+                  commandType: data.commandType,
+                  output: '',
+                  error: false
+                }]);
               },
               
               onOutput: (data) => {
                 console.log('📝 Action command output:', data);
-                if (consoleSetLogs.current) {
-                  consoleSetLogs.current(prev => [...prev, {
-                    id: `${sessionId}-output-${Date.now()}`,
-                    timestamp: new Date(),
-                    command: '',
-                    commandType: '',
-                    output: data.output, // Raw ANSI output - console will handle parsing
-                    error: data.error
-                  }]);
-                }
+                setConsoleLogs(prev => [...prev, {
+                  id: `${sessionId}-output-${Date.now()}`,
+                  timestamp: new Date(),
+                  command: '',
+                  commandType: '',
+                  output: data.output, // Raw ANSI output - console will handle parsing
+                  error: data.error
+                }]);
               },
               
               onComplete: (data) => {
                 console.log('✅ Action command completed:', data);
-                if (consoleSetLogs.current) {
-                  consoleSetLogs.current(prev => [...prev, {
-                    id: `${sessionId}-complete`,
-                    timestamp: new Date(),
-                    command: '',
-                    commandType: '',
-                    output: `Command completed with exit code: ${data.exitCode}${data.success ? ' (Success)' : ' (Failed)'}`,
-                    error: !data.success
-                  }]);
-                }
+                setConsoleLogs(prev => [...prev, {
+                  id: `${sessionId}-complete`,
+                  timestamp: new Date(),
+                  command: '',
+                  commandType: '',
+                  output: `Command completed with exit code: ${data.exitCode}${data.success ? ' (Success)' : ' (Failed)'}`,
+                  error: !data.success
+                }]);
                 
                 if (data.success) {
                   resolve();
@@ -162,16 +154,14 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
               
               onError: (data) => {
                 console.error('💥 Action command error:', data);
-                if (consoleSetLogs.current) {
-                  consoleSetLogs.current(prev => [...prev, {
-                    id: `${sessionId}-error`,
-                    timestamp: new Date(),
-                    command: '',
-                    commandType: '',
-                    output: `Error: ${data.error}`,
-                    error: true
-                  }]);
-                }
+                setConsoleLogs(prev => [...prev, {
+                  id: `${sessionId}-error`,
+                  timestamp: new Date(),
+                  command: '',
+                  commandType: '',
+                  output: `Error: ${data.error}`,
+                  error: true
+                }]);
                 reject(new Error(data.error));
               }
             }
@@ -180,29 +170,25 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
       }
 
       // Log action completion
-      if (consoleSetLogs.current) {
-        consoleSetLogs.current(prev => [...prev, {
-          id: `action-${Date.now()}-complete`,
-          timestamp: new Date(),
-          command: '',
-          commandType: '',
-          output: `✅ Action "${action.Name}" completed successfully`,
-          error: false
-        }]);
-      }
+      setConsoleLogs(prev => [...prev, {
+        id: `action-${Date.now()}-complete`,
+        timestamp: new Date(),
+        command: '',
+        commandType: '',
+        output: `✅ Action "${action.Name}" completed successfully`,
+        error: false
+      }]);
 
       // Check if action requires page refresh
       if (action.ShouldRefreshPage) {
-        if (consoleSetLogs.current) {
-          consoleSetLogs.current(prev => [...prev, {
-            id: `action-${Date.now()}-refresh`,
-            timestamp: new Date(),
-            command: '',
-            commandType: '',
-            output: `🔄 Refreshing page due to project changes...`,
-            error: false
-          }]);
-        }
+        setConsoleLogs(prev => [...prev, {
+          id: `action-${Date.now()}-refresh`,
+          timestamp: new Date(),
+          command: '',
+          commandType: '',
+          output: `🔄 Refreshing page due to project changes...`,
+          error: false
+        }]);
         
         // Refresh page after a short delay to show the message
         setTimeout(() => {
@@ -213,16 +199,14 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
       console.error('Error executing action:', err);
       
       // Log action error
-      if (consoleSetLogs.current) {
-        consoleSetLogs.current(prev => [...prev, {
-          id: `action-${Date.now()}-error`,
-          timestamp: new Date(),
-          command: '',
-          commandType: '',
-          output: `❌ Action "${action.Name}" failed: ${err}`,
-          error: true
-        }]);
-      }
+      setConsoleLogs(prev => [...prev, {
+        id: `action-${Date.now()}-error`,
+        timestamp: new Date(),
+        command: '',
+        commandType: '',
+        output: `❌ Action "${action.Name}" failed: ${err}`,
+        error: true
+      }]);
     } finally {
       setExecutingActions(prev => {
         const newSet = new Set(prev);
@@ -450,15 +434,13 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
         minHeight: 0, // Allow flex child to shrink
         height: isMaximized ? 'calc(70vh - 100px)' : 'auto' // Give console most of the space in maximized mode
       }}>
-                 <ConsolePanel 
-           projectPath={projectPath} 
-           isMaximized={isMaximized}
-           onToggleMaximize={toggleMaximize}
-           showMaximizeButton={false}
-           onLogEntry={(setLogs) => {
-             // Store the setLogs function for action execution
-             consoleSetLogs.current = setLogs;
-           }}
+                                  <ConsolePanel 
+          projectPath={projectPath} 
+          isMaximized={isMaximized}
+          onToggleMaximize={toggleMaximize}
+          showMaximizeButton={false}
+          logs={consoleLogs}
+          setLogs={setConsoleLogs}
          />
       </Box>
     </>
