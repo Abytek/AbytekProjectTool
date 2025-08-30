@@ -213,6 +213,14 @@ const ProjectPage = () => {
             <DataViewer initialExpanded={[]} />
           </Grid>
 
+          {/* Project Actions & Console */}
+          {projectData && (
+            <Grid item xs={12}>
+              <ProjectActionsViewer projectPath={projectPath} />
+            </Grid>
+          )}
+
+          {/* Project Configuration */}
           {projectData && (
             <Grid item xs={12}>
               <Paper>
@@ -306,13 +314,6 @@ const ProjectPage = () => {
                   </TabPanel>
                 ))}
               </Paper>
-            </Grid>
-          )}
-
-          {/* Project Actions & Console */}
-          {projectData && (
-            <Grid item xs={12}>
-              <ProjectActionsViewer projectPath={projectPath} />
             </Grid>
           )}
 
