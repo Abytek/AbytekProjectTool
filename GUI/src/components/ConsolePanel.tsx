@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { Send as SendIcon, Clear as ClearIcon, Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
 import aptService from '../services/aptService';
+import socketService from '../services/socketService';
 // @ts-ignore - no types available for ansi-to-html
 import Convert from 'ansi-to-html';
 
@@ -166,7 +167,7 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
   };
 
   const executeCommand = async () => {
-    console.log('🚀 executeCommand called', { command: command, projectPath, isExecuting });
+    console.log('🚀 executeCommand (real-time) called', { command: command, projectPath, isExecuting });
     
     if (!projectPath || isExecuting) {
       console.log('❌ executeCommand early return:', { 
@@ -176,75 +177,91 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
       return;
     }
 
-    console.log('✅ Proceeding with command execution');
+    console.log('✅ Proceeding with real-time command execution');
     setShouldRefocus(true);
     setIsExecuting(true);
 
-    const commandId = `${Date.now()}-${Math.random()}`;
-    
-    // Add command entry to logs
-    const commandEntry: LogEntry = {
-      id: commandId,
-      timestamp: new Date(),
-      command: command,
-      commandType: commandType,
-      output: '',
-      error: false
-    };
-    
-    console.log('📝 Adding command entry to logs:', commandEntry);
-    setLogs(prev => [...prev, commandEntry]);
+    const sessionId = socketService.generateSessionId();
     
     try {
-      console.log('🌐 Calling aptService.executeCommand with:', {
-        command: command.trim(),
-        commandType: commandType,
-        projectPath: projectPath
-      });
-      
-      const response = await aptService.executeCommand({
-        command: command,
-        commandType: commandType,
-        projectPath: projectPath
-      });
-
-      console.log('📥 Response received:', response);
-
-      // Add output entry
-      if (response.output || response.error) {
-        const outputEntry: LogEntry = {
-          id: `${commandId}-output`,
-          timestamp: new Date(),
-          command: '',
-          commandType: '',
-          output: response.error || response.output,
-          error: !!response.error
-        };
-        console.log('📝 Adding output entry to logs:', outputEntry);
-        setLogs(prev => [...prev, outputEntry]);
-      } else {
-        console.log('⚠️ No output or error in response');
-      }
-    } catch (error: any) {
-      console.error('❌ Command execution error:', error);
+      await socketService.executeCommand(
+        {
+          command: command,
+          commandType: commandType,
+          projectPath: projectPath,
+          sessionId: sessionId
+        },
+        {
+          onStart: (data) => {
+            console.log('🚀 Command started:', data);
+            const commandEntry: LogEntry = {
+              id: `${sessionId}-start`,
+              timestamp: new Date(),
+              command: data.command,
+              commandType: data.commandType,
+              output: '',
+              error: false
+            };
+            setLogs(prev => [...prev, commandEntry]);
+          },
+          
+          onOutput: (data) => {
+            console.log('📝 Command output chunk:', data);
+            const outputEntry: LogEntry = {
+              id: `${sessionId}-output-${Date.now()}`,
+              timestamp: new Date(),
+              command: '',
+              commandType: '',
+              output: data.output,
+              error: data.error
+            };
+            setLogs(prev => [...prev, outputEntry]);
+          },
+          
+          onComplete: (data) => {
+            console.log('✅ Command completed:', data);
+            const completeEntry: LogEntry = {
+              id: `${sessionId}-complete`,
+              timestamp: new Date(),
+              command: '',
+              commandType: '',
+              output: `Command completed with exit code: ${data.exitCode}${data.success ? ' (Success)' : ' (Failed)'}`,
+              error: !data.success
+            };
+            setLogs(prev => [...prev, completeEntry]);
+            setIsExecuting(false);
+            setCommand('');
+          },
+          
+          onError: (data) => {
+            console.error('💥 Command error:', data);
+            const errorEntry: LogEntry = {
+              id: `${sessionId}-error`,
+              timestamp: new Date(),
+              command: '',
+              commandType: '',
+              output: `Error: ${data.error}`,
+              error: true
+            };
+            setLogs(prev => [...prev, errorEntry]);
+            setIsExecuting(false);
+            setCommand('');
+          }
+        }
+      );
+    } catch (error) {
+      console.error('💥 Socket.IO error:', error);
       const errorEntry: LogEntry = {
-        id: `${commandId}-error`,
+        id: `${sessionId}-socket-error`,
         timestamp: new Date(),
         command: '',
         commandType: '',
-        output: error.response?.data?.error || error.message || 'Command execution failed',
+        output: `Socket.IO Error: ${error}`,
         error: true
       };
-      console.log('📝 Adding error entry to logs:', errorEntry);
       setLogs(prev => [...prev, errorEntry]);
-    } finally {
       setIsExecuting(false);
       setCommand('');
-      
-      // Set flag to refocus after a short delay
-      setTimeout(() => {
-        setShouldRefocus(true);
-      }, 100);
     }
   };
 
@@ -327,7 +344,12 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
                 onBlur={() => console.log('🎯 TextField blurred')}
                 onClick={() => console.log('🖱️ TextField clicked')}
                 onInput={(e) => console.log('⌨️ TextField onInput:', (e.target as HTMLInputElement).value)}
-                onKeyPress={handleKeyPress}
+                onKeyPress={(e) => {
+          if (e.key === 'Enter' && !isExecuting) {
+            e.preventDefault();
+            executeCommand(); // Use real-time version
+          }
+        }}
                 onKeyDown={(e) => console.log('⌨️ KeyDown:', e.key)}
                 placeholder={`Enter ${commandTypes.find(t => t.value === commandType)?.label} command...`}
                 disabled={isExecuting}

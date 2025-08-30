@@ -3,6 +3,9 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const { spawn, exec } = require('child_process');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const Convert = require('ansi-to-html');
 
 // Import APT modules
 const AMJS = require("../../Submodules/AbytekModuleJS/Source/AMJS/.js");
@@ -34,6 +37,14 @@ const getEnvironmentConfigDir = (projectDirectoryPath) => {
 };
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
+const convert = new Convert();
 const port = 3001; // Different from React dev server port
 
 app.use(cors());
@@ -540,6 +551,135 @@ app.post('/api/execute-command', (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`APT GUI Server running on port ${port}`);
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log(`[Socket.IO] User connected: ${socket.id}`);
+  
+  // Handle real-time command execution
+  socket.on('execute-command', (data) => {
+    console.log(`[Socket.IO] Execute command:`, data);
+    
+    const { command, commandType, projectPath, sessionId } = data;
+    
+    if (!commandType) {
+      socket.emit('command-error', { sessionId, error: 'Missing required field: commandType' });
+      return;
+    }
+
+    let fullCommandString;
+    const spawnOptions = {
+      cwd: projectPath && fs.existsSync(projectPath) ? projectPath : process.cwd(),
+      env: { ...process.env },
+      shell: true // Use shell to execute commands
+    };
+
+    try {
+      // Build the full command string with specific prefixes: apt:, node:, python:, native (no prefix)
+      switch (commandType) {
+        case 'apt':
+          if (command.trim()) {
+            fullCommandString = `apt ${command.trim()}`;
+          } else {
+            // Empty APT command - run help
+            fullCommandString = 'apt';
+          }
+          break;
+        
+        case 'node':
+          if (command.trim()) {
+            fullCommandString = `node ${command.trim()}`;
+          } else {
+            // Empty node command - show version
+            fullCommandString = 'node --version';
+          }
+          break;
+        
+        case 'python':
+          if (command.trim()) {
+            fullCommandString = `python ${command.trim()}`;
+          } else {
+            // Empty python command - show version
+            fullCommandString = 'python --version';
+          }
+          break;
+        
+        default: // 'native' or any other type
+          if (command.trim()) {
+            fullCommandString = command.trim();
+          } else {
+            fullCommandString = 'echo Empty command executed';
+          }
+          break;
+      }
+
+      console.log(`[Socket.IO] Executing: "${fullCommandString}" in`, spawnOptions.cwd);
+      
+      // Use spawn with shell=true for streaming output
+      const childProcess = spawn(fullCommandString, [], spawnOptions);
+      
+      // Send command start event
+      socket.emit('command-start', { 
+        sessionId, 
+        command: fullCommandString,
+        commandType,
+        pid: childProcess.pid
+      });
+
+      // Stream stdout
+      childProcess.stdout.on('data', (data) => {
+        const output = data.toString();
+        console.log(`[Socket.IO] stdout chunk:`, output);
+        socket.emit('command-output', { 
+          sessionId, 
+          output: convert.toHtml(output),
+          error: false 
+        });
+      });
+
+      // Stream stderr
+      childProcess.stderr.on('data', (data) => {
+        const output = data.toString();
+        console.log(`[Socket.IO] stderr chunk:`, output);
+        socket.emit('command-output', { 
+          sessionId, 
+          output: convert.toHtml(output),
+          error: true 
+        });
+      });
+
+      // Handle process completion
+      childProcess.on('close', (code) => {
+        console.log(`[Socket.IO] Command completed with code:`, code);
+        socket.emit('command-complete', { 
+          sessionId, 
+          exitCode: code,
+          success: code === 0
+        });
+      });
+
+      // Handle process error
+      childProcess.on('error', (err) => {
+        console.error(`[Socket.IO] Command error:`, err);
+        socket.emit('command-error', { 
+          sessionId, 
+          error: `Process error: ${err.message}` 
+        });
+      });
+
+    } catch (err) {
+      console.error(`[Socket.IO] Error setting up command:`, err);
+      socket.emit('command-error', { 
+        sessionId, 
+        error: err.message 
+      });
+    }
+  });
+  
+  socket.on('disconnect', () => {
+    console.log(`[Socket.IO] User disconnected: ${socket.id}`);
+  });
+});
+
+server.listen(port, () => {
+    console.log(`APT GUI Server with Socket.IO running on port ${port}`);
 });

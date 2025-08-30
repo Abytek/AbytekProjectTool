@@ -30,6 +30,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import aptService, { ProjectAction } from '../services/aptService';
+import socketService from '../services/socketService';
 import ConsolePanel from './ConsolePanel';
 
 interface LogEntry {
@@ -99,51 +100,83 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
         const commandType = isAptCommand ? 'apt' : 'native';
         const actualCommand = isAptCommand ? command.trim().substring(4) : command.trim();
 
-        const commandId = `action-${Date.now()}-${Math.random()}`;
+        const sessionId = socketService.generateSessionId();
 
-        // Log command start
-        if (consoleSetLogs.current) {
-          consoleSetLogs.current(prev => [...prev, {
-            id: commandId,
-            timestamp: new Date(),
-            command: command.trim(),
-            commandType: commandType,
-            output: '',
-            error: false
-          }]);
-        }
-
-        try {
-          const response = await aptService.executeCommand({
-            command: actualCommand,
-            commandType: commandType,
-            projectPath: projectPath
-          });
-
-          // Log command output
-          if (consoleSetLogs.current && (response.output || response.error)) {
-            consoleSetLogs.current(prev => [...prev, {
-              id: `${commandId}-output`,
-              timestamp: new Date(),
-              command: '',
-              commandType: '',
-              output: response.error || response.output,
-              error: !!response.error
-            }]);
-          }
-        } catch (cmdErr: any) {
-          // Log command error
-          if (consoleSetLogs.current) {
-            consoleSetLogs.current(prev => [...prev, {
-              id: `${commandId}-error`,
-              timestamp: new Date(),
-              command: '',
-              commandType: '',
-              output: cmdErr.response?.data?.error || cmdErr.message || 'Command execution failed',
-              error: true
-            }]);
-          }
-        }
+        // Execute command with real-time Socket.IO
+        await new Promise<void>((resolve, reject) => {
+          socketService.executeCommand(
+            {
+              command: actualCommand,
+              commandType: commandType,
+              projectPath: projectPath,
+              sessionId: sessionId
+            },
+            {
+              onStart: (data) => {
+                console.log('🚀 Action command started:', data);
+                if (consoleSetLogs.current) {
+                  consoleSetLogs.current(prev => [...prev, {
+                    id: `${sessionId}-start`,
+                    timestamp: new Date(),
+                    command: data.command,
+                    commandType: data.commandType,
+                    output: '',
+                    error: false
+                  }]);
+                }
+              },
+              
+              onOutput: (data) => {
+                console.log('📝 Action command output:', data);
+                if (consoleSetLogs.current) {
+                  consoleSetLogs.current(prev => [...prev, {
+                    id: `${sessionId}-output-${Date.now()}`,
+                    timestamp: new Date(),
+                    command: '',
+                    commandType: '',
+                    output: data.output,
+                    error: data.error
+                  }]);
+                }
+              },
+              
+              onComplete: (data) => {
+                console.log('✅ Action command completed:', data);
+                if (consoleSetLogs.current) {
+                  consoleSetLogs.current(prev => [...prev, {
+                    id: `${sessionId}-complete`,
+                    timestamp: new Date(),
+                    command: '',
+                    commandType: '',
+                    output: `Command completed with exit code: ${data.exitCode}${data.success ? ' (Success)' : ' (Failed)'}`,
+                    error: !data.success
+                  }]);
+                }
+                
+                if (data.success) {
+                  resolve();
+                } else {
+                  reject(new Error(`Command failed with exit code: ${data.exitCode}`));
+                }
+              },
+              
+              onError: (data) => {
+                console.error('💥 Action command error:', data);
+                if (consoleSetLogs.current) {
+                  consoleSetLogs.current(prev => [...prev, {
+                    id: `${sessionId}-error`,
+                    timestamp: new Date(),
+                    command: '',
+                    commandType: '',
+                    output: `Error: ${data.error}`,
+                    error: true
+                  }]);
+                }
+                reject(new Error(data.error));
+              }
+            }
+          ).catch(reject);
+        });
       }
 
       // Log action completion
