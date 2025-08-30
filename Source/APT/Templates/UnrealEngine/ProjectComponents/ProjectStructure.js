@@ -48,6 +48,20 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles"
             ) ?? true
         );
+        
+        this.Config = APT.Common.ForwardString(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.Config"
+            ) ?? APT.Templates.UnrealEngine.Utilities.Configs.DEFAULT
+        );
+
+        this.OpenEditor = APT.Common.ForwardBool(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor"
+            ) ?? false
+        );
 
         if (this.IsEngine)
         {
@@ -82,6 +96,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
             }
         }
+        if (this.OpenEditor)
+        {
+            APT.Templates.UnrealEngine.Utilities.OpenEditor(this);
+        }
     }
 
     GenerateActions(Actions)
@@ -108,6 +126,18 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles true `
+                ]
+            }
+        );
+        Actions.push(
+            {
+                Name: "OpenEditor",
+                Description: "Open editor",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor true `
                 ]
             }
         );
