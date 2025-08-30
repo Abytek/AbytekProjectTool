@@ -35,6 +35,19 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 
         this.UProjectFile = APT.Templates.UnrealEngine.Utilities.SearchUProjectFile(this.Project.EntryDirectory);
         this.IsEngine = (this.UProjectFile == null);
+        
+        this.AutomaticSetupEngine = APT.Common.ForwardBool(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine"
+            ) ?? this.IsEngine
+        );
+        this.AutomaticGenerateProjectFiles = APT.Common.ForwardBool(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles"
+            ) ?? true
+        );
 
         if (this.IsEngine)
         {
@@ -57,7 +70,41 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         }
         if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
         {
-            APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
+            if (this.IsEngine)
+            {
+                if (this.AutomaticSetupEngine)
+                {
+                    APT.Templates.UnrealEngine.Utilities.SetupEngine(this);
+                }
+            }
+            if (this.AutomaticGenerateProjectFiles)
+            {
+                APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
+            }
         }
+    }
+
+    GenerateActions(Actions)
+    {
+        Actions.push(
+            {
+                Name: "SetupEngine",
+                Description: "Setup engine",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine true `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
+                ]
+            },
+            {
+                Name: "GenerateProjectFiles",
+                Description: "Generate project files",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles true `
+                ]
+            }
+        );
     }
 }

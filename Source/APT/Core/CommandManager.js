@@ -154,7 +154,16 @@ AMJS.Namespace.F_CommandManager = class
             }
         }
 
-        console.log(`CLI input:`, this.CLIInput);
+        {
+            let LogContent = "CLI Input:\n";
+            this.CLIInput.forEach(
+                (Value, Key, Map) =>
+                {
+                    LogContent += `[${Key}] ${APT.Common.NiceJSONStringify(Value)}\n`;
+                }
+            );	
+            console.log(LogContent);
+        }
     }
 
     /**

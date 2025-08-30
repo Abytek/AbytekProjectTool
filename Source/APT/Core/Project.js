@@ -138,4 +138,9 @@ AMJS.Namespace.F_Project = class
             }
         );
     }
+
+    GenerateAPTCommandOnThis()
+    {
+        return `apt ${this.EntryDirectory.replaceAll("\\", "/")}`;
+    }
 };

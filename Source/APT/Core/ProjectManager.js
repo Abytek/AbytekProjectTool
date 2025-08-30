@@ -71,7 +71,8 @@ AMJS.Namespace.F_ProjectManager = class
         console.log(`Import project ${RelativeProjectEntryDirectory}`);
 
         // Parse additional options and merge instance data
-        let ParsedAdditionalOptions = { ...AdditionalOptions };
+        let ParsedAdditionalOptions = APT.Common.SimpleDeepCopy(this.System.CommandManager.CLIInput.get('ProjectDefault') ?? new Object());
+        APT.Common.MergeData(ParsedAdditionalOptions, AdditionalOptions);
 
         let InstanceData = APT.Common.SimpleDeepCopy(this.DefaultInstanceData);
         if (AdditionalOptions.InstanceData)
@@ -431,6 +432,9 @@ AMJS.Namespace.F_ProjectManager = class
                     Description: {
                         type: "string"
                     },
+                    ShouldRefreshPage: {
+                        type: "boolean"
+                    },
                     Commands: {
                         type: "array",
                         items: {
@@ -493,6 +497,7 @@ AMJS.Namespace.F_ProjectManager = class
         return {
             Name: "Import",
             Description: "Import the project",
+            ShouldRefreshPage: true,
             Commands: [
                 `apt ${EntryDirectory.replaceAll("\\", "/")}`
             ]
