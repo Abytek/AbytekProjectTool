@@ -424,6 +424,26 @@ app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
     }
 });
 
+// Get project actions
+app.get('/api/project/:projectPath/actions', (req, res) => {
+    console.log(`[API] GET /api/project/${req.params.projectPath}/actions`);
+    try {
+        const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
+        const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
+        
+        if (!fs.existsSync(absoluteDirectoryPath)) {
+            return res.status(404).json({ error: 'Project directory not found' });
+        }
+
+        const actions = APT.Core.System.ProjectManager.SearchActions(absoluteDirectoryPath);
+        console.log(`[API] Actions response:`, APT.Common.NiceJSONStringify(actions));
+        res.json(actions);
+    } catch (error) {
+        console.error(`[API] Error getting project actions:`, error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Execute command
 app.post('/api/execute-command', (req, res) => {
     console.log(`[API] POST /api/execute-command`, req.body);

@@ -416,4 +416,76 @@ AMJS.Namespace.F_ProjectManager = class
         }
         return Result;
     }
+
+    ValidateActions(EntryDirectory, Actions)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    Name: {
+                        type: "string"
+                    },
+                    Description: {
+                        type: "string"
+                    },
+                    Commands: {
+                        type: "array",
+                        items: {
+                            type: "string"
+                        }
+                    }
+                },
+                additionalProperties: false,
+            }
+        };
+        const Validator = ajv.compile(Schema);
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        if (!Validator(Actions))
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+        }
+        return Result;
+    }
+    SearchActions(EntryDirectory)
+    {
+        console.log(`Search actions(${EntryDirectory})`);
+        const ProjectImportedDirectory = APT.Common.GetProjectImportedDirectory(EntryDirectory);
+        const ActionsFile = path.join(ProjectImportedDirectory, "Actions.json");
+        if (fs.existsSync(ActionsFile))
+        {
+            console.log(`Found actions file(${EntryDirectory}):`, ActionsFile);
+            const ActionsFileContent = fs.readFileSync(ActionsFile).toString();
+            console.log(`Actions file content:`, ActionsFileContent);
+            return JSON.parse(ActionsFileContent);
+        }
+        console.log(`Not found actions file(${EntryDirectory}):`, ActionsFile);
+        return [];
+    }
+    SaveActions(EntryDirectory, Actions)
+    {
+        console.log(`Save actions(${EntryDirectory}):`, APT.Common.NiceJSONStringify(Actions));
+        const ValidatedResult = this.ValidateActions(EntryDirectory, Actions);
+        if (!ValidatedResult.Status)
+        {
+            console.error(`❌ Invalid actions(${EntryDirectory}):`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+            return false;
+        }
+        const ProjectImportedDirectory = APT.Common.GetProjectImportedDirectory(EntryDirectory);
+        if (!fs.existsSync(ProjectImportedDirectory))
+        {
+            fs.mkdirSync(ProjectImportedDirectory, { recursive: true });
+        }
+        fs.writeFileSync(path.join(ProjectImportedDirectory, "Actions.json"), APT.Common.NiceJSONStringify(Actions), {  });
+        return true;
+    }
 }

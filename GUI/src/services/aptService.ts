@@ -72,6 +72,12 @@ export interface CommandExecutionResponse {
     error?: string;
 }
 
+export interface ProjectAction {
+    Name: string;
+    Description: string;
+    Commands: string[];
+}
+
 export interface APTService {
     getConfigNames(projectPath: string): Promise<string[]>;
     getConfig(projectPath: string, configName: string): Promise<Record<string, any>>;
@@ -85,6 +91,7 @@ export interface APTService {
     addConfig(projectPath: string, configName: string, config: Record<string, any>): Promise<void>;
     deleteConfig(projectPath: string, configName: string): Promise<void>;
     executeCommand(request: CommandExecutionRequest): Promise<CommandExecutionResponse>;
+    getProjectActions(projectPath: string): Promise<ProjectAction[]>;
 }
 
 const aptService: APTService = {
@@ -152,6 +159,12 @@ const aptService: APTService = {
 
     async executeCommand(request: CommandExecutionRequest): Promise<CommandExecutionResponse> {
         const response = await axios.post(`${API_BASE_URL}/execute-command`, request);
+        return response.data;
+    },
+
+    async getProjectActions(projectPath: string): Promise<ProjectAction[]> {
+        const url = `${API_BASE_URL}/project/${encodeURIComponent(projectPath)}/actions`;
+        const response = await axios.get(url);
         return response.data;
     }
 };

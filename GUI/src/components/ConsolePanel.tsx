@@ -28,16 +28,37 @@ interface LogEntry {
 
 interface ConsolePanelProps {
   projectPath: string;
+  isMaximized?: boolean;
+  onToggleMaximize?: () => void;
+  showMaximizeButton?: boolean;
 }
 
-const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
+const ConsolePanel: React.FC<ConsolePanelProps> = ({ 
+  projectPath, 
+  isMaximized = false, 
+  onToggleMaximize, 
+  showMaximizeButton = true 
+}) => {
+  console.log('🎯 ConsolePanel rendered with props:', { 
+    projectPath, 
+    isMaximized, 
+    hasOnToggleMaximize: !!onToggleMaximize, 
+    showMaximizeButton 
+  });
   const [commandType, setCommandType] = useState<string>('apt');
   const [command, setCommand] = useState<string>('');
+  
+  // Add debugging for state changes
+  useEffect(() => {
+    console.log('🔄 Command state changed to:', `"${command}"`);
+  }, [command]);
+  
+  console.log('🎯 Current command state:', `"${command}"`);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [consoleHeight, setConsoleHeight] = useState<number>(400); // Fixed height for console output
   const [isResizing, setIsResizing] = useState<boolean>(false);
-  const [isMaximized, setIsMaximized] = useState<boolean>(false);
+
   const [shouldRefocus, setShouldRefocus] = useState<boolean>(false);
   
   const logViewerRef = useRef<HTMLDivElement>(null);
@@ -100,110 +121,129 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing) return;
     
-    const logViewerRect = logViewerRef.current?.getBoundingClientRect();
-    if (!logViewerRect) return;
-    
-    // Calculate new height based on mouse position relative to the top of the log viewer
-    const newHeight = Math.max(200, Math.min(800, e.clientY - logViewerRect.top));
-    setConsoleHeight(newHeight);
-  }, [isResizing]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsResizing(false);
-  }, []);
-
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'ns-resize';
-      document.body.style.userSelect = 'none';
-      
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-      };
-    }
-  }, [isResizing, handleMouseMove, handleMouseUp]);
-
-  const addLog = (command: string, commandType: string, output: string, error: boolean = false) => {
-    const newLog: LogEntry = {
-      id: Date.now().toString() + Math.random(),
-      timestamp: new Date(),
-      command,
-      commandType,
-      output,
-      error
+    const handleMouseMove = (e: MouseEvent) => {
+      const container = resizerRef.current?.parentElement;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const newHeight = Math.max(200, Math.min(800, e.clientY - rect.top - 100));
+        setConsoleHeight(newHeight);
+      }
     };
-    setLogs(prev => [...prev, newLog]);
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, []);
+
+  const parseColoredOutput = (output: string) => {
+    try {
+      const convert = new Convert({
+        fg: '#f0f0f0',
+        bg: 'transparent',
+        newline: true,
+        escapeXML: true
+      });
+      return convert.toHtml(output);
+    } catch (error) {
+      console.error('Error parsing ANSI colors:', error);
+      return output.replace(/\u001b\[[0-9;]*m/g, '');
+    }
   };
 
-  const executeCommand = async (): Promise<void> => {
-    if (!projectPath) return;
+  const executeCommand = async () => {
+    console.log('🚀 executeCommand called', { command: command, projectPath, isExecuting });
     
+    if (!projectPath || isExecuting) {
+      console.log('❌ executeCommand early return:', { 
+        hasProjectPath: !!projectPath, 
+        isExecuting 
+      });
+      return;
+    }
+
+    console.log('✅ Proceeding with command execution');
+    setShouldRefocus(true);
     setIsExecuting(true);
-    const currentCommand = command;
-    const currentCommandType = commandType;
+
+    const commandId = `${Date.now()}-${Math.random()}`;
     
-    // Add command to log immediately - just show the command
-    const displayCommand = currentCommand.trim() || '';
-    addLog(displayCommand, currentCommandType, '', false);
+    // Add command entry to logs
+    const commandEntry: LogEntry = {
+      id: commandId,
+      timestamp: new Date(),
+      command: command,
+      commandType: commandType,
+      output: '',
+      error: false
+    };
+    
+    console.log('📝 Adding command entry to logs:', commandEntry);
+    setLogs(prev => [...prev, commandEntry]);
     
     try {
-      const result = await aptService.executeCommand({
-        command: currentCommand,
-        commandType: currentCommandType,
+      console.log('🌐 Calling aptService.executeCommand with:', {
+        command: command.trim(),
+        commandType: commandType,
         projectPath: projectPath
       });
       
-      // Add output as a separate log entry without metadata
-      if (result.output) {
-        addLog('', '', result.output, false);
+      const response = await aptService.executeCommand({
+        command: command,
+        commandType: commandType,
+        projectPath: projectPath
+      });
+
+      console.log('📥 Response received:', response);
+
+      // Add output entry
+      if (response.output || response.error) {
+        const outputEntry: LogEntry = {
+          id: `${commandId}-output`,
+          timestamp: new Date(),
+          command: '',
+          commandType: '',
+          output: response.error || response.output,
+          error: !!response.error
+        };
+        console.log('📝 Adding output entry to logs:', outputEntry);
+        setLogs(prev => [...prev, outputEntry]);
+      } else {
+        console.log('⚠️ No output or error in response');
       }
     } catch (error: any) {
-      let errorMessage = 'Command execution failed';
+      console.error('❌ Command execution error:', error);
+      const errorEntry: LogEntry = {
+        id: `${commandId}-error`,
+        timestamp: new Date(),
+        command: '',
+        commandType: '',
+        output: error.response?.data?.error || error.message || 'Command execution failed',
+        error: true
+      };
+      console.log('📝 Adding error entry to logs:', errorEntry);
+      setLogs(prev => [...prev, errorEntry]);
+    } finally {
+      setIsExecuting(false);
+      setCommand('');
       
-      if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      } else if (error.response?.data?.output) {
-        errorMessage = error.response.data.output;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      // Add error as a separate log entry without metadata
-      addLog('', '', errorMessage, true);
+      // Set flag to refocus after a short delay
+      setTimeout(() => {
+        setShouldRefocus(true);
+      }, 100);
     }
-    
-    setIsExecuting(false);
-    setCommand(''); // Clear input after execution
-    setShouldRefocus(true); // Trigger refocus
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
+    console.log('⌨️ Key pressed:', event.key, 'Current command:', command);
+    if (event.key === 'Enter' && !isExecuting) {
+      console.log('🚀 Enter key - executing command');
       executeCommand();
-    }
-  };
-
-  // Handle input blur to refocus immediately
-  const handleInputBlur = (event: React.FocusEvent) => {
-    // Only refocus if we're not executing and the blur wasn't caused by clicking elsewhere intentionally
-    if (!isExecuting) {
-      setTimeout(() => {
-        const target = event.target as HTMLInputElement;
-        if (target && document.activeElement !== target) {
-          target.focus();
-        }
-      }, 10);
     }
   };
 
@@ -212,7 +252,9 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
   };
 
   const toggleMaximize = () => {
-    setIsMaximized(prev => !prev);
+    if (onToggleMaximize) {
+      onToggleMaximize();
+    }
   };
 
   // Handle console panel click to ensure focus
@@ -223,52 +265,26 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
     }
   };
 
-  // Handle mouse enter to focus console for better scroll behavior
-  const handleConsoleMouseEnter = (ref: React.RefObject<HTMLDivElement>) => () => {
+  // Handle console panel mouse enter to ensure focus
+  const handleConsoleMouseEnter = (ref: React.RefObject<HTMLDivElement>) => (event: React.MouseEvent) => {
     if (ref.current) {
-      ref.current.focus({ preventScroll: true });
+      ref.current.focus();
     }
   };
 
-  const formatTimestamp = (timestamp: Date) => {
-    return timestamp.toLocaleTimeString();
-  };
-
-  // Create ANSI to HTML converter with proper terminal colors
-  const ansiConverter = new Convert({
-    fg: '#f8f8f2',
-    bg: '#1e1e1e',
-    newline: false,
-    escapeXML: false,
-    colors: {
-      0: '#1e1e1e',   // black
-      1: '#cd3131',   // red  
-      2: '#16c60c',   // green
-      3: '#c19c00',   // yellow
-      4: '#2472c8',   // blue
-      5: '#bc3fbc',   // magenta
-      6: '#61d6d6',   // cyan
-      7: '#e5e5e5',   // white
-      8: '#666666',   // bright black (gray)
-      9: '#ff6e6e',   // bright red
-      10: '#69ff94',  // bright green
-      11: '#ffffa5',  // bright yellow
-      12: '#d6acff',  // bright blue
-      13: '#ff92df',  // bright magenta
-      14: '#a4ffff',  // bright cyan
-      15: '#ffffff',  // bright white
-    }
-  });
-
-  const parseColoredOutput = (output: string) => {
-    // Use the ansi-to-html library for proper ANSI parsing
-    return ansiConverter.toHtml(output);
+  const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    // Immediately refocus if input loses focus (prevents losing focus during command execution)
+    setTimeout(() => {
+      if (event.target) {
+        event.target.focus();
+      }
+    }, 0);
   };
 
   return (
     <>
       {/* Normal Console Layout */}
-      {!isMaximized && (
+      {(
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
           {/* Command Bar */}
           <Paper sx={{ p: 2, mb: 2 }}>
@@ -289,26 +305,44 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
               </FormControl>
               
               <TextField
-                ref={commandInputRef}
                 fullWidth
                 size="small"
                 label="Command"
                 value={command}
-                onChange={(e) => setCommand(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  console.log('📝 TextField onChange fired! Value:', newValue);
+                  setCommand(newValue);
+                }}
+                onFocus={() => console.log('🎯 TextField focused')}
+                onBlur={() => console.log('🎯 TextField blurred')}
+                onClick={() => console.log('🖱️ TextField clicked')}
+                onInput={(e) => console.log('⌨️ TextField onInput:', (e.target as HTMLInputElement).value)}
                 onKeyPress={handleKeyPress}
-                onBlur={handleInputBlur}
+                onKeyDown={(e) => console.log('⌨️ KeyDown:', e.key)}
                 placeholder={`Enter ${commandTypes.find(t => t.value === commandType)?.label} command...`}
                 disabled={isExecuting}
                 inputProps={{
                   autoComplete: 'off',
-                  spellCheck: false
+                  spellCheck: false,
+                  onChange: (e: any) => console.log('🔧 Native onChange:', e.target.value)
                 }}
               />
               
               <Button
                 variant="contained"
-                onClick={executeCommand}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  console.log('🖱️ Execute button clicked!', { command, projectPath, isExecuting });
+                  executeCommand();
+                }}
                 disabled={isExecuting || !projectPath}
+                style={{ 
+                  opacity: (isExecuting || !projectPath) ? 0.5 : 1,
+                  pointerEvents: (isExecuting || !projectPath) ? 'none' : 'auto',
+                  backgroundColor: (isExecuting || !projectPath) ? '#ccc' : undefined
+                }}
                 startIcon={<SendIcon />}
                 sx={{ 
                   minWidth: 120,
@@ -334,27 +368,18 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
                       : '0 4px 12px rgba(33, 150, 243, 0.4)',
                     transform: isExecuting ? 'none' : 'translateY(-1px)'
                   },
-                  '&:active': {
-                    transform: isExecuting ? 'none' : 'translateY(0px)',
-                    boxShadow: isExecuting
-                      ? '0 2px 4px rgba(0,0,0,0.2)'
-                      : '0 2px 6px rgba(33, 150, 243, 0.3)'
-                  },
-                  '&:disabled': {
-                    background: 'linear-gradient(45deg, #666 30%, #888 90%)',
-                    color: '#bbb',
-                    boxShadow: 'none'
-                  }
                 }}
               >
-                {isExecuting ? 'Running...' : 'Execute'}
+                {isExecuting ? 'Running...' : !projectPath ? 'No Project' : 'Execute'}
               </Button>
               
-              <Tooltip title="Maximize console">
-                <IconButton onClick={toggleMaximize}>
-                  <FullscreenIcon />
-                </IconButton>
-              </Tooltip>
+              {showMaximizeButton && (
+                <Tooltip title="Maximize console">
+                  <IconButton onClick={toggleMaximize}>
+                    <FullscreenIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
               
               <Tooltip title="Clear logs">
                 <IconButton onClick={clearLogs} disabled={logs.length === 0}>
@@ -365,83 +390,94 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
           </Paper>
 
           {/* Log Viewer */}
-          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-              Console Output
+          <Paper sx={{ 
+            p: 2, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            overflow: 'hidden',
+            backgroundColor: isMaximized ? '#1a1a1a' : 'inherit',
+            color: isMaximized ? '#fff' : 'inherit'
+          }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: isMaximized ? '#fff' : 'inherit' }}>
+              {isMaximized ? 'Console Output - Full Screen' : 'Console Output'}
             </Typography>
             
             <Box
-              ref={logViewerRef}
+              ref={isMaximized ? logViewerMaximizedRef : logViewerRef}
               tabIndex={0}
-              onClick={handleConsoleClick(logViewerRef)}
-              onMouseEnter={handleConsoleMouseEnter(logViewerRef)}
+              onClick={handleConsoleClick(isMaximized ? logViewerMaximizedRef : logViewerRef)}
+              onMouseEnter={handleConsoleMouseEnter(isMaximized ? logViewerMaximizedRef : logViewerRef)}
               sx={{
                 height: `${consoleHeight}px`,
-                minHeight: `${consoleHeight}px`,
-                maxHeight: `${consoleHeight}px`,
+                minHeight: isMaximized ? '100%' : `${consoleHeight}px`,
+                maxHeight: isMaximized ? '100%' : `${consoleHeight}px`,
                 overflow: 'hidden',
                 overflowX: 'auto',
                 overflowY: 'scroll',
                 scrollbarWidth: 'thin', // For Firefox
                 scrollbarColor: '#666 #1a1a1a', // For Firefox
                 backgroundColor: '#1e1e1e',
-                color: '#f8f9fa',
-                fontFamily: 'monospace',
-                fontSize: '11px',
+                fontFamily: 'Consolas, Monaco, monospace',
+                fontSize: '14px',
+                lineHeight: 1.6,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
                 p: 2,
-                borderRadius: 1,
-                border: '1px solid #333',
-                cursor: 'text',
-                position: 'relative',
                 boxSizing: 'border-box',
+                position: 'relative',
+                outline: 'none',
                 '&:focus': {
                   outline: '2px solid #2196F3',
-                  outlineOffset: -1,
+                  outlineOffset: '-2px'
                 },
-                '&:hover': {
-                  borderColor: '#555',
+                // Scrollbar styling
+                '::-webkit-scrollbar': {
+                  width: '12px',
+                  height: '12px'
                 },
-                '&::-webkit-scrollbar': {
-                  width: 12,
-                  height: 12
+                '::-webkit-scrollbar-track': {
+                  background: '#2b2b2b',
+                  borderRadius: '10px',
+                  border: '1px solid #1e1e1e'
                 },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: '#1a1a1a',
-                  borderRadius: 6,
-                  border: '1px solid #333'
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: '#666',
-                  borderRadius: 6,
-                  border: '1px solid #444',
+                '::-webkit-scrollbar-thumb': {
+                  background: '#555',
+                  borderRadius: '10px',
+                  border: '2px solid #2b2b2b',
                   '&:hover': {
-                    backgroundColor: '#777'
+                    background: '#777'
                   },
                   '&:active': {
-                    backgroundColor: '#888'
+                    background: '#999'
                   }
                 },
-                '&::-webkit-scrollbar-corner': {
-                  backgroundColor: '#1a1a1a'
+                '::-webkit-scrollbar-corner': {
+                  background: '#2b2b2b'
                 },
+                // Log styling
                 '& .log-entry': {
-                  mb: 0.5,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2
-                },
-                '& .log-header': {
-                  color: '#74c0fc',
-                  fontSize: '10px',
-                  opacity: 0.8
+                  marginBottom: '8px',
+                  '&:last-child': {
+                    marginBottom: 0
+                  }
                 },
                 '& .log-command': {
-                  color: '#ffd43b',
-                  fontWeight: 'bold'
+                  color: '#4CAF50',
+                  fontWeight: 'bold',
+                  marginBottom: '4px',
+                  userSelect: 'text'
                 },
                 '& .log-output': {
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
+                  color: '#f0f0f0',
+                  paddingLeft: '8px',
+                  userSelect: 'text',
+                  '& pre': {
+                    margin: 0,
+                    fontFamily: 'inherit',
+                    fontSize: 'inherit',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
+                  }
                 },
                 '& .log-error': {
                   color: '#ff6b6b'
@@ -449,32 +485,37 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
               }}
             >
               {logs.length === 0 ? (
-                <Typography variant="body2" sx={{ color: '#adb5bd', fontStyle: 'italic' }}>
+                <Typography variant="body1" sx={{ color: '#adb5bd', fontStyle: 'italic', textAlign: 'center', mt: 4 }}>
                   No commands executed yet. Enter a command above and press Execute or Enter.
                 </Typography>
               ) : (
-                logs.map((log) => (
-                  <Box key={log.id} className="log-entry">
-                    {log.command || log.commandType ? (
-                      // Command entry: show $ command
-                      <div className="log-command">
-                        {log.command ? `$ ${log.command}` : '$'}
-                      </div>
-                    ) : (
-                      // Output entry: just show the output
-                      <div 
-                        className={`log-output ${log.error ? 'log-error' : ''}`}
-                        dangerouslySetInnerHTML={{ 
-                          __html: parseColoredOutput(log.output) 
-                        }}
-                      />
-                    )}
-                  </Box>
-                ))
+                logs.map((log) => {
+                  console.log('📊 Rendering log:', log);
+                  return (
+                    <Box key={log.id} className="log-entry">
+                      {log.command || log.commandType ? (
+                        // Command entry: show $ command
+                        <div className="log-command">
+                          {log.command ? `$ ${log.command}` : '$'}
+                        </div>
+                      ) : (
+                        // Output entry: just show the output
+                        <div 
+                          className={`log-output ${log.error ? 'log-error' : ''}`}
+                          dangerouslySetInnerHTML={{ 
+                            __html: parseColoredOutput(log.output) 
+                          }}
+                        />
+                      )}
+                    </Box>
+                  );
+                })
               )}
             </Box>
-            
-            {/* Resizer - at the bottom */}
+          </Paper>
+
+          {/* Console Resizer - only show in normal mode */}
+          {!isMaximized && (
             <Box
               ref={resizerRef}
               onMouseDown={handleMouseDown}
@@ -490,231 +531,10 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({ projectPath }) => {
                 }
               }}
             />
-          </Paper>
+          )}
         </Box>
       )}
 
-      {/* Full-Screen Maximized Console */}
-      {isMaximized && (
-        <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#0a0a0a',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Full-screen Command Bar */}
-          <Paper sx={{ p: 2, m: 2, borderRadius: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Command Type</InputLabel>
-                <Select
-                  value={commandType}
-                  onChange={(e) => setCommandType(e.target.value)}
-                  label="Command Type"
-                >
-                  {commandTypes.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              
-              <TextField
-                ref={commandInputMaximizedRef}
-                fullWidth
-                size="small"
-                label="Command"
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                onKeyPress={handleKeyPress}
-                onBlur={handleInputBlur}
-                placeholder={`Enter ${commandTypes.find(t => t.value === commandType)?.label} command...`}
-                disabled={isExecuting}
-                inputProps={{
-                  autoComplete: 'off',
-                  spellCheck: false
-                }}
-              />
-              
-              <Button
-                variant="contained"
-                onClick={executeCommand}
-                disabled={isExecuting || !projectPath}
-                startIcon={<SendIcon />}
-                sx={{ 
-                  minWidth: 120,
-                  height: 40,
-                  borderRadius: 2,
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  background: isExecuting 
-                    ? 'linear-gradient(45deg, #666 30%, #888 90%)' 
-                    : 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                  boxShadow: isExecuting
-                    ? '0 2px 4px rgba(0,0,0,0.2)'
-                    : '0 3px 8px rgba(33, 150, 243, 0.3)',
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    background: isExecuting
-                      ? 'linear-gradient(45deg, #666 30%, #888 90%)'
-                      : 'linear-gradient(45deg, #1976D2 30%, #1CB5E0 90%)',
-                    boxShadow: isExecuting
-                      ? '0 2px 4px rgba(0,0,0,0.2)'
-                      : '0 4px 12px rgba(33, 150, 243, 0.4)',
-                    transform: isExecuting ? 'none' : 'translateY(-1px)'
-                  },
-                  '&:active': {
-                    transform: isExecuting ? 'none' : 'translateY(0px)',
-                    boxShadow: isExecuting
-                      ? '0 2px 4px rgba(0,0,0,0.2)'
-                      : '0 2px 6px rgba(33, 150, 243, 0.3)'
-                  },
-                  '&:disabled': {
-                    background: 'linear-gradient(45deg, #666 30%, #888 90%)',
-                    color: '#bbb',
-                    boxShadow: 'none'
-                  }
-                }}
-              >
-                {isExecuting ? 'Running...' : 'Execute'}
-              </Button>
-              
-              <Tooltip title="Minimize console">
-                <IconButton onClick={toggleMaximize}>
-                  <FullscreenExitIcon />
-                </IconButton>
-              </Tooltip>
-              
-              <Tooltip title="Clear logs">
-                <IconButton onClick={clearLogs} disabled={logs.length === 0}>
-                  <ClearIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Paper>
-
-          {/* Full-screen Log Viewer */}
-          <Paper sx={{ mx: 2, mb: 2, flex: 1, display: 'flex', flexDirection: 'column', borderRadius: 2, overflow: 'hidden', minHeight: 0 }}>
-            <Box sx={{ p: 2, borderBottom: '1px solid rgba(255, 255, 255, 0.12)' }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Console Output - Full Screen
-              </Typography>
-            </Box>
-            
-            <Box
-              ref={logViewerMaximizedRef}
-              tabIndex={0}
-              onClick={handleConsoleClick(logViewerMaximizedRef)}
-              onMouseEnter={handleConsoleMouseEnter(logViewerMaximizedRef)}
-              sx={{
-                flex: 1,
-                minHeight: 0, // Important for flex containers
-                maxHeight: '100%', 
-                overflow: 'hidden',
-                overflowX: 'auto',
-                overflowY: 'scroll',
-                scrollbarWidth: 'thin', // For Firefox
-                scrollbarColor: '#666 #1a1a1a', // For Firefox
-                backgroundColor: '#1e1e1e',
-                color: '#f8f9fa',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                p: 2,
-                cursor: 'text',
-                position: 'relative',
-                boxSizing: 'border-box',
-                '&:focus': {
-                  outline: '2px solid #2196F3',
-                  outlineOffset: -1,
-                },
-                '&:hover': {
-                  borderColor: '#555',
-                },
-                '&::-webkit-scrollbar': {
-                  width: 12,
-                  height: 12
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: '#1a1a1a',
-                  borderRadius: 6,
-                  border: '1px solid #333'
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: '#666',
-                  borderRadius: 6,
-                  border: '1px solid #444',
-                  '&:hover': {
-                    backgroundColor: '#777'
-                  },
-                  '&:active': {
-                    backgroundColor: '#888'
-                  }
-                },
-                '&::-webkit-scrollbar-corner': {
-                  backgroundColor: '#1a1a1a'
-                },
-                '& .log-entry': {
-                  mb: 0.5,
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  lineHeight: 1.3
-                },
-                '& .log-header': {
-                  color: '#74c0fc',
-                  fontSize: '11px',
-                  opacity: 0.8
-                },
-                '& .log-command': {
-                  color: '#ffd43b',
-                  fontWeight: 'bold'
-                },
-                '& .log-output': {
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
-                },
-                '& .log-error': {
-                  color: '#ff6b6b'
-                }
-              }}
-            >
-              {logs.length === 0 ? (
-                <Typography variant="body1" sx={{ color: '#adb5bd', fontStyle: 'italic', textAlign: 'center', mt: 4 }}>
-                  No commands executed yet. Enter a command above and press Execute or Enter.
-                </Typography>
-              ) : (
-                logs.map((log) => (
-                  <Box key={log.id} className="log-entry">
-                    {log.command || log.commandType ? (
-                      // Command entry: show $ command
-                      <div className="log-command">
-                        {log.command ? `$ ${log.command}` : '$'}
-                      </div>
-                    ) : (
-                      // Output entry: just show the output
-                      <div 
-                        className={`log-output ${log.error ? 'log-error' : ''}`}
-                        dangerouslySetInnerHTML={{ 
-                          __html: parseColoredOutput(log.output) 
-                        }}
-                      />
-                    )}
-                  </Box>
-                ))
-              )}
-            </Box>
-          </Paper>
-        </Box>
-      )}
     </>
   );
 };

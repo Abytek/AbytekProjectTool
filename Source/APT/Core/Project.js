@@ -94,6 +94,25 @@ AMJS.Namespace.F_Project = class
         this.PostLoad();
     }
 
+    
+    GenerateImportAction()
+    {
+        let ThisProject = this;
+        return {
+            Name: "Import",
+            Description: "Import the project",
+            Commands: [
+                `apt ${ThisProject.EntryDirectory.replaceAll("\\", "/")}`
+            ]
+        };
+    }
+    GenerateDefaultActions()
+    {
+        return [
+            this.GenerateImportAction()
+        ];
+    }
+
     /**
      * Executes component lifecycle methods in order:
      * 1. Init() - Initial setup
@@ -114,6 +133,16 @@ AMJS.Namespace.F_Project = class
                 Value.PostInit();
             }
         );
+        {
+            let Actions = this.GenerateDefaultActions();
+            this.Components.forEach(
+                (Value, Key, Map) =>
+                {
+                    Value.GenerateActions(Actions);
+                }
+            );
+            APT.Core.System.ProjectManager.SaveActions(this.EntryDirectory, Actions);
+        }
         this.Components.forEach(
             (Value, Key, Map) =>
             {

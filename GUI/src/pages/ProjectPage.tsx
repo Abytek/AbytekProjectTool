@@ -18,8 +18,8 @@ import DataViewer from '../components/DataViewer';
 import aptService, { ProjectResponse, ProjectLink } from '../services/aptService';
 import ProjectConfigViewer from '../components/ProjectConfigViewer';
 import ConfigDialog from '../components/ConfigDialog';
-import ConsolePanel from '../components/ConsolePanel';
 import ProjectDetailsViewer from '../components/ProjectDetailsViewer';
+import ProjectActionsViewer from '../components/ProjectActionsViewer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -309,15 +309,10 @@ const ProjectPage = () => {
             </Grid>
           )}
 
-          {/* Console Panel */}
-          {projectPath && (
+          {/* Project Actions & Console */}
+          {projectData && (
             <Grid item xs={12}>
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                  Console
-                </Typography>
-                <ConsolePanel projectPath={projectPath} />
-              </Paper>
+              <ProjectActionsViewer projectPath={projectPath} />
             </Grid>
           )}
 

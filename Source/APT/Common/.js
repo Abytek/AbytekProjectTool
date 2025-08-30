@@ -337,6 +337,16 @@ AMJS.Namespace.GetDataDirectory = function()
     return path.join(path.parse(Raw).root, ".APTData");
 }
 
+AMJS.Namespace.GetProjectImportedDirectory = function(EntryDirectory)
+{
+    const Result = path.join(AMJS.Namespace.GetDataDirectory(), "Imported");
+    if (EntryDirectory == null)
+    {
+        return Result;
+    }
+    return path.join(Result, AMJS.Namespace.StringToUUID(path.normalize(EntryDirectory)));
+}
+
 /**
  * Gets the cache directory path
  * @returns {string} Absolute path to cache directory

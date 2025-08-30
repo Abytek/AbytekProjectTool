@@ -116,11 +116,12 @@ AMJS.Namespace.F_Environment = class
             {
                 return this.LoadEnvironmentConfig(BaseDirectories, "Base", ConfigDirectoryPath);
             }
+            return;
         }
         const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
         if (!ValidatedResult.Status)
         {
-            console.error(`Invalid environment config ${EnvConfigFile}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+            console.error(`Invalid environment config ${EnvConfigFile}:\nConfig:${APT.Common.NiceJSONStringify(EnvConfig)}\nErrors:${APT.Common.NiceJSONStringify(ValidatedResult.Errors)}`);
             return null;
         }
         if ("Parent" in EnvConfig)
