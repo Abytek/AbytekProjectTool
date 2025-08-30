@@ -9,7 +9,7 @@ AMJS.Import("./Project")
 
 AMJS.Namespace.GetEnvironmentDependenciesDirectory = function()
 {
-    return path.join(APT.Common.GetDataDirectory(), "Dependencies");
+    return path.join(APT.Common.GetDataDirectory(), "D");
 }
 
 /**
@@ -244,12 +244,11 @@ AMJS.Namespace.F_Environment = class
             Dependency
         };
         const StoreKeyJSON = JSON.stringify(StoreKey);
-        const StoreKeyJSONEncoded = APT.Common.StringToUUID(StoreKeyJSON);
+        const StoreKeyJSONEncoded = APT.Common.StringToShortID(StoreKeyJSON);
 
         const DependencyDirectoryPath = path.join(
             AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
-            StoreKeyJSONEncoded,
-            DependencyName
+            StoreKeyJSONEncoded
         );
 
         if (!fs.existsSync(DependencyDirectoryPath))
@@ -283,7 +282,7 @@ AMJS.Namespace.F_Environment = class
                 await Git.reset(['--hard', `origin/${Branch}`]);
             }
         }
-        return path.join(DependencyDirectoryPath, "APTProject.js");
+        return DependencyDirectoryPath;
     }
     ImportDependentProject(EntryDirectory, DependencyName, Dependency)
     {
