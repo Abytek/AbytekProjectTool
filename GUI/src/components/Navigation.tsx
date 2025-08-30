@@ -12,7 +12,7 @@ const Navigation = () => {
     <AppBar position="static">
       <Toolbar>
         <Typography 
-          variant="h6" 
+          variant="subtitle1" 
           component={RouterLink} 
           to="/"
           sx={{ 
@@ -22,7 +22,8 @@ const Navigation = () => {
             '&:hover': {
               opacity: 0.8
             },
-            cursor: 'pointer'
+            cursor: 'pointer',
+            fontWeight: 600
           }}
         >
           Abytek Project Tool

@@ -333,7 +333,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
     return (
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Dependencies</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Dependencies</Typography>
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
@@ -500,7 +500,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
            <SettingsIcon color="primary" />
-           <Typography variant="h5">{name} Config</Typography>
+           <Typography variant="h6" sx={{ fontWeight: 600 }}>{name} Config</Typography>
          </Box>
          <Box sx={{ display: 'flex', gap: 1 }}>
            <Box sx={{ display: 'flex', gap: 1 }}>
@@ -541,7 +541,7 @@ const ProjectConfigViewer: React.FC<ProjectConfigViewerProps> = ({ config: initi
 
       <Box sx={{ mt: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">Settings</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Settings</Typography>
         </Box>
         <Paper sx={{ p: 2 }}>
           {/* Global Default */}

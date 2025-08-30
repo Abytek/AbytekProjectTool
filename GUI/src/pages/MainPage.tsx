@@ -6,7 +6,7 @@ const MainPage = () => {
   return (
     <Box>
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h5" gutterBottom>
           Welcome to Abytek Project Tool
         </Typography>
         <Typography variant="body1">

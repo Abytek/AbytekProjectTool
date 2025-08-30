@@ -178,7 +178,7 @@ const ProjectPage = () => {
   return (
     <Box>
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           Project Configuration
         </Typography>
         <TextField
@@ -313,7 +313,7 @@ const ProjectPage = () => {
           {projectPath && (
             <Grid item xs={12}>
               <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
                   Console
                 </Typography>
                 <ConsolePanel projectPath={projectPath} />
