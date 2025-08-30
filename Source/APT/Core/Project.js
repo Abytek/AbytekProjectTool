@@ -94,22 +94,10 @@ AMJS.Namespace.F_Project = class
         this.PostLoad();
     }
 
-    
-    GenerateImportAction()
-    {
-        let ThisProject = this;
-        return {
-            Name: "Import",
-            Description: "Import the project",
-            Commands: [
-                `apt ${ThisProject.EntryDirectory.replaceAll("\\", "/")}`
-            ]
-        };
-    }
     GenerateDefaultActions()
     {
         return [
-            this.GenerateImportAction()
+            APT.Core.System.ProjectManager.GenerateImportAction(this.EntryDirectory)
         ];
     }
 

@@ -469,7 +469,7 @@ AMJS.Namespace.F_ProjectManager = class
             return JSON.parse(ActionsFileContent);
         }
         console.log(`Not found actions file(${EntryDirectory}):`, ActionsFile);
-        return [];
+        return [ this.GenerateImportAction(EntryDirectory) ];
     }
     SaveActions(EntryDirectory, Actions)
     {
@@ -487,5 +487,15 @@ AMJS.Namespace.F_ProjectManager = class
         }
         fs.writeFileSync(path.join(ProjectImportedDirectory, "Actions.json"), APT.Common.NiceJSONStringify(Actions), {  });
         return true;
+    }
+    GenerateImportAction(EntryDirectory)
+    {
+        return {
+            Name: "Import",
+            Description: "Import the project",
+            Commands: [
+                `apt ${EntryDirectory.replaceAll("\\", "/")}`
+            ]
+        };
     }
 }

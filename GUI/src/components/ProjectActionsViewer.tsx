@@ -26,7 +26,8 @@ import {
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Fullscreen as FullscreenIcon,
-  FullscreenExit as FullscreenExitIcon
+  FullscreenExit as FullscreenExitIcon,
+  Info as InfoIcon
 } from '@mui/icons-material';
 import aptService, { ProjectAction } from '../services/aptService';
 import ConsolePanel from './ConsolePanel';
@@ -189,8 +190,8 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
         ) : (
           <Box sx={{ 
             display: 'flex', 
-            flexDirection: 'column', 
-            gap: 2,
+            flexWrap: 'wrap',
+            gap: 1,
             maxHeight: isMaximized ? '25vh' : 'none', 
             overflow: isMaximized ? 'auto' : 'visible',
             ...(isMaximized && {
@@ -209,75 +210,73 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
               },
             })
           }}>
-          {actions.map((action, index) => {
+          {actions.map((action) => {
             const isExecuting = executingActions.has(action.Name);
             
             return (
-              <Accordion key={action.Name} defaultExpanded={false}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pr: 2 }}>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {action.Name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {action.Description}
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="contained"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent accordion toggle
-                        executeAction(action);
-                      }}
-                      disabled={isExecuting}
-                      startIcon={isExecuting ? <CircularProgress size={16} /> : <PlayArrowIcon />}
-                      sx={{ ml: 2 }}
+              <Box key={action.Name} sx={{ position: 'relative', display: 'inline-block' }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => executeAction(action)}
+                  disabled={isExecuting}
+                  startIcon={isExecuting ? <CircularProgress size={16} /> : <PlayArrowIcon />}
+                  endIcon={
+                    <Tooltip 
+                      title={
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                            {action.Name}
+                          </Typography>
+                          <Typography variant="body2" sx={{ mb: 1 }}>
+                            {action.Description}
+                          </Typography>
+                          <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                          <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                            Commands:
+                          </Typography>
+                          {action.Commands.map((command, idx) => (
+                            <Typography 
+                              key={idx}
+                              variant="caption" 
+                              sx={{ 
+                                fontFamily: 'monospace',
+                                display: 'block',
+                                backgroundColor: 'rgba(0,0,0,0.2)',
+                                px: 0.5,
+                                py: 0.25,
+                                borderRadius: 0.5,
+                                mb: 0.25,
+                                fontSize: '0.7rem'
+                              }}
+                            >
+                              $ {command}
+                            </Typography>
+                          ))}
+                        </Box>
+                      }
+                      placement="top"
+                      arrow
+                      enterDelay={500}
                     >
-                      {isExecuting ? 'Executing...' : 'Run'}
-                    </Button>
-                  </Box>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Box>
-                    <Divider sx={{ mb: 2 }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <CodeIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Commands to execute:
-                      </Typography>
-                    </Box>
-                    <List dense disablePadding>
-                      {action.Commands.map((command, cmdIndex) => (
-                        <ListItem key={cmdIndex} sx={{ pl: 0 }}>
-                          <ListItemText
-                            primary={
-                              <Typography 
-                                variant="body2" 
-                                sx={{ 
-                                  fontFamily: 'monospace',
-                                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                  px: 1,
-                                  py: 0.5,
-                                  borderRadius: 1,
-                                  fontSize: '0.8125rem'
-                                }}
-                              >
-                                $ {command}
-                              </Typography>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                    {action.Commands.length > 1 && (
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                        Commands will be executed sequentially in the order shown above.
-                      </Typography>
-                    )}
-                  </Box>
-                </AccordionDetails>
-              </Accordion>
+                      <InfoIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                    </Tooltip>
+                  }
+                  sx={{ 
+                    textTransform: 'none',
+                    minWidth: 'auto',
+                    borderRadius: 2,
+                    px: 2,
+                    py: 0.5,
+                    '& .MuiButton-endIcon': {
+                      ml: 1,
+                      mr: 0
+                    }
+                  }}
+                >
+                  {action.Name}
+                </Button>
+              </Box>
             );
           })}
           </Box>
