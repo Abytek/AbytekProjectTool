@@ -190,6 +190,25 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
           error: false
         }]);
       }
+
+      // Check if action requires page refresh
+      if (action.ShouldRefreshPage) {
+        if (consoleSetLogs.current) {
+          consoleSetLogs.current(prev => [...prev, {
+            id: `action-${Date.now()}-refresh`,
+            timestamp: new Date(),
+            command: '',
+            commandType: '',
+            output: `🔄 Refreshing page due to project changes...`,
+            error: false
+          }]);
+        }
+        
+        // Refresh page after a short delay to show the message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
     } catch (err) {
       console.error('Error executing action:', err);
       
@@ -371,6 +390,20 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
                               $ {command}
                             </Typography>
                           ))}
+                          {action.ShouldRefreshPage && (
+                            <>
+                              <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                              <Typography variant="caption" sx={{ 
+                                color: '#ffa726', 
+                                fontWeight: 600, 
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5
+                              }}>
+                                🔄 This action will refresh the page when completed
+                              </Typography>
+                            </>
+                          )}
                         </Box>
                       }
                       placement="top"
@@ -389,7 +422,15 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
                     '& .MuiButton-endIcon': {
                       ml: 1,
                       mr: 0
-                    }
+                    },
+                    ...(action.ShouldRefreshPage && {
+                      borderColor: '#ffa726',
+                      backgroundColor: 'rgba(255, 167, 38, 0.1)',
+                      '&:hover': {
+                        borderColor: '#ff9800',
+                        backgroundColor: 'rgba(255, 152, 0, 0.15)'
+                      }
+                    })
                   }}
                 >
                   {action.Name}
