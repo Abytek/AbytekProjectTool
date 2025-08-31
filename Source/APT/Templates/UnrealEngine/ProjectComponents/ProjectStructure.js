@@ -56,6 +56,12 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             ) ?? APT.Templates.UnrealEngine.Utilities.Configs.DEFAULT
         );
 
+        this.BuildEditor = APT.Common.ForwardBool(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor"
+            ) ?? false
+        );
         this.OpenEditor = APT.Common.ForwardBool(
             APT.Common.FindPropertyByPath(
                 this.Project.AdditionalOptions,
@@ -96,6 +102,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 APT.Templates.UnrealEngine.Utilities.GenerateProjectFiles(this);
             }
         }
+        if (this.BuildEditor)
+        {
+            APT.Templates.UnrealEngine.Utilities.BuildEditor(this);
+        }
         if (this.OpenEditor)
         {
             APT.Templates.UnrealEngine.Utilities.OpenEditor(this);
@@ -131,12 +141,26 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
+                Name: "BuildEditor",
+                Description: "Build editor",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor true `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor false `
+                ]
+            }
+        );
+        Actions.push(
+            {
                 Name: "OpenEditor",
                 Description: "Open editor",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor true `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor true `
                 ]
             }

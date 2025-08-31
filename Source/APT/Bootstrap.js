@@ -13,3 +13,5 @@ let APT = ModuleSystem.Import([], ".js");
 let System = new APT.Core.F_System();
 APT.Core.System = System;
 System.Start();
+
+process.exit(0);

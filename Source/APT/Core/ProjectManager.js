@@ -503,4 +503,15 @@ AMJS.Namespace.F_ProjectManager = class
             ]
         };
     }
+    GenerateRefreshAction(EntryDirectory)
+    {
+        return {
+            Name: "Refresh",
+            Description: "Refresh the project",
+            ShouldRefreshPage: true,
+            Commands: [
+                `apt ${EntryDirectory.replaceAll("\\", "/")} :GlobalDefault.ShouldConfigureProjects false`
+            ]
+        };
+    }
 }
