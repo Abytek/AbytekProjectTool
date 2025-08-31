@@ -197,7 +197,9 @@ AMJS.Namespace.F_Environment = class
             if (Name in EnvConfig)
             {
                 let CLIInput = APT.Core.System.CommandManager.CLIInput;
-                CLIInput.set(Name, EnvConfig[Name]);
+                let PreValue = CLIInput.get(Name);
+                let Value = APT.Common.MergeData(PreValue, EnvConfig[Name]);
+                CLIInput.set(Name, Value);
             }
         }
         ApplyCLIInputList("GlobalDefault", EnvConfig);

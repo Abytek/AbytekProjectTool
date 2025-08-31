@@ -6,7 +6,7 @@ AMJS.Namespace.GetDefaultShouldConfigureProjects = function()
     {
         return true;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultSupportDebug = function()
 {
@@ -15,7 +15,7 @@ AMJS.Namespace.GetDefaultSupportDebug = function()
     {
         return true;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultSupportOptimization = function()
 {
@@ -24,7 +24,7 @@ AMJS.Namespace.GetDefaultSupportOptimization = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultSupportMinSize = function()
 {
@@ -33,7 +33,7 @@ AMJS.Namespace.GetDefaultSupportMinSize = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultEnableTest = function()
 {
@@ -42,7 +42,7 @@ AMJS.Namespace.GetDefaultEnableTest = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 
 AMJS.Namespace.GetDefaultProjectEntryDirectory = function()
@@ -52,7 +52,7 @@ AMJS.Namespace.GetDefaultProjectEntryDirectory = function()
     {
         return null;
     }
-    return APT.Common.ForwardString(Result);
+    return APT.Common.ForwardString(Result[0]);
 }
 
 AMJS.Namespace.GetDefaultEnvironmentName = function()
@@ -62,5 +62,5 @@ AMJS.Namespace.GetDefaultEnvironmentName = function()
     {
         return "Development";
     }
-    return APT.Common.ForwardString(Result);
+    return APT.Common.ForwardString(Result[0]);
 }

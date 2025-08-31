@@ -146,7 +146,7 @@ AMJS.Namespace.F_CommandManager = class
             let MainProjectEntryDirectorySlot = this.CLIInput.get('MainProjectEntryDirectory');
             if (MainProjectEntryDirectorySlot.length == 1)
             {
-                this.CLIInput.get("GlobalDefault").ProjectEntryDirectory = path.resolve(MainProjectEntryDirectorySlot[0]);
+                this.CLIInput.get("GlobalDefault").ProjectEntryDirectory = [ path.resolve(MainProjectEntryDirectorySlot[0]) ];
             }
             if (MainProjectEntryDirectorySlot.length > 1)
             {
