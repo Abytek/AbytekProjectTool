@@ -25,6 +25,7 @@ APT.Core.System = System;
 System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureProjects = false;
 
 // Start the system
+System.AutomaticExit = false;
 System.Start();
 
 // Helper function to get environment config directory

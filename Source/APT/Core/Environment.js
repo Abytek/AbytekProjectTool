@@ -239,8 +239,6 @@ AMJS.Namespace.F_Environment = class
 
         let GitDetails = Dependency.GitDetails;
 
-        throw new Error("Not implemented");
-
         const StoreKey = { 
             DependencyName,
             Dependency
