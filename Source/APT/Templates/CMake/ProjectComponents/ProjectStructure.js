@@ -68,6 +68,9 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
     }
     Start()
     {
-        APT.Templates.CMake.Utilities.GenerateProjectFiles(this);
+        if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
+        {
+            APT.Templates.CMake.Utilities.GenerateProjectFiles(this);
+        }
     }
 }

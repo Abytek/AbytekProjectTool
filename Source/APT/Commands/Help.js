@@ -10,7 +10,7 @@ class F_Logger
 
         this.CommandName = null;
         this.AutomaticDetect = false;
-        this.NeedMainProjectEntryFile = true;
+        this.NeedMainProjectEntryDirectory = true;
         this.Description = null;
 
         this.IsFinalized = false;
@@ -24,9 +24,9 @@ class F_Logger
     {
         this.AutomaticDetect = Value;
     }
-    SetNeedMainProjectEntryFile(Value)
+    SetNeedMainProjectEntryDirectory(Value)
     {
-        this.NeedMainProjectEntryFile = Value;
+        this.NeedMainProjectEntryDirectory = Value;
     }
     SetDescription(Value)
     {
@@ -42,7 +42,7 @@ class F_Logger
             {
                 console.log(`       Description: ${this.Description}`);
             }
-            console.log(`       Syntax: apt ${this.NeedMainProjectEntryFile ? '<MainProjectEntryFile> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
+            console.log(`       Syntax: apt ${this.NeedMainProjectEntryDirectory ? '<MainProjectEntryDirectory> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
         }
     }
 }
@@ -65,6 +65,6 @@ AMJS.Namespace.Help.LogHelp = function(Logger)
 {
     Logger.SetCommandName("Help");
     Logger.SetAutomaticDetect(true);
-    Logger.SetNeedMainProjectEntryFile(false);
+    Logger.SetNeedMainProjectEntryDirectory(false);
     Logger.SetDescription("list all the APT CLI commands");
 }

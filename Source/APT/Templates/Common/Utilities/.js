@@ -1,4 +1,13 @@
 
+AMJS.Namespace.GetDefaultShouldConfigureProjects = function()
+{
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ShouldConfigureProjects;
+    if (Result == null)
+    {
+        return true;
+    }
+    return APT.Common.ForwardBool(Result[0]);
+}
 AMJS.Namespace.GetDefaultSupportDebug = function()
 {
     let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').SupportDebug;
@@ -6,7 +15,7 @@ AMJS.Namespace.GetDefaultSupportDebug = function()
     {
         return true;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultSupportOptimization = function()
 {
@@ -15,7 +24,7 @@ AMJS.Namespace.GetDefaultSupportOptimization = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultSupportMinSize = function()
 {
@@ -24,7 +33,7 @@ AMJS.Namespace.GetDefaultSupportMinSize = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 AMJS.Namespace.GetDefaultEnableTest = function()
 {
@@ -33,25 +42,25 @@ AMJS.Namespace.GetDefaultEnableTest = function()
     {
         return false;
     }
-    return APT.Common.ForwardBool(Result);
+    return APT.Common.ForwardBool(Result[0]);
 }
 
-AMJS.Namespace.GetDefaultProjectEntryFile = function()
+AMJS.Namespace.GetDefaultProjectEntryDirectory = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryFile;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ProjectEntryDirectory;
     if (Result == null)
     {
         return null;
     }
-    return APT.Common.ForwardString(Result);
+    return APT.Common.ForwardString(Result[0]);
 }
 
 AMJS.Namespace.GetDefaultEnvironmentName = function()
 {
-    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').GetDefaultEnvironmentName;
+    let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').EnvironmentName;
     if (Result == null)
     {
         return "Development";
     }
-    return APT.Common.ForwardString(Result);
+    return APT.Common.ForwardString(Result[0]);
 }

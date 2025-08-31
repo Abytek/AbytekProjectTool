@@ -14,21 +14,23 @@ AMJS.Namespace.F_Project = class
 {
     /**
      * Creates a new project instance
-     * @param {string} AbsoluteEntryFile - Path to project entry file
+     * @param {string} EntryDirectory - Path to project entry directory	
      * @param {Object} AdditionalOptions - Project configuration options
      */
-    constructor(AbsoluteEntryFile, AdditionalOptions)
+    constructor(EntryDirectory, AdditionalOptions)
     {
-        this.AbsoluteEntryFile = AbsoluteEntryFile;
-        this.EntryDirectory = path.dirname(AbsoluteEntryFile);
-        this.Name = AbsoluteEntryFile;
+        this.EntryDirectory = EntryDirectory;
+        this.EntryFile = path.join(EntryDirectory, "APTProject.js");
+        this.HasEntryFile = fs.existsSync(this.EntryFile);
+        this.Name = EntryDirectory;
         this.Label = this.Name;
         this.AdditionalOptions = AdditionalOptions ?? new Object();
         this.Components = new Map();
 
         this.IsFinalized = false;
 
-        APT.Core.System.ProjectManager.SetupProjectLink(this.AbsoluteEntryFile);
+        this.Preset = APT.Core.System.ProjectManager.GenerateProjectPreset(this.EntryDirectory);
+        this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.EntryDirectory);
     }
 
     /**
@@ -80,13 +82,24 @@ AMJS.Namespace.F_Project = class
 
     TryFinalize()
     {
+        console.log(`Try finalize project ${this.EntryDirectory}`);
         if (this.IsFinalized)
         {
+            console.log(`Project was finalized ${this.EntryDirectory}`);
             return;
         }
 
+        console.log(`Project was not finalized => Finalize ${this.EntryDirectory}`);
         this.IsFinalized = true;
         this.PostLoad();
+    }
+
+    GenerateDefaultActions()
+    {
+        return [
+            APT.Core.System.ProjectManager.GenerateImportAction(this.EntryDirectory),
+            APT.Core.System.ProjectManager.GenerateRefreshAction(this.EntryDirectory)
+        ];
     }
 
     /**
@@ -109,11 +122,26 @@ AMJS.Namespace.F_Project = class
                 Value.PostInit();
             }
         );
+        {
+            let Actions = this.GenerateDefaultActions();
+            this.Components.forEach(
+                (Value, Key, Map) =>
+                {
+                    Value.GenerateActions(Actions);
+                }
+            );
+            APT.Core.System.ProjectManager.SaveActions(this.EntryDirectory, Actions);
+        }
         this.Components.forEach(
             (Value, Key, Map) =>
             {
                 Value.Start();
             }
         );
+    }
+
+    GenerateAPTCommandOnThis()
+    {
+        return `apt ${this.EntryDirectory.replaceAll("\\", "/")}`;
     }
 };

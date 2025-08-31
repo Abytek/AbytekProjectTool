@@ -6,14 +6,14 @@ AMJS.Namespace.OpenEditor = function(CommandManager)
 {
     if (CommandManager.CLIInput.has("OpenEditor"))
     {
-        const MainProjectEntryFile = APT.Templates.Common.Utilities.GetDefaultProjectEntryFile();
-        if (MainProjectEntryFile == null)
+        const MainProjectEntryDirectory = APT.Templates.Common.Utilities.GetDefaultProjectEntryDirectory();
+        if (MainProjectEntryDirectory == null)
         {
-            throw new Error("Invalid MainProjectEntryFile");
+            throw new Error("Invalid MainProjectEntryDirectory");
         }
         
         let ProjectManager = CommandManager.System.ProjectManager;
-        let Project = ProjectManager.ImportProject(null, MainProjectEntryFile);
+        let Project = ProjectManager.ImportProject([], MainProjectEntryDirectory);
         
         if (!APT.Editors.OpenEditor(Project))
         {

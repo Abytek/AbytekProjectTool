@@ -12,13 +12,13 @@
 
 - **ImportMainProject**
   ```bash
-  apt <MainProjectEntryFile> <AdditionalArguments...>
+  apt <MainProjectEntryDirectory> <AdditionalArguments...>
   ```
-  Imports the main project from its entry file.
+  Imports the main project from its entry directory.
 
 - **OpenEditor**
   ```bash
-  apt <MainProjectEntryFile> :OpenEditor <AdditionalArguments...>
+  apt <MainProjectEntryDirectory> :OpenEditor <AdditionalArguments...>
   ```
   Opens the project in configured IDE.
 
@@ -26,13 +26,13 @@
 
 - **LogCache**
   ```bash
-  apt <MainProjectEntryFile> :LogCache
+  apt <MainProjectEntryDirectory> :LogCache
   ```
   Displays APT cache information.
 
 - **CleanCache**
   ```bash
-  apt <MainProjectEntryFile> :CleanCache
+  apt <MainProjectEntryDirectory> :CleanCache
   ```
   Cleans APT cache.
 
@@ -40,17 +40,17 @@
 
 1. **Import Project**:
    ```bash
-   apt MyProject/APTProject.js
+   apt MyProjectDirectory
    ```
 
 1. **Create New Project**:
    ```bash
-   apt MyProject/APTProject.js :OpenEditor :GlobalDefault.Editor VisualStudio2022
+   apt MyProjectDirectory :OpenEditor :GlobalDefault.Editor VisualStudio2022
    ```
 
 2. **Clean cache**:
    ```bash
-   apt MyProject/APTProject.js :CleanCache
+   apt MyProjectDirectory :CleanCache
    ```
 
 ## Additional Arguments

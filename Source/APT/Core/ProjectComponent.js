@@ -41,6 +41,14 @@ AMJS.Namespace.A_ProjectComponent = class
      * Startup phase
      * Called after all components have completed PostInit()
      */
+    GenerateActions(OutActions)
+    {
+    }
+
+    /**
+     * Startup phase
+     * Called after all components have completed PostInit()
+     */
     Start()
     {
     }

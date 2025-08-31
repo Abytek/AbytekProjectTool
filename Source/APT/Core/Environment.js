@@ -9,7 +9,7 @@ AMJS.Import("./Project")
 
 AMJS.Namespace.GetEnvironmentDependenciesDirectory = function()
 {
-    return path.join(APT.Common.GetDataDirectory(), "Dependencies");
+    return path.join(APT.Common.GetDataDirectory(), "D");
 }
 
 /**
@@ -28,11 +28,11 @@ AMJS.Namespace.F_Environment = class
         this.System = System;
 
         let This = this;
-        this.SetupEnvironment = (Module, EnvName, ConfigDirectoryPath) => 
+        this.SetupEnvironment = (BaseDirectories, EnvName, ConfigDirectoryPath) => 
         {  
             let Result = false;
             let Done = false;
-            This.AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
+            This.AsyncSetupEnvironment(BaseDirectories, EnvName, ConfigDirectoryPath)
                 .then(
                     (TempResult) => { Result = TempResult; Done = true; }
                 );
@@ -106,20 +106,28 @@ AMJS.Namespace.F_Environment = class
         }
         return Result;
     }
-    LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath)
+    LoadEnvironmentConfig(BaseDirectories, EnvName, ConfigDirectoryPath)
     {
         const EnvConfigFile = path.join(ConfigDirectoryPath, EnvName);
-        let EnvConfig = AMJS.ModuleSystem.ImportJSON(Module, EnvConfigFile);
+        let EnvConfig = AMJS.ModuleSystem.ImportJSON(BaseDirectories, EnvConfigFile, false);
+        if (!EnvConfig)
+        {
+            if (EnvName != "Base")
+            {
+                return this.LoadEnvironmentConfig(BaseDirectories, "Base", ConfigDirectoryPath);
+            }
+            return;
+        }
         const ValidatedResult = this.ValidateEnvironmentConfig(EnvConfig);
         if (!ValidatedResult.Status)
         {
-            console.error(`Invalid environment config ${EnvConfigFile}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
+            console.error(`Invalid environment config ${EnvConfigFile}:\nConfig:${APT.Common.NiceJSONStringify(EnvConfig)}\nErrors:${APT.Common.NiceJSONStringify(ValidatedResult.Errors)}`);
             return null;
         }
         if ("Parent" in EnvConfig)
         {
             let ParentEnvName = EnvConfig.Parent;
-            let ParentEnvConfig = this.LoadEnvironmentConfig(Module, ParentEnvName, ConfigDirectoryPath);
+            let ParentEnvConfig = this.LoadEnvironmentConfig(BaseDirectories, ParentEnvName, ConfigDirectoryPath);
             EnvConfig = this.MergeEnvironmentConfigs(EnvConfig, ParentEnvConfig);
         }
         return EnvConfig;
@@ -155,34 +163,7 @@ AMJS.Namespace.F_Environment = class
                     Result[ParamName] = new Object();
                 }
                 let ResultParam = APT.Common.SimpleDeepCopy(Result[ParamName]);
- 
-                let MergeFunction = function(ResultObject, AObject)
-                {
-                    for (let Key in AObject)
-                    {
-                        let AProperty = AObject[Key];
-
-                        if (typeof AProperty == "object")
-                        {
-                            if (Key in ResultObject)
-                            {
-                                let ResultPropertySrc = ResultObject[Key];
-                                if (typeof ResultPropertySrc == "object")
-                                {
-                                    let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
-                                    MergeFunction(ResultPropertyDst, AProperty);
-                                    ResultObject[Key] = ResultPropertyDst;
-                                    continue;
-                                }
-                            }
-                        }
-                        
-                        ResultObject[Key] = AProperty;
-                    }
-                }
-                MergeFunction(ResultParam, AParam);
-
-                Result[ParamName] = ResultParam;
+                Result[ParamName] = APT.Common.MergeData(ResultParam, AParam);
             }
         }
 
@@ -191,15 +172,15 @@ AMJS.Namespace.F_Environment = class
         MergeOptionParam("ProjectDefault");
         return Result;
     }
-    async AsyncSetupEnvironment(Module, EnvName, ConfigDirectoryPath)
+    async AsyncSetupEnvironment(BaseDirectories, EnvName, ConfigDirectoryPath)
     {
-        let EnvConfig = this.LoadEnvironmentConfig(Module, EnvName, ConfigDirectoryPath);
+        let EnvConfig = this.LoadEnvironmentConfig(BaseDirectories, EnvName, ConfigDirectoryPath);
         if (!EnvConfig)
         {
             return false;
         }
 
-        console.log("APT.SetupEnvironment:\n", APT.Common.NiceJSONStringify(EnvConfig));
+        console.log(`APT.SetupEnvironment(${APT.Common.NiceJSONStringify(BaseDirectories)}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
 
         this.ApplyCLIInputs(EnvConfig);
 
@@ -216,7 +197,9 @@ AMJS.Namespace.F_Environment = class
             if (Name in EnvConfig)
             {
                 let CLIInput = APT.Core.System.CommandManager.CLIInput;
-                CLIInput.set(Name, EnvConfig[Name]);
+                let PreValue = CLIInput.get(Name);
+                let Value = APT.Common.MergeData(PreValue, EnvConfig[Name]);
+                CLIInput.set(Name, Value);
             }
         }
         ApplyCLIInputList("GlobalDefault", EnvConfig);
@@ -232,18 +215,18 @@ AMJS.Namespace.F_Environment = class
             let ProjectLink = ProjectManager.SearchProjectLink(Dependency);
             if (ProjectLink)
             {
-                if (fs.existsSync(ProjectLink.EntryFile))
+                if (fs.existsSync(ProjectLink.EntryDirectory))
                 {
-                    this.ImportDependentProject(ProjectLink.EntryFile, DependencyName, Dependency);
+                    this.ImportDependentProject(ProjectLink.EntryDirectory, DependencyName, Dependency);
                     continue;
                 }
             }
 
             {
-                let TestProjectEntryFile = await this.AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency);
-                if (TestProjectEntryFile)
+                let TestProjectEntryDirectory = await this.AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency);
+                if (TestProjectEntryDirectory)
                 {
-                    this.ImportDependentProject(TestProjectEntryFile, DependencyName, Dependency);
+                    this.ImportDependentProject(TestProjectEntryDirectory, DependencyName, Dependency);
                 }
             }
         }
@@ -263,13 +246,35 @@ AMJS.Namespace.F_Environment = class
             Dependency
         };
         const StoreKeyJSON = JSON.stringify(StoreKey);
-        const StoreKeyJSONEncoded = APT.Common.StringToUUID(StoreKeyJSON);
 
-        const DependencyDirectoryPath = path.join(
-            AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
-            StoreKeyJSONEncoded,
-            DependencyName
-        );
+        // Generate a unique directory path for the dependency
+        const ProjectLinks = APT.Core.System.ProjectManager.LoadProjectLinks();
+        let DepID = 0; // APT.Common.StringToShortID(StoreKeyJSON);
+        let DependencyDirectoryPath = null;
+        while (DependencyDirectoryPath == null)
+        {
+            let TestDependencyDirectoryPath = path.normalize(
+                path.join(
+                    AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
+                    DepID.toString(),
+                    DependencyName
+                )
+            );
+            let Duplicate = false;
+            if (fs.existsSync(TestDependencyDirectoryPath))
+            {
+                for (let ProjectLink of ProjectLinks)
+                {
+                    if (ProjectLink.EntryDirectory == TestDependencyDirectoryPath)
+                    {
+                        Duplicate = !(APT.Core.System.ProjectManager.TryMatchProjectLink(Dependency, ProjectLink));
+                        break;
+                    }
+                }
+            }
+            DependencyDirectoryPath = Duplicate ? null : TestDependencyDirectoryPath;
+            ++DepID;
+        }
 
         if (!fs.existsSync(DependencyDirectoryPath))
         {
@@ -302,9 +307,9 @@ AMJS.Namespace.F_Environment = class
                 await Git.reset(['--hard', `origin/${Branch}`]);
             }
         }
-        return path.join(DependencyDirectoryPath, "APTProject.js");
+        return DependencyDirectoryPath;
     }
-    ImportDependentProject(EntryFile, DependencyName, Dependency)
+    ImportDependentProject(EntryDirectory, DependencyName, Dependency)
     {
         let ProjectManager = APT.Core.System.ProjectManager;
         
@@ -318,7 +323,7 @@ AMJS.Namespace.F_Environment = class
         {
             Required = Dependency.Required;
         }
-        let DependentProject = ProjectManager.ImportProject(null, EntryFile, AdditionalOptions, Required);
+        let DependentProject = ProjectManager.ImportProject([], EntryDirectory, AdditionalOptions, Required);
         return DependentProject;
     }
 }

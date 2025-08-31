@@ -29,6 +29,8 @@ AMJS.Namespace.F_System = class
         
         /** @type {APT.Core.F_Environment} Environment instance */
         this.Environment = new AMJS.Namespace.F_Environment(this);
+
+        this.AutomaticExit = true;
     }
 
     /**
@@ -37,5 +39,9 @@ AMJS.Namespace.F_System = class
     Start()
     {
         this.CommandManager.Start();
+        if (this.AutomaticExit)
+        {
+            process.exit(0);
+        }
     }
 };
