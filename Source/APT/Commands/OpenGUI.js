@@ -59,6 +59,8 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                 
                 console.log('Starting development server...');
             }
+            
+            APT.Core.System.AutomaticExit = false;
 
             // Handle server cleanup on exit
             process.on('SIGINT', () => {

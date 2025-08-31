@@ -239,17 +239,42 @@ AMJS.Namespace.F_Environment = class
 
         let GitDetails = Dependency.GitDetails;
 
+        throw new Error("Not implemented");
+
         const StoreKey = { 
             DependencyName,
             Dependency
         };
         const StoreKeyJSON = JSON.stringify(StoreKey);
-        const StoreKeyJSONEncoded = APT.Common.StringToShortID(StoreKeyJSON);
 
-        const DependencyDirectoryPath = path.join(
-            AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
-            StoreKeyJSONEncoded
-        );
+        // Generate a unique directory path for the dependency
+        const ProjectLinks = APT.Core.System.ProjectManager.LoadProjectLinks();
+        let DepID = 0; // APT.Common.StringToShortID(StoreKeyJSON);
+        let DependencyDirectoryPath = null;
+        while (DependencyDirectoryPath == null)
+        {
+            let TestDependencyDirectoryPath = path.normalize(
+                path.join(
+                    AMJS.Namespace.GetEnvironmentDependenciesDirectory(),
+                    DepID.toString(),
+                    DependencyName
+                )
+            );
+            let Duplicate = false;
+            if (fs.existsSync(TestDependencyDirectoryPath))
+            {
+                for (let ProjectLink of ProjectLinks)
+                {
+                    if (ProjectLink.EntryDirectory == TestDependencyDirectoryPath)
+                    {
+                        Duplicate = !(APT.Core.System.ProjectManager.TryMatchProjectLink(Dependency, ProjectLink));
+                        break;
+                    }
+                }
+            }
+            DependencyDirectoryPath = Duplicate ? null : TestDependencyDirectoryPath;
+            ++DepID;
+        }
 
         if (!fs.existsSync(DependencyDirectoryPath))
         {
