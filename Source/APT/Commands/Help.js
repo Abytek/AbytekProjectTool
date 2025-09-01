@@ -37,19 +37,19 @@ class F_Logger
     {
         if (!this.IsFinalized)
         {
-            console.log(`   ${this.CommandName}:`);
+            APT.Log("APT", `   ${this.CommandName}:`);
             if (this.Description)
             {
-                console.log(`       Description: ${this.Description}`);
+                APT.Log("APT", `       Description: ${this.Description}`);
             }
-            console.log(`       Syntax: apt ${this.NeedMainProjectEntryDirectory ? '<MainProjectEntryDirectory> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
+            APT.Log("APT", `       Syntax: apt ${this.NeedMainProjectEntryDirectory ? '<MainProjectEntryDirectory> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
         }
     }
 }
 
 AMJS.Namespace.Help = function(CommandManager)
 {
-    console.log(`APT CLI commands:`);
+    APT.Log("APT", `APT CLI commands:`);
     for(let Command of CommandManager.Commands)
     {
         if (Command.LogHelp)

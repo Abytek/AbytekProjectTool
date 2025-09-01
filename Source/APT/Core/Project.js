@@ -82,14 +82,14 @@ AMJS.Namespace.F_Project = class
 
     TryFinalize()
     {
-        console.log(`Try finalize project ${this.EntryDirectory}`);
+        APT.Log("APT", `Try finalize project ${this.EntryDirectory}`);
         if (this.IsFinalized)
         {
-            console.log(`Project was finalized ${this.EntryDirectory}`);
+            APT.Log("APT", `Project was finalized ${this.EntryDirectory}`);
             return;
         }
 
-        console.log(`Project was not finalized => Finalize ${this.EntryDirectory}`);
+        APT.Log("APT", `Project was not finalized => Finalize ${this.EntryDirectory}`);
         this.IsFinalized = true;
         this.PostLoad();
     }
@@ -147,7 +147,7 @@ AMJS.Namespace.F_Project = class
 
     PreImport()
     {
-        console.log(`Pre import project ${this.EntryDirectory}`);
+        APT.Log("APT", `Pre import project ${this.EntryDirectory}`);
 
         this.EnvConfig = APT.Core.System.Environment.SetupEnvironment(
             [ this.EntryDirectory ],
@@ -161,7 +161,7 @@ AMJS.Namespace.F_Project = class
     }
     ImportDependencies()
     {
-        console.log(`Importing dependencies for project ${this.EntryDirectory}`);
+        APT.Log("APT", `Importing dependencies for project ${this.EntryDirectory}`);
 
         this.Dependencies = new Object();
         for (let DependencyName in this.EnvConfig.Dependencies)
@@ -177,6 +177,6 @@ AMJS.Namespace.F_Project = class
             }
         }
 
-        console.log(`Imported dependencies for project ${this.EntryDirectory}:\n`, APT.Common.NiceJSONStringify(Object.keys(this.Dependencies)));
+        APT.Log("APT", `Imported dependencies for project ${this.EntryDirectory}:\n`, APT.Common.NiceJSONStringify(Object.keys(this.Dependencies)));
     }
 };

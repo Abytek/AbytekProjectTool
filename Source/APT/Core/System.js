@@ -21,8 +21,41 @@ AMJS.Namespace.F_System = class
      */
     constructor()
     {
+        /** @type {APT.Core.F_Logger} Logger instance */
+        this.Logger = new AMJS.Namespace.F_Logger(this);
+
         /** @type {APT.Core.F_CommandManager} Command manager instance */
         this.CommandManager = new AMJS.Namespace.F_CommandManager(this);
+
+        // Apply LoggerDefault
+        if (this.CommandManager.CLIInput.has('GlobalDefault'))
+        {
+            const GlobalDefault = this.CommandManager.CLIInput.get('GlobalDefault');
+            if ("Logger" in GlobalDefault)
+            {
+                const LoggerDefault = GlobalDefault.Logger;
+                if (LoggerDefault.HiddenCategories)
+                {
+                    if (Array.isArray(LoggerDefault.HiddenCategories))
+                    {
+                        for(const Category of LoggerDefault.HiddenCategories)
+                        {
+                            this.Logger.HideCategory(Category);
+                        }
+                    }
+                }
+                if (LoggerDefault.HiddenTypes)
+                {
+                    if (Array.isArray(LoggerDefault.HiddenTypes))
+                    {
+                        for(const Type of LoggerDefault.HiddenTypes)
+                        {
+                            this.Logger.HideType(Type);
+                        }
+                    }
+                }
+            }
+        }
         
         /** @type {APT.Core.F_ProjectManager} Project manager instance */
         this.ProjectManager = new AMJS.Namespace.F_ProjectManager(this);

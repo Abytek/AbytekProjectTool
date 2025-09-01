@@ -21,5 +21,5 @@ AMJS.Namespace.GenerateProjectFiles_VisualStudio2022 = function(ProjectStructure
             stdio: 'inherit' 
         }
     );
-    console.log("Visual Studio 2022 project files generated successfully");
+    APT.Log("APT.Templates.CMake", "Visual Studio 2022 project files generated successfully");
 }

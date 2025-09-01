@@ -10,7 +10,7 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
     let Project = ProjectStructure.Project;
 
-    console.log(`<APT.Templates.CMake> Begin generating project files for ${Project.EntryDirectory}`);
+    APT.Log("APT.Templates.CMake", `Begin generating project files for ${Project.EntryDirectory}`);
 
     fs.mkdirSync(ProjectStructure.BuildDirectory, { recursive: true });
 
@@ -31,5 +31,5 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
         throw new Error(`unknown CMake generator ${ProjectStructure.Generator}`);
     }
 
-    console.log(`<APT.Templates.CMake> Generated project files for ${Project.EntryDirectory} successfully`);
+    APT.Log("APT.Templates.CMake", `Generated project files for ${Project.EntryDirectory} successfully`);
 }

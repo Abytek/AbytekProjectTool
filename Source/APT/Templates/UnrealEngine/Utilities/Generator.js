@@ -9,7 +9,7 @@ AMJS.Namespace.SetupEngine = function(ProjectStructure)
 {
     let Project = ProjectStructure.Project;
 
-    console.log(`<APT.Templates.UnrealEngine> Begin setting up engine ${Project.EntryDirectory}`);
+    APT.Log("APT.Templates.UnrealEngine", `Begin setting up engine ${Project.EntryDirectory}`);
     if (!ProjectStructure.IsEngine)
     {
         throw new Error(`Project is not an engine ${Project.EntryDirectory}`);
@@ -20,14 +20,14 @@ AMJS.Namespace.SetupEngine = function(ProjectStructure)
             cwd: Project.EntryDirectory
         }
     );
-    console.log(`<APT.Templates.UnrealEngine> Setup engine ${Project.EntryDirectory} successfully`);
+    APT.Log("APT.Templates.UnrealEngine", `Setup engine ${Project.EntryDirectory} successfully`);
 }
 
 AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
     let Project = ProjectStructure.Project;
 
-    console.log(`<APT.Templates.UnrealEngine> Begin generating project files for ${Project.EntryDirectory}`);
+    APT.Log("APT.Templates.UnrealEngine", `Begin generating project files for ${Project.EntryDirectory}`);
     if (ProjectStructure.IsEngine)
     {
         execSync(
@@ -51,5 +51,5 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
             }
         );
     }
-    console.log(`<APT.Templates.UnrealEngine> Generated project files for ${Project.EntryDirectory} successfully`);
+    APT.Log("APT.Templates.UnrealEngine", `Generated project files for ${Project.EntryDirectory} successfully`);
 }

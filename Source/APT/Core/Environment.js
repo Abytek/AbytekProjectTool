@@ -180,7 +180,7 @@ AMJS.Namespace.F_Environment = class
             return null;
         }
 
-        console.log(`APT.SetupEnvironment(${APT.Common.NiceJSONStringify(BaseDirectories)}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
+        APT.Log("APT", `APT.SetupEnvironment(${APT.Common.NiceJSONStringify(BaseDirectories)}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
 
         this.ApplyCLIInputs(EnvConfig);
 
@@ -278,10 +278,10 @@ AMJS.Namespace.F_Environment = class
 
         if (!fs.existsSync(DependencyDirectoryPath))
         {
-            console.log(`Cloning git repository ${GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
+            APT.Log("APT", `Cloning git repository ${GitDetails.RemoteURL} into ${DependencyDirectoryPath}`);
             const Git = simpleGit();
             await Git.clone(GitDetails.RemoteURL, DependencyDirectoryPath)
-                .then(() => console.log(`✅ Repo cloned to ${DependencyDirectoryPath}`))
+                .then(() => APT.Log("APT", `✅ Repo cloned to ${DependencyDirectoryPath}`))
                 .catch(
                     err => {
                         console.error('❌ Clone failed:', err)
@@ -293,7 +293,7 @@ AMJS.Namespace.F_Environment = class
                 );
         }
         {
-            console.log(`Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
+            APT.Log("APT", `Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
             const Git = simpleGit(DependencyDirectoryPath);
             if ("Commit" in GitDetails)
             {

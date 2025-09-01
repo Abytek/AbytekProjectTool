@@ -22,5 +22,5 @@ AMJS.Namespace.GenerateProjectFiles_UnixMakefiles = function(ProjectStructure)
             stdio: 'inherit' 
         }
     );
-    console.log("Unix Makefiles project files generated successfully");
+    APT.Log("APT.Templates.CMake", "Unix Makefiles project files generated successfully");
 }
