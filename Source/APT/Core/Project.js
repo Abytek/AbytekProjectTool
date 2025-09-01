@@ -144,4 +144,39 @@ AMJS.Namespace.F_Project = class
     {
         return `apt ${this.EntryDirectory.replaceAll("\\", "/")}`;
     }
+
+    PreImport()
+    {
+        console.log(`Pre import project ${this.EntryDirectory}`);
+
+        this.EnvConfig = APT.Core.System.Environment.SetupEnvironment(
+            [ this.EntryDirectory ],
+            APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
+            this.Preset.EnvironmentConfigDirectory
+        ) || {
+            Dependencies: new Object()
+        };
+
+        this.ImportDependencies();
+    }
+    ImportDependencies()
+    {
+        console.log(`Importing dependencies for project ${this.EntryDirectory}`);
+
+        this.Dependencies = new Object();
+        for (let DependencyName in this.EnvConfig.Dependencies)
+        {
+            let Dependency = this.EnvConfig.Dependencies[DependencyName];
+            let ProjectLink = APT.Core.System.ProjectManager.SearchProjectLink(Dependency);
+            if (ProjectLink)
+            {
+                this.Dependencies[DependencyName] = APT.Core.System.ProjectManager.ImportProject(
+                    [], 
+                    ProjectLink.EntryDirectory
+                );
+            }
+        }
+
+        console.log(`Imported dependencies for project ${this.EntryDirectory}:\n`, APT.Common.NiceJSONStringify(Object.keys(this.Dependencies)));
+    }
 };

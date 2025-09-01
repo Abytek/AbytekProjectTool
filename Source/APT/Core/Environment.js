@@ -30,7 +30,7 @@ AMJS.Namespace.F_Environment = class
         let This = this;
         this.SetupEnvironment = (BaseDirectories, EnvName, ConfigDirectoryPath) => 
         {  
-            let Result = false;
+            let Result = null;
             let Done = false;
             This.AsyncSetupEnvironment(BaseDirectories, EnvName, ConfigDirectoryPath)
                 .then(
@@ -177,7 +177,7 @@ AMJS.Namespace.F_Environment = class
         let EnvConfig = this.LoadEnvironmentConfig(BaseDirectories, EnvName, ConfigDirectoryPath);
         if (!EnvConfig)
         {
-            return false;
+            return null;
         }
 
         console.log(`APT.SetupEnvironment(${APT.Common.NiceJSONStringify(BaseDirectories)}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
@@ -186,9 +186,9 @@ AMJS.Namespace.F_Environment = class
 
         if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
         {
-            return false;
+            return null;
         }
-        return true;
+        return EnvConfig;
     }
     ApplyCLIInputs(EnvConfig)
     {

@@ -46,7 +46,7 @@ AMJS.Namespace.F_ProjectManager = class
      */
     CalculateProjectKey(EntryDirectory, InstanceData = new Object())
     {
-        return { EntryDirectory, InstanceData };
+        return APT.Common.NiceJSONStringify({ EntryDirectory, InstanceData });
     }
 
     /**
@@ -99,6 +99,8 @@ AMJS.Namespace.F_ProjectManager = class
 
         // Check for existing project instance
         const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryDirectory, InstanceData);
+        console.log(`Calculated project key for ${AbsoluteProjectEntryDirectory}:`, ProjectKey);
+        console.log(`Previous project maps:`, APT.Common.NiceJSONStringify(this.Projects.keys()));
         if (this.Projects.has(ProjectKey))
         {
             console.log(`Found imported project ${AbsoluteProjectEntryDirectory}`);
@@ -109,18 +111,9 @@ AMJS.Namespace.F_ProjectManager = class
 
         // Create new project instance
         let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions);
+        this.Projects.set(ProjectKey, Project);
 
         let ProjectManager = this;
-
-        let PostImportProject = function()
-        {
-            console.log(`Post import project ${AbsoluteProjectEntryDirectory}`);
-            APT.Core.System.Environment.SetupEnvironment(
-                [ AbsoluteProjectEntryDirectory ],
-                APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
-                Project.Preset.EnvironmentConfigDirectory
-            );
-        };
 
         if (Project.HasEntryFile)
         {
@@ -154,7 +147,7 @@ AMJS.Namespace.F_ProjectManager = class
                             return APT.Core.System.Environment.SetupEnvironment([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
                         }
 
-                        PostImportProject();
+                        Project.PreImport();
                     },
                     IsAnonymous: true
                 }
@@ -162,16 +155,16 @@ AMJS.Namespace.F_ProjectManager = class
 
             if (!ProjectContext)
             {
+                this.Projects.delete(ProjectKey);
                 return false;
             }
         }
         else
         {
-            PostImportProject();
+            Project.PreImport();
         }
 
         // Store and finalize project
-        this.Projects.set(ProjectKey, Project);
         Project.TryFinalize();
         return Project;
     }
