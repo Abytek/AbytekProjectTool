@@ -147,6 +147,6 @@ AMJS.Namespace.F_ProjectAccessor = class
                 stdio: 'inherit' 
             }
         );
-        console.log(`Built ${Project.EntryDirectory} (Config: ${this.Config})`);
+        APT.Log("APT.Templates.AbytekCMake", `Built ${Project.EntryDirectory} (Config: ${this.Config})`);
     }
 }

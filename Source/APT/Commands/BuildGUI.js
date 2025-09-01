@@ -11,14 +11,14 @@ AMJS.Namespace.BuildGUI = function(CommandManager)
         const guiPath = path.join(__dirname, '../../../GUI');
         
         try {
-            console.log('Installing GUI dependencies...');
+            APT.Log("APT", 'Installing GUI dependencies...');
             execSync(`cd "${guiPath}" && npm install`, { stdio: 'inherit' });
-            console.log('Dependencies installed successfully');
+            APT.Log("APT", 'Dependencies installed successfully');
             
             // Build the GUI
-            console.log('Building GUI...');
+            APT.Log("APT", 'Building GUI...');
             execSync(`cd "${guiPath}" && npm run build`, { stdio: 'inherit' });
-            console.log('GUI built successfully');
+            APT.Log("APT", 'GUI built successfully');
         } catch (error) {
             console.error('Error building GUI:', error.message);
             throw error;

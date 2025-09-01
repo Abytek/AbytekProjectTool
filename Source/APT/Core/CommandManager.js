@@ -162,7 +162,7 @@ AMJS.Namespace.F_CommandManager = class
                     LogContent += `[${Key}] ${APT.Common.NiceJSONStringify(Value)}\n`;
                 }
             );	
-            console.log(LogContent);
+            APT.Log("APT", LogContent);
         }
     }
 

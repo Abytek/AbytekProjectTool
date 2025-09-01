@@ -2,7 +2,7 @@ const { execSync, execFile, spawn } = require('child_process');
 
 AMJS.Namespace.BuildEditor = function(ProjectStructure)
 {
-    console.log(`Building Unreal Editor for ${ProjectStructure.MainDirectory}`);
+    APT.Log("APT.Templates.UnrealEngine", `Building Unreal Editor for ${ProjectStructure.MainDirectory}`);
 
     let UnrealBuildToolExecutableFile = ProjectStructure.IsEngine ? ProjectStructure.UnrealBuildToolExecutableFile : ProjectStructure.EngineProject.UnrealBuildToolExecutableFile;
 
@@ -21,11 +21,11 @@ AMJS.Namespace.BuildEditor = function(ProjectStructure)
     }
     OpenEditorArgs.push('-skipcompile');
 
-    console.log(`Unreal Editor was successfully built.`);
+    APT.Log("APT.Templates.UnrealEngine", `Unreal Editor was successfully built.`);
 }
 AMJS.Namespace.OpenEditor = function(ProjectStructure)
 {
-    console.log(`Opening Unreal Editor for ${ProjectStructure.MainDirectory}`);
+    APT.Log("APT.Templates.UnrealEngine", `Opening Unreal Editor for ${ProjectStructure.MainDirectory}`);
     
     let UnrealEditorExecutableFile = ProjectStructure.IsEngine ? ProjectStructure.UnrealEditorExecutableFile : ProjectStructure.EngineProject.UnrealEditorExecutableFile;
 
@@ -56,5 +56,5 @@ AMJS.Namespace.OpenEditor = function(ProjectStructure)
     {
         throw new Error(error);
     }
-    console.log(`Unreal Editor opened in ${ProjectStructure.MainDirectory}`);
+    APT.Log("APT.Templates.UnrealEngine", `Unreal Editor opened in ${ProjectStructure.MainDirectory}`);
 }

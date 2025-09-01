@@ -397,6 +397,15 @@ AMJS.Namespace.GetProjectImportedDirectory = function(EntryDirectory)
 }
 
 /**
+ * Gets the logs directory path
+ * @returns {string} Absolute path to logs directory
+ */
+AMJS.Namespace.GetLogsDirectory = function()
+{
+    return path.join(AMJS.Namespace.GetDataDirectory(), "Logs");
+}
+
+/**
  * Gets the cache directory path
  * @returns {string} Absolute path to cache directory
  */

@@ -17,7 +17,7 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                 execSync('npm list -g serve', { stdio: 'ignore' });
             } catch {
                 // serve is not installed globally, install it
-                console.log('Installing serve package globally...');
+                APT.Log("APT", 'Installing serve package globally...');
                 execSync('npm install -g serve', { stdio: 'inherit' });
             }
 
@@ -32,12 +32,12 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                 const fs = require('fs');
                 const buildPath = path.join(guiPath, 'build');
                 if (!fs.existsSync(buildPath)) {
-                    console.log('Production build not found. Please run "apt :BuildGUI" first.');
+                    APT.Log("APT", 'Production build not found. Please run "apt :BuildGUI" first.');
                     return true;
                 }
                 
                 // Start production server using serve
-                console.log(`Starting production server on port ${port}...`);
+                APT.Log("APT", `Starting production server on port ${port}...`);
                 const serveCmd = process.platform === 'win32' ? 'serve.cmd' : 'serve';
                 server = spawn(serveCmd, ['-s', buildPath, '-l', port], {
                     stdio: 'inherit',
@@ -45,10 +45,10 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                     windowsHide: true
                 });
                 
-                console.log('Starting production server...');
+                APT.Log("APT", 'Starting production server...');
             } else {
                 // Start development server using npm
-                console.log(`Starting development server on port ${port}...`);
+                APT.Log("APT", `Starting development server on port ${port}...`);
                 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
                 server = spawn(npmCmd, ['run', 'dev'], {
                     cwd: guiPath,
@@ -57,14 +57,14 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                     windowsHide: true
                 });
                 
-                console.log('Starting development server...');
+                APT.Log("APT", 'Starting development server...');
             }
             
             APT.Core.System.AutomaticExit = false;
 
             // Handle server cleanup on exit
             process.on('SIGINT', () => {
-                console.log(`Shutting down ${isProduction ? 'production' : 'development'} server...`);
+                APT.Log("APT", `Shutting down ${isProduction ? 'production' : 'development'} server...`);
                 server.kill();
                 process.exit(0);
             });

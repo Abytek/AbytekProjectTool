@@ -22,5 +22,5 @@ AMJS.Namespace.GenerateProjectFiles_Ninja = function(ProjectStructure)
             stdio: 'inherit' 
         }
     );
-    console.log("Ninja project files generated successfully");
+    APT.Log("APT.Templates.CMake", "Ninja project files generated successfully");
 }

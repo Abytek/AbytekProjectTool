@@ -7,7 +7,7 @@ AMJS.Namespace.OpenEditor = function(Project)
 {
     try 
     {
-        console.log(`Opening editor: ${Project.EntryDirectory}`);
+        APT.Log("APT", `Opening editor: ${Project.EntryDirectory}`);
         execSync(`code \"${Project.EntryDirectory}\"`);
     } 
     catch (err) 

@@ -68,7 +68,7 @@ AMJS.Namespace.F_ProjectManager = class
      */
     ImportProject(BaseDirectories, RelativeProjectEntryDirectory, AdditionalOptions = new Object(), Required = true)
     {
-        console.log(`Import project ${RelativeProjectEntryDirectory}`);
+        APT.Log("APT", `Import project ${RelativeProjectEntryDirectory}`);
 
         // Parse additional options and merge instance data
         let ParsedAdditionalOptions = APT.Common.SimpleDeepCopy(this.System.CommandManager.CLIInput.get('ProjectDefault') ?? new Object());
@@ -95,19 +95,19 @@ AMJS.Namespace.F_ProjectManager = class
             return false;
         }
 
-        console.log(`Found project entry directory ${AbsoluteProjectEntryDirectory}`);
+        APT.Log("APT", `Found project entry directory ${AbsoluteProjectEntryDirectory}`);
 
         // Check for existing project instance
         const ProjectKey = this.CalculateProjectKey(AbsoluteProjectEntryDirectory, InstanceData);
-        console.log(`Calculated project key for ${AbsoluteProjectEntryDirectory}:`, ProjectKey);
-        console.log(`Previous project maps:`, APT.Common.NiceJSONStringify(this.Projects.keys()));
+        APT.Log("APT", `Calculated project key for ${AbsoluteProjectEntryDirectory}:`, ProjectKey);
+        APT.Log("APT", `Previous project maps:`, APT.Common.NiceJSONStringify(this.Projects.keys()));
         if (this.Projects.has(ProjectKey))
         {
-            console.log(`Found imported project ${AbsoluteProjectEntryDirectory}`);
+            APT.Log("APT", `Found imported project ${AbsoluteProjectEntryDirectory}`);
             return this.Projects.get(ProjectKey);
         }
 
-        console.log(`Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
+        APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
 
         // Create new project instance
         let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions);
@@ -171,7 +171,7 @@ AMJS.Namespace.F_ProjectManager = class
 
     LoadProjectLinks()
     {
-        console.log(`Load project links`);
+        APT.Log("APT", `Load project links`);
 
         const dirPath = APT.Common.GetProjectLinksDirectory();
 
@@ -188,7 +188,7 @@ AMJS.Namespace.F_ProjectManager = class
                     const content = fs.readFileSync(fullPath, 'utf8');
                     const parsed = JSON.parse(content);
 
-                    console.log(`Check project link for loading:`, APT.Common.NiceJSONStringify(parsed));
+                    APT.Log("APT", `Check project link for loading:`, APT.Common.NiceJSONStringify(parsed));
 
                     const ValidatedResult = ThisProjectManager.ValidateProjectLink(parsed);
                     if (!ValidatedResult.Status)
@@ -259,13 +259,13 @@ AMJS.Namespace.F_ProjectManager = class
     }
     SearchProjectLink(ProjectLink)
     {        
-        console.log(`Search project link:`, ProjectLink);
+        APT.Log("APT", `Search project link:`, ProjectLink);
         let LastProjectLinks = this.LoadProjectLinks();
         for(let LastProjectLink of LastProjectLinks)
         {
             if (this.TryMatchProjectLinks(ProjectLink, LastProjectLink))
             {
-                console.log(`Found last project link:`, LastProjectLink);
+                APT.Log("APT", `Found last project link:`, LastProjectLink);
                 return LastProjectLink;
             }
         }
@@ -339,7 +339,7 @@ AMJS.Namespace.F_ProjectManager = class
     {
         const ProjectLink = this.GenerateProjectLink(ProjectEntryDirectory);
 
-        console.log(`Setup project link:`, ProjectLink);
+        APT.Log("APT", `Setup project link:`, ProjectLink);
 
         let SearchedProjectLink = this.SearchProjectLink(ProjectLink);
         if (!SearchedProjectLink)
@@ -351,7 +351,7 @@ AMJS.Namespace.F_ProjectManager = class
     }
     AddProjectLink(ProjectLink)
     {
-        console.log(`Add project link:`, ProjectLink);
+        APT.Log("APT", `Add project link:`, ProjectLink);
         const ProjectLinksDirectory = APT.Common.GetProjectLinksDirectory();
         const ProjectLinkFile = path.join(APT.Common.GetProjectLinksDirectory(), APT.Common.StringToUUID(ProjectLink.EntryDirectory) + ".json");
         if (!fs.existsSync(ProjectLinksDirectory))
@@ -455,22 +455,22 @@ AMJS.Namespace.F_ProjectManager = class
     }
     SearchActions(EntryDirectory)
     {
-        console.log(`Search actions(${EntryDirectory})`);
+        APT.Log("APT", `Search actions(${EntryDirectory})`);
         const ProjectImportedDirectory = APT.Common.GetProjectImportedDirectory(EntryDirectory);
         const ActionsFile = path.join(ProjectImportedDirectory, "Actions.json");
         if (fs.existsSync(ActionsFile))
         {
-            console.log(`Found actions file(${EntryDirectory}):`, ActionsFile);
+            APT.Log("APT", `Found actions file(${EntryDirectory}):`, ActionsFile);
             const ActionsFileContent = fs.readFileSync(ActionsFile).toString();
-            console.log(`Actions file content:`, ActionsFileContent);
+            APT.Log("APT", `Actions file content:`, ActionsFileContent);
             return JSON.parse(ActionsFileContent);
         }
-        console.log(`Not found actions file(${EntryDirectory}):`, ActionsFile);
+        APT.Log("APT", `Not found actions file(${EntryDirectory}):`, ActionsFile);
         return [ this.GenerateImportAction(EntryDirectory) ];
     }
     SaveActions(EntryDirectory, Actions)
     {
-        console.log(`Save actions(${EntryDirectory}):`, APT.Common.NiceJSONStringify(Actions));
+        APT.Log("APT", `Save actions(${EntryDirectory}):`, APT.Common.NiceJSONStringify(Actions));
         const ValidatedResult = this.ValidateActions(EntryDirectory, Actions);
         if (!ValidatedResult.Status)
         {

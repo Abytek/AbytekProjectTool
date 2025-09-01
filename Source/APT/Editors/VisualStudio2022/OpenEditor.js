@@ -22,7 +22,7 @@ AMJS.Namespace.OpenEditor = function(Project)
                     const slnFiles = files.filter(file => file.endsWith('.sln'));
 
                     if (slnFiles.length === 0) {
-                        console.log('No .sln files found.');
+                        APT.Log("APT", 'No .sln files found.');
                         return;
                     }
 
@@ -40,7 +40,7 @@ AMJS.Namespace.OpenEditor = function(Project)
                     const slnFiles = files.filter(file => file.endsWith('.sln'));
 
                     if (slnFiles.length === 0) {
-                        console.log('No .sln files found.');
+                        APT.Log("APT", 'No .sln files found.');
                         return;
                     }
 
@@ -54,7 +54,7 @@ AMJS.Namespace.OpenEditor = function(Project)
             throw new Error(`Not found solution file`);
         }
 
-        console.log(`Opening editor: ${SolutionFile}`);
+        APT.Log("APT", `Opening editor: ${SolutionFile}`);
         open.default(SolutionFile);
     } 
     catch (err) 
