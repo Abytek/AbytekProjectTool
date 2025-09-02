@@ -496,7 +496,8 @@ AMJS.Namespace.F_ProjectManager = class
             ShouldRefreshPage: true,
             Commands: [
                 `apt ${EntryDirectory.replaceAll("\\", "/")}`
-            ]
+            ],
+            Category: "Base"
         };
     }
     GenerateRefreshAction(EntryDirectory)
@@ -507,7 +508,8 @@ AMJS.Namespace.F_ProjectManager = class
             ShouldRefreshPage: true,
             Commands: [
                 `apt ${EntryDirectory.replaceAll("\\", "/")} :GlobalDefault.ShouldConfigureProjects false`
-            ]
+            ],
+            Category: "Base"
         };
     }
 }

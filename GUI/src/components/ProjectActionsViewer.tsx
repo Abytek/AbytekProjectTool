@@ -310,9 +310,6 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
           </Box>
         ) : (
           <Box sx={{ 
-            display: 'flex', 
-            flexWrap: 'wrap',
-            gap: 1,
             maxHeight: isMaximized ? '25vh' : 'none', 
             overflow: isMaximized ? 'auto' : 'visible',
             ...(isMaximized && {
@@ -331,97 +328,263 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
               },
             })
           }}>
-          {actions.map((action) => {
-            const isExecuting = executingActions.has(action.Name);
-            
-            return (
-              <Box key={action.Name} sx={{ position: 'relative', display: 'inline-block' }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => executeAction(action)}
-                  disabled={isExecuting}
-                  startIcon={isExecuting ? <CircularProgress size={16} /> : <PlayArrowIcon />}
-                  endIcon={
-                    <Tooltip 
-                      title={
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+            {(() => {
+              // Group actions by category
+              const categorizedActions = actions.reduce((acc, action) => {
+                const category = action.Category || 'General';
+                if (!acc[category]) {
+                  acc[category] = [];
+                }
+                acc[category].push(action);
+                return acc;
+              }, {} as Record<string, ProjectAction[]>);
+
+              const categories = Object.keys(categorizedActions);
+              
+              // If only one category and it's "General", show actions directly without accordion
+              if (categories.length === 1 && categories[0] === 'General') {
+                return (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexWrap: 'wrap',
+                    gap: 1
+                  }}>
+                    {categorizedActions.General.map((action) => {
+                      const isExecuting = executingActions.has(action.Name);
+                      
+                      return (
+                        <Box key={action.Name} sx={{ position: 'relative', display: 'inline-block' }}>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={() => executeAction(action)}
+                            disabled={isExecuting}
+                            startIcon={isExecuting ? <CircularProgress size={16} /> : <PlayArrowIcon />}
+                            endIcon={
+                              <Tooltip 
+                                title={
+                                  <Box>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                      {action.Name}
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                      {action.Description}
+                                    </Typography>
+                                    <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                                    <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                                      Commands:
+                                    </Typography>
+                                    {action.Commands.map((command, idx) => (
+                                      <Typography 
+                                        key={idx}
+                                        variant="caption" 
+                                        sx={{ 
+                                          fontFamily: 'monospace',
+                                          display: 'block',
+                                          backgroundColor: 'rgba(0,0,0,0.2)',
+                                          px: 0.5,
+                                          py: 0.25,
+                                          borderRadius: 0.5,
+                                          mb: 0.25,
+                                          fontSize: '0.7rem'
+                                        }}
+                                      >
+                                        $ {command}
+                                      </Typography>
+                                    ))}
+                                    {action.ShouldRefreshPage && (
+                                      <>
+                                        <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                                        <Typography variant="caption" sx={{ 
+                                          color: '#ffa726', 
+                                          fontWeight: 600, 
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          gap: 0.5
+                                        }}>
+                                          🔄 This action will refresh the page when completed
+                                        </Typography>
+                                      </>
+                                    )}
+                                  </Box>
+                                }
+                                placement="top"
+                                arrow
+                                enterDelay={500}
+                              >
+                                <InfoIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                              </Tooltip>
+                            }
+                            sx={{ 
+                              textTransform: 'none',
+                              minWidth: 'auto',
+                              borderRadius: 2,
+                              px: 2,
+                              py: 0.5,
+                              '& .MuiButton-endIcon': {
+                                ml: 1,
+                                mr: 0
+                              },
+                              ...(action.ShouldRefreshPage && {
+                                borderColor: '#ffa726',
+                                backgroundColor: 'rgba(255, 167, 38, 0.1)',
+                                '&:hover': {
+                                  borderColor: '#ff9800',
+                                  backgroundColor: 'rgba(255, 152, 0, 0.15)'
+                                }
+                              })
+                            }}
+                          >
                             {action.Name}
-                          </Typography>
-                          <Typography variant="body2" sx={{ mb: 1 }}>
-                            {action.Description}
-                          </Typography>
-                          <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
-                          <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
-                            Commands:
-                          </Typography>
-                          {action.Commands.map((command, idx) => (
-                            <Typography 
-                              key={idx}
-                              variant="caption" 
-                              sx={{ 
-                                fontFamily: 'monospace',
-                                display: 'block',
-                                backgroundColor: 'rgba(0,0,0,0.2)',
-                                px: 0.5,
-                                py: 0.25,
-                                borderRadius: 0.5,
-                                mb: 0.25,
-                                fontSize: '0.7rem'
-                              }}
-                            >
-                              $ {command}
-                            </Typography>
-                          ))}
-                          {action.ShouldRefreshPage && (
-                            <>
-                              <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
-                              <Typography variant="caption" sx={{ 
-                                color: '#ffa726', 
-                                fontWeight: 600, 
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.5
-                              }}>
-                                🔄 This action will refresh the page when completed
-                              </Typography>
-                            </>
-                          )}
+                          </Button>
                         </Box>
-                      }
-                      placement="top"
-                      arrow
-                      enterDelay={500}
+                      );
+                    })}
+                  </Box>
+                );
+              }
+
+              // Multiple categories or named categories - use accordions
+              return (
+                <Box sx={{ mb: 2 }}>
+                  {categories.sort().map((category) => (
+                    <Accordion 
+                      key={category} 
+                      defaultExpanded={true}
+                      sx={{ 
+                        mb: 1,
+                        backgroundColor: isMaximized ? '#1a1a1a' : 'background.paper',
+                        color: isMaximized ? '#fff' : 'inherit',
+                        '&:before': {
+                          display: 'none', // Remove default MUI divider
+                        }
+                      }}
                     >
-                      <InfoIcon sx={{ fontSize: 16, color: 'primary.main' }} />
-                    </Tooltip>
-                  }
-                  sx={{ 
-                    textTransform: 'none',
-                    minWidth: 'auto',
-                    borderRadius: 2,
-                    px: 2,
-                    py: 0.5,
-                    '& .MuiButton-endIcon': {
-                      ml: 1,
-                      mr: 0
-                    },
-                    ...(action.ShouldRefreshPage && {
-                      borderColor: '#ffa726',
-                      backgroundColor: 'rgba(255, 167, 38, 0.1)',
-                      '&:hover': {
-                        borderColor: '#ff9800',
-                        backgroundColor: 'rgba(255, 152, 0, 0.15)'
-                      }
-                    })
-                  }}
-                >
-                  {action.Name}
-                </Button>
-              </Box>
-            );
-          })}
+                      <AccordionSummary 
+                        expandIcon={<ExpandMoreIcon sx={{ color: isMaximized ? '#fff' : 'inherit' }} />}
+                        sx={{
+                          '& .MuiAccordionSummary-content': {
+                            alignItems: 'center',
+                            gap: 1
+                          }
+                        }}
+                      >
+                        <CodeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          {category}
+                        </Typography>
+                        <Chip 
+                          label={categorizedActions[category].length}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                          sx={{ ml: 1 }}
+                        />
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexWrap: 'wrap',
+                          gap: 1
+                        }}>
+                          {categorizedActions[category].map((action) => {
+                            const isExecuting = executingActions.has(action.Name);
+                            
+                            return (
+                              <Box key={action.Name} sx={{ position: 'relative', display: 'inline-block' }}>
+                                <Button
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() => executeAction(action)}
+                                  disabled={isExecuting}
+                                  startIcon={isExecuting ? <CircularProgress size={16} /> : <PlayArrowIcon />}
+                                  endIcon={
+                                    <Tooltip 
+                                      title={
+                                        <Box>
+                                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                                            {action.Name}
+                                          </Typography>
+                                          <Typography variant="body2" sx={{ mb: 1 }}>
+                                            {action.Description}
+                                          </Typography>
+                                          <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                                          <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
+                                            Commands:
+                                          </Typography>
+                                          {action.Commands.map((command, idx) => (
+                                            <Typography 
+                                              key={idx}
+                                              variant="caption" 
+                                              sx={{ 
+                                                fontFamily: 'monospace',
+                                                display: 'block',
+                                                backgroundColor: 'rgba(0,0,0,0.2)',
+                                                px: 0.5,
+                                                py: 0.25,
+                                                borderRadius: 0.5,
+                                                mb: 0.25,
+                                                fontSize: '0.7rem'
+                                              }}
+                                            >
+                                              $ {command}
+                                            </Typography>
+                                          ))}
+                                          {action.ShouldRefreshPage && (
+                                            <>
+                                              <Divider sx={{ my: 1, backgroundColor: 'rgba(255,255,255,0.3)' }} />
+                                              <Typography variant="caption" sx={{ 
+                                                color: '#ffa726', 
+                                                fontWeight: 600, 
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 0.5
+                                              }}>
+                                                🔄 This action will refresh the page when completed
+                                              </Typography>
+                                            </>
+                                          )}
+                                        </Box>
+                                      }
+                                      placement="top"
+                                      arrow
+                                      enterDelay={500}
+                                    >
+                                      <InfoIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                                    </Tooltip>
+                                  }
+                                  sx={{ 
+                                    textTransform: 'none',
+                                    minWidth: 'auto',
+                                    borderRadius: 2,
+                                    px: 2,
+                                    py: 0.5,
+                                    '& .MuiButton-endIcon': {
+                                      ml: 1,
+                                      mr: 0
+                                    },
+                                    ...(action.ShouldRefreshPage && {
+                                      borderColor: '#ffa726',
+                                      backgroundColor: 'rgba(255, 167, 38, 0.1)',
+                                      '&:hover': {
+                                        borderColor: '#ff9800',
+                                        backgroundColor: 'rgba(255, 152, 0, 0.15)'
+                                      }
+                                    })
+                                  }}
+                                >
+                                  {action.Name}
+                                </Button>
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
+                </Box>
+              );
+            })()}
           </Box>
         )}
       </Box>

@@ -120,6 +120,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 {
                     Name: "Setup Engine",
                     Description: "Setup engine",
+                    Category: "[Unreal Engine] Build & Setup",
                     Commands: [
                         `${this.Project.GenerateAPTCommandOnThis()} `
                         + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine true `
@@ -132,6 +133,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             {
                 Name: "Generate Project Files",
                 Description: "Generate project files",
+                Category: "[Unreal Engine] Build & Setup",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
@@ -143,6 +145,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             {
                 Name: "Build Editor",
                 Description: "Build editor",
+                Category: "[Unreal Engine] Build & Setup",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
@@ -154,8 +157,9 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
-                Name: "Open Editor",
-                Description: "Open editor",
+                Name: "Open Unreal Editor",
+                Description: "Open Unreal Editor",
+                Category: "[Unreal Engine] Editors",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticSetupEngine false `
@@ -169,6 +173,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             {
                 Name: "Open Visual Studio 2022",
                 Description: "Open Visual Studio 2022",
+                Category: "[Unreal Engine] Editors",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:OpenEditor `
@@ -181,6 +186,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             {
                 Name: "Open Visual Studio Code",
                 Description: "Open Visual Studio Code",
+                Category: "[Unreal Engine] Editors",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
                     + `:OpenEditor `

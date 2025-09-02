@@ -77,6 +77,7 @@ export interface ProjectAction {
     Description: string;
     Commands: string[];
     ShouldRefreshPage?: boolean;
+    Category?: string;
 }
 
 export interface APTService {

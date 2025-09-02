@@ -130,6 +130,30 @@ AMJS.Namespace.F_Project = class
                     Value.GenerateActions(Actions);
                 }
             );
+            if ("GitDetails" in this.ProjectLink)
+            {
+                const GitDetails = this.ProjectLink.GitDetails;
+                Actions.push(
+                    {
+                        Name: "Reset to remote",
+                        Description: "Reset to remote",
+                        Commands: [
+                            `git reset --hard origin`
+                        ],
+                        Category: "Git"
+                    }
+                );
+                Actions.push(
+                    {
+                        Name: "Discard changes",
+                        Description: "Discard changes",
+                        Commands: [
+                            `git clean -fdx`
+                        ],
+                        Category: "Git"
+                    }
+                );
+            }
             APT.Core.System.ProjectManager.SaveActions(this.EntryDirectory, Actions);
         }
         this.Components.forEach(
