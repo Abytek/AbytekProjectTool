@@ -292,21 +292,21 @@ AMJS.Namespace.F_Environment = class
                     }
                 );
         }
-        {
-            APT.Log("APT", `Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
-            const Git = simpleGit(DependencyDirectoryPath);
-            if ("Commit" in GitDetails)
-            {
-                const Commit = GitDetails.Commit;
-                await Git.reset(['--hard', `${Commit}`]);
-            }
-            else
-            if ("Branch" in GitDetails)
-            {
-                const Branch = GitDetails.Branch;
-                await Git.reset(['--hard', `origin/${Branch}`]);
-            }
-        }
+        // {
+        //     APT.Log("APT", `Updating git repository ${GitDetails.RemoteURL} at ${DependencyDirectoryPath}`);
+        //     const Git = simpleGit(DependencyDirectoryPath);
+        //     if ("Commit" in GitDetails)
+        //     {
+        //         const Commit = GitDetails.Commit;
+        //         await Git.reset(['--hard', `${Commit}`]);
+        //     }
+        //     else
+        //     if ("Branch" in GitDetails)
+        //     {
+        //         const Branch = GitDetails.Branch;
+        //         await Git.reset(['--hard', `origin/${Branch}`]);
+        //     }
+        // }
         return DependencyDirectoryPath;
     }
     ImportDependentProject(EntryDirectory, DependencyName, Dependency)
