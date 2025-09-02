@@ -118,7 +118,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             Actions.push(
                 {
-                    Name: "SetupEngine",
+                    Name: "Setup Engine",
                     Description: "Setup engine",
                     Commands: [
                         `${this.Project.GenerateAPTCommandOnThis()} `
@@ -130,7 +130,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         }
         Actions.push(
             {
-                Name: "GenerateProjectFiles",
+                Name: "Generate Project Files",
                 Description: "Generate project files",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
@@ -141,7 +141,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
-                Name: "BuildEditor",
+                Name: "Build Editor",
                 Description: "Build editor",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
@@ -154,7 +154,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
-                Name: "OpenEditor",
+                Name: "Open Editor",
                 Description: "Open editor",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
@@ -162,6 +162,30 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor true `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor true `
+                ]
+            }
+        );
+        Actions.push(
+            {
+                Name: "Open Visual Studio 2022",
+                Description: "Open Visual Studio 2022",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:OpenEditor `
+                    + `:GlobalDefault.Editor VisualStudio2022 `
+                    + `:GlobalDefault.ShouldConfigureProjects false `
+                ]
+            }
+        );
+        Actions.push(
+            {
+                Name: "Open Visual Studio Code",
+                Description: "Open Visual Studio Code",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:OpenEditor `
+                    + `:GlobalDefault.Editor VisualStudioCode `
+                    + `:GlobalDefault.ShouldConfigureProjects false `
                 ]
             }
         );

@@ -428,6 +428,9 @@ AMJS.Namespace.F_ProjectManager = class
                     ShouldRefreshPage: {
                         type: "boolean"
                     },
+                    Category: {
+                        type: "string"
+                    },
                     Commands: {
                         type: "array",
                         items: {

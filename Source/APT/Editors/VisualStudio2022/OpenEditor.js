@@ -2,7 +2,7 @@
 AMJS.Import("../../Templates/CMake/ProjectComponents/ProjectStructure");
 AMJS.Import("../../Templates/UnrealEngine/ProjectComponents/ProjectStructure");
 
-const open = require("open");
+const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
@@ -11,22 +11,29 @@ AMJS.Namespace.OpenEditor = function(Project)
     try 
     {
         let SolutionFile = null;
-        {
+        (() => {
+            let FindSolutionFile = function(Directory)
+            {
+                const files = fs.readdirSync(Directory);
+                const slnFiles = files.filter(file => file.endsWith('.sln'));
+                if (slnFiles.length === 0) 
+                {
+                    return false;
+                }
+                SolutionFile = path.join(Directory, slnFiles[0]);
+                return true;
+            }
+
             {
                 let ProjectStructure = Project.FindComponent(
                     APT.Templates.CMake.ProjectComponents.F_ProjectStructure
                 );
                 if (ProjectStructure)
                 {
-                    const files = fs.readdirSync(ProjectStructure.BuildDirectory);
-                    const slnFiles = files.filter(file => file.endsWith('.sln'));
-
-                    if (slnFiles.length === 0) {
-                        APT.Log("APT", 'No .sln files found.');
+                    if (FindSolutionFile(ProjectStructure.BuildDirectory))
+                    {
                         return;
                     }
-
-                   SolutionFile = path.join(ProjectStructure.SourceDirectory, slnFiles[0]);
                 }
             }
 
@@ -36,18 +43,18 @@ AMJS.Namespace.OpenEditor = function(Project)
                 );
                 if (ProjectStructure)
                 {
-                    const files = fs.readdirSync(ProjectStructure.MainDirectory);
-                    const slnFiles = files.filter(file => file.endsWith('.sln'));
-
-                    if (slnFiles.length === 0) {
-                        APT.Log("APT", 'No .sln files found.');
+                    if (FindSolutionFile(ProjectStructure.MainDirectory))
+                    {
                         return;
                     }
-
-                   SolutionFile = path.join(ProjectStructure.MainDirectory, slnFiles[0]);
                 }
             }
-        }
+
+            if (FindSolutionFile(Project.EntryDirectory))
+            {
+                return;
+            }
+        })();
          
         if (!SolutionFile)
         {
@@ -55,7 +62,13 @@ AMJS.Namespace.OpenEditor = function(Project)
         }
 
         APT.Log("APT", `Opening editor: ${SolutionFile}`);
-        open.default(SolutionFile);
+        const child = spawn(`start`, [ SolutionFile ], {
+            detached: true,
+            stdio: 'ignore',
+            env: { ...process.env },
+            shell: true // Use shell to execute commands
+        });
+        child.unref();          
     } 
     catch (err) 
     {
