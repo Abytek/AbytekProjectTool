@@ -31,8 +31,7 @@ System.Start();
 // Helper function to get environment config directory
 const getEnvironmentConfigDir = (projectDirectoryPath) => {
     const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-    const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
-    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(projectFilePath);
+    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(absoluteDirectoryPath);
     console.log(projectPreset);
     return path.join(absoluteDirectoryPath, projectPreset.EnvironmentConfigDirectory);
 };

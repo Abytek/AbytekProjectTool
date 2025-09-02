@@ -393,6 +393,7 @@ AMJS.Namespace.F_ProjectManager = class
     }
     GenerateProjectPreset(ProjectEntryDirectory)
     {
+        APT.Log("APT", `Generating/finding project preset for ${ProjectEntryDirectory}`);
         const PresetFile = path.join(ProjectEntryDirectory, "APTPreset.json");
         let Result = {
             EnvironmentConfigDirectory: "Config/Environment",
@@ -407,6 +408,11 @@ AMJS.Namespace.F_ProjectManager = class
                 return null;
             }
             Result = APT.Common.MergeData(Result, Preset);
+            APT.Log("APT", `Found project preset for ${ProjectEntryDirectory}:`, APT.Common.NiceJSONStringify(Result));
+        }
+        else
+        {
+            APT.Log("APT", `Generated project preset for ${ProjectEntryDirectory}:`, APT.Common.NiceJSONStringify(Result));
         }
         return Result;
     }

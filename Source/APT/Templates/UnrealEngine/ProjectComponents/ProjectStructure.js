@@ -143,8 +143,8 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
-                Name: "Build Editor",
-                Description: "Build editor",
+                Name: "Build Unreal Editor",
+                Description: "Build Unreal Editor",
                 Category: "[Unreal Engine] Build & Setup",
                 Commands: [
                     `${this.Project.GenerateAPTCommandOnThis()} `
