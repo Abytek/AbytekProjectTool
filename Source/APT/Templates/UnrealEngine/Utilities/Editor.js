@@ -4,7 +4,13 @@ AMJS.Namespace.BuildEditor = function(ProjectStructure)
 {
     APT.Log("APT.Templates.UnrealEngine", `Building Unreal Editor for ${ProjectStructure.MainDirectory}`);
 
-    let UnrealBuildToolExecutableFile = ProjectStructure.IsEngine ? ProjectStructure.UnrealBuildToolExecutableFile : ProjectStructure.EngineProject.UnrealBuildToolExecutableFile;
+    let UnrealBuildToolExecutableFile = (
+        ProjectStructure.IsEngine 
+        ? ProjectStructure.UnrealBuildToolExecutableFile 
+        : ProjectStructure.EngineProject.GetComponent(
+            APT.Templates.UnrealEngine.ProjectComponents.F_ProjectStructure
+        ).UnrealBuildToolExecutableFile
+    );
 
     execSync(
         `${UnrealBuildToolExecutableFile} UnrealEditor Win64 ${ProjectStructure.Config}`, 
@@ -27,8 +33,14 @@ AMJS.Namespace.OpenEditor = function(ProjectStructure)
 {
     APT.Log("APT.Templates.UnrealEngine", `Opening Unreal Editor for ${ProjectStructure.MainDirectory}`);
     
-    let UnrealEditorExecutableFile = ProjectStructure.IsEngine ? ProjectStructure.UnrealEditorExecutableFile : ProjectStructure.EngineProject.UnrealEditorExecutableFile;
-
+    let UnrealEditorExecutableFile = (
+        ProjectStructure.IsEngine 
+        ? ProjectStructure.UnrealEditorExecutableFile 
+        : ProjectStructure.EngineProject.GetComponent(
+            APT.Templates.UnrealEngine.ProjectComponents.F_ProjectStructure
+        ).UnrealEditorExecutableFile
+    );
+    
     let OpenEditorArgs = [];
     if (!ProjectStructure.IsEngine)
     {

@@ -306,6 +306,43 @@ AMJS.Namespace.FindPropertyByPath = function(InObject, Key)
     return Subobject[LastKeyPart];
 }
 
+AMJS.Namespace.FindPropertyByPathThenReset = function(InObject, Key)
+{
+    let KeyParts = Key.split(".");
+    let ParsedKeyParts = [];
+    for(let KeyPart of KeyParts)
+    {
+        if (KeyPart != "")
+        {
+            ParsedKeyParts.push(KeyPart);
+        }
+    }
+
+    let NumKeyParts = ParsedKeyParts.length;
+    let Subobject = InObject;
+    if (!(NumKeyParts > 0))
+    {
+        return null;
+    }
+    for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
+    {
+        let KeyPart = ParsedKeyParts[Idx];
+        if (!(KeyPart in Subobject))
+        {
+            return null;
+        }
+        Subobject = Subobject[KeyPart];
+    }
+    let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
+    if (!(LastKeyPart in Subobject))
+    {
+        return null;
+    }
+    let FinalResult = Subobject[LastKeyPart];
+    Subobject[LastKeyPart] = null;
+    return FinalResult;
+}
+
 /**
  * Converts a value to a string, with special handling for arrays
  * @param {*} Value - Value to convert

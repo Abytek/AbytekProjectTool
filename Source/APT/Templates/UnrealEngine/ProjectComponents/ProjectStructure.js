@@ -56,18 +56,41 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             ) ?? APT.Templates.UnrealEngine.Utilities.Configs.DEFAULT
         );
 
-        this.BuildEditor = APT.Common.ForwardBool(
-            APT.Common.FindPropertyByPath(
-                this.Project.AdditionalOptions,
-                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor"
-            ) ?? false
+        let ThisComponent = this;
+        let CheckIfProjectEntryDirectoryForCasting = function(PropertyPath)
+        {
+            let ProjectEntryDirectoryForCasting = APT.Common.ForwardString(
+                APT.Common.FindPropertyByPath(
+                    ThisComponent.Project.AdditionalOptions,
+                    PropertyPath
+                ) ?? ""
+            );
+            return path.normalize(ProjectEntryDirectoryForCasting) == path.normalize(ThisComponent.Project.EntryDirectory);
+        }
+
+        this.BuildEditor = (
+            CheckIfProjectEntryDirectoryForCasting(
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.ProjectEntryDirectoryForBuildingEditor"
+            )
+            && APT.Common.ForwardBool(
+                APT.Common.FindPropertyByPath(
+                    this.Project.AdditionalOptions,
+                    "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor"
+                ) ?? false
+            )
         );
-        this.OpenEditor = APT.Common.ForwardBool(
-            APT.Common.FindPropertyByPath(
-                this.Project.AdditionalOptions,
-                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor"
-            ) ?? false
+        this.OpenEditor = (
+            CheckIfProjectEntryDirectoryForCasting(
+                "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.ProjectEntryDirectoryForOpeningEditor"
+            )
+            && APT.Common.ForwardBool(
+                APT.Common.FindPropertyByPath(
+                    this.Project.AdditionalOptions,
+                    "APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor"
+                ) ?? false
+            )
         );
+
 
         if (this.IsEngine)
         {
@@ -164,6 +187,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor true `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor false `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.ProjectEntryDirectoryForBuildingEditor "${this.Project.EntryDirectory}" `
                 ]
             }
         );
@@ -178,6 +202,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.AutomaticGenerateProjectFiles false `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.BuildEditor true `
                     + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.OpenEditor true `
+                    + `:ProjectDefault.APT.Templates.UnrealEngine.ProjectComponents.ProjectStructure.ProjectEntryDirectoryForOpeningEditor "${this.Project.EntryDirectory}" `
                 ]
             }
         );
