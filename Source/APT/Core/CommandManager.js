@@ -34,6 +34,7 @@ AMJS.Namespace.F_CommandManager = class
         this.Commands = [
             APT.Commands.CleanCache,
             APT.Commands.CleanData,
+            APT.Commands.OpenExplorer,
             APT.Commands.OpenEditor,
             APT.Commands.LogCache,
             APT.Commands.ImportMainProject,

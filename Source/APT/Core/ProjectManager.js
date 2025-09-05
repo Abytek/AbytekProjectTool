@@ -518,4 +518,16 @@ AMJS.Namespace.F_ProjectManager = class
             Category: "Base"
         };
     }
+    GenerateOpenExplorerAction(EntryDirectory)
+    {
+        return {
+            Name: "Open Explorer",
+            Description: "Open the project in explorer",
+            ShouldRefreshPage: false,
+            Commands: [
+                `apt ${EntryDirectory.replaceAll("\\", "/")} :OpenExplorer`
+            ],
+            Category: "Base"
+        };
+    }
 }

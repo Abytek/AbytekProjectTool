@@ -9,3 +9,4 @@ AMJS.Import("./OpenEditor");
 AMJS.Import("./Help");
 AMJS.Import("./BuildGUI");
 AMJS.Import("./OpenGUI");
+AMJS.Import("./OpenExplorer");

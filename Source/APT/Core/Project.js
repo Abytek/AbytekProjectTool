@@ -98,7 +98,8 @@ AMJS.Namespace.F_Project = class
     {
         return [
             APT.Core.System.ProjectManager.GenerateImportAction(this.EntryDirectory),
-            APT.Core.System.ProjectManager.GenerateRefreshAction(this.EntryDirectory)
+            APT.Core.System.ProjectManager.GenerateRefreshAction(this.EntryDirectory),
+            APT.Core.System.ProjectManager.GenerateOpenExplorerAction(this.EntryDirectory)
         ];
     }
 
