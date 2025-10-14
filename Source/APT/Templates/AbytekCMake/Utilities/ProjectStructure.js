@@ -1,5 +1,6 @@
 
 const path = require("path");
+const fs = require("fs");
 
 AMJS.Namespace.AProjectTypes =
 {
@@ -34,4 +35,55 @@ AMJS.Namespace.CalculateBuildDirectory = function(Options)
     const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectEntryDirectory);
 
     return path.join(TopmostBuildDirectory, AProjectType, PlatformTags.sort().join("."), Generator, Config);
+}
+
+AMJS.Namespace.ShouldGenerateCMakeLists = function(ProjectStructure)
+{
+    const ProjectEntryDirectory = ProjectStructure.Project.EntryDirectory;
+    const AbytekCMakeFilePath = path.join(ProjectEntryDirectory, "AbytekCMake.txt");
+    return fs.existsSync(AbytekCMakeFilePath);
+}
+AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
+{
+    const ProjectEntryDirectory = ProjectStructure.Project.EntryDirectory;
+    const PlatformTags = ProjectStructure.Project.PlatformTags;
+    const AProjectType = ProjectStructure.Project.AProjectType;
+    const Config = ProjectStructure.Project.Config;
+    const Generator = ProjectStructure.Project.Generator;
+
+    const EngineProject = AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject;
+    const EngineEntryDirectory = EngineProject.EntryDirectory.replaceAll("\\", "/");
+    const EngineCMakeProjectStructure = EngineProject.EnsureComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
+    const EngineProjectBuildDirectory = EngineCMakeProjectStructure.BuildDirectory.replaceAll("\\", "/");
+
+    const ParsedProjectName = ProjectStructure.Project.Name.replaceAll("\\", "/").replaceAll("/", ".").replaceAll(":", "");
+
+    const AbytekCMakeFilePath = path.join(ProjectEntryDirectory, "AbytekCMake.txt");
+    const AbytekCMakeContent = fs.readFileSync(AbytekCMakeFilePath).toString();
+
+    const CMakeListsPath = path.join(ProjectEntryDirectory, "CMakeLists.txt");
+    const CMakeListsContent = `
+        cmake_minimum_required(VERSION 3.14)
+
+        if(APPLE)
+            project("${ParsedProjectName}" LANGUAGES C CXX OBJC OBJCXX)
+        else()
+            project("${ParsedProjectName}" LANGUAGES C CXX)
+        endif()
+
+        add_subdirectory("${EngineEntryDirectory}" "${EngineProjectBuildDirectory}")
+
+        include(Abytek/Utilities/SetGlobal)
+        include(Abytek/Utilities/SetupModules)
+
+        include(Abytek/SetupIDE)
+        include(Abytek/SetupCompiler)
+        include(Abytek/SetupDependencies)
+
+        Abytek_SetGlobal(CMAKE_MODULE_PATH "${"${CMAKE_MODULE_PATH}"};${"${CMAKE_CURRENT_LIST_DIR}"}/CMake")
+
+        ${AbytekCMakeContent}
+    `;
+
+    fs.writeFileSync(CMakeListsPath, CMakeListsContent);
 }

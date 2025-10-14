@@ -52,4 +52,11 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             APT.Templates.CMake.Utilities.GetDefaultDirectConfig()
         );
     }
+    Init()
+    {
+        if (APT.Templates.AbytekCMake.Utilities.ShouldGenerateCMakeLists(this))
+        {
+            APT.Templates.AbytekCMake.Utilities.GenerateCMakeLists(this);
+        }
+    }
 }
