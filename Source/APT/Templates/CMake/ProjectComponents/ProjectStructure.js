@@ -68,9 +68,13 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
     }
     Start()
     {
-        if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
+        let CommonProjectStruccture = this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure);
+        if (APT.Templates.CMake.Utilities.SupportAutoCMakeConfiguration(CommonProjectStruccture.PlatformTags))
         {
-            APT.Templates.CMake.Utilities.GenerateProjectFiles(this);
+            if (CommonProjectStruccture.ShouldConfigureProject)
+            {
+                APT.Templates.CMake.Utilities.GenerateProjectFiles(this);
+            }
         }
     }
 }

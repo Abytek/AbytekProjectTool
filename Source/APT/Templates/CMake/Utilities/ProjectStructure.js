@@ -118,3 +118,12 @@ AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator
 {
     return AMJS.Namespace.CalculateCMakeParentBuildDirectory(BuildDirectory, Generator);
 }
+
+AMJS.Namespace.SupportAutoCMakeConfiguration = function(PlatformTags)
+{
+    if (PlatformTags.includes(APT.Common.PlatformTags.WINDOWS))
+    {
+        return true;
+    }
+    return false;
+}
