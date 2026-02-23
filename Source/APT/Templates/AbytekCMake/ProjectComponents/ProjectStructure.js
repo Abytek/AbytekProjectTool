@@ -59,4 +59,21 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             APT.Templates.AbytekCMake.Utilities.GenerateCMakeLists(this);
         }
     }
+    
+    GenerateActions(Actions)
+    {
+        Actions.push(
+            {
+                Name: "Open Visual Studio 2022",
+                Description: "Open Visual Studio 2022",
+                Category: "Abytek",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:OpenEditor `
+                    + `:GlobalDefault.Editor VisualStudio2022 `
+                    + `:GlobalDefault.ShouldConfigureProjects false `
+                ]
+            }
+        );
+    }
 }
