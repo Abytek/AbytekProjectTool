@@ -104,6 +104,10 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
 AMJS.Namespace.GenerateEnginePathFile = function(ProjectStructure)
 {
     const CMakeProjectStructure = ProjectStructure.Project.EnsureComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
+    if (!fs.existsSync(CMakeProjectStructure.BuildDirectory))
+    {
+        fs.mkdirSync(CMakeProjectStructure.BuildDirectory, { recursive: true });
+    }
     const EnginePathFilePath = path.join(CMakeProjectStructure.BuildDirectory, "AbytekEnginePath.txt");
     fs.writeFileSync(EnginePathFilePath, AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject.EntryDirectory);
 }
