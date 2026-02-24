@@ -474,14 +474,14 @@ app.post('/api/execute-command', (req, res) => {
     };
 
     try {
-        // Build the full command with specific prefixes: apt:, node:, python:, native (no prefix)
+        // Build the full command with specific prefixes: abytekpt:, node:, python:, native (no prefix)
         switch (commandType) {
-            case 'apt':
+            case 'abytekpt':
                 if (command.trim()) {
-                    fullCommand = `apt ${command}`;
+                    fullCommand = `abytekpt ${command}`;
                 } else {
                     // Empty APT command - run help
-                    fullCommand = 'apt';
+                    fullCommand = 'abytekpt';
                 }
                 break;
             
@@ -574,14 +574,14 @@ io.on('connection', (socket) => {
     };
 
     try {
-      // Build the full command string with specific prefixes: apt:, node:, python:, native (no prefix)
+      // Build the full command string with specific prefixes: abytekpt:, node:, python:, native (no prefix)
       switch (commandType) {
-        case 'apt':
+        case 'abytekpt':
           if (command.trim()) {
-            fullCommandString = `apt ${command.trim()}`;
+            fullCommandString = `abytekpt ${command.trim()}`;
           } else {
             // Empty APT command - run help
-            fullCommandString = 'apt';
+            fullCommandString = 'abytekpt';
           }
           break;
         

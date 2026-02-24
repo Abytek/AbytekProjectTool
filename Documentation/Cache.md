@@ -17,13 +17,13 @@ APT provides two CLI commands for managing the cache:
 
 1. **View Cache Contents**
    ```bash
-   apt <ProjectEntryDirectory> :LogCache
+   abytekpt <ProjectEntryDirectory> :LogCache
    ```
    Displays all current cache entries and their values.
 
 2. **Clean Cache**
    ```bash
-   apt <ProjectEntryDirectory> :CleanCache
+   abytekpt <ProjectEntryDirectory> :CleanCache
    ```
    Removes all cache entries by deleting the cache directory.
 

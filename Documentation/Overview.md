@@ -26,10 +26,10 @@ AbytekProjectTool (APT) is a modular project management and build system built o
 2. **Basic Usage**:
    ```bash
    # Get help
-   apt
+   abytekpt
 
    # Import a project (for specific example, you can import the HelloAPT sample project below)
-   apt <ProjectEntryDirectory>
+   abytekpt <ProjectEntryDirectory>
    ```
 
 ## Common Project Structure
@@ -62,7 +62,7 @@ Demonstrates:
 
 How to import:   
 ```bash
-apt ./Samples/HelloAPT/HelloAPT/APTProject.js
+abytekpt ./Samples/HelloAPT/HelloAPT/APTProject.js
 ```
 
 ### AbytekCMake
@@ -76,7 +76,7 @@ Demonstrates:
 
 How to import:   
 ```bash
-apt Samples/AbytekCMake/APTProject.js
+abytekpt Samples/AbytekCMake/APTProject.js
 ```
 
 ## Further Reading

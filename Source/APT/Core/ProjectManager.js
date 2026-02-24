@@ -535,7 +535,7 @@ AMJS.Namespace.F_ProjectManager = class
             Description: "Import the project",
             ShouldRefreshPage: true,
             Commands: [
-                `apt ${EntryDirectory.replaceAll("\\", "/")}`
+                `abytekpt ${EntryDirectory.replaceAll("\\", "/")}`
             ],
             Category: "Base"
         };
@@ -547,7 +547,7 @@ AMJS.Namespace.F_ProjectManager = class
             Description: "Refresh the project",
             ShouldRefreshPage: true,
             Commands: [
-                `apt ${EntryDirectory.replaceAll("\\", "/")} :GlobalDefault.ShouldConfigureProjects false`
+                `abytekpt ${EntryDirectory.replaceAll("\\", "/")} :GlobalDefault.ShouldConfigureProjects false`
             ],
             Category: "Base"
         };
@@ -559,7 +559,7 @@ AMJS.Namespace.F_ProjectManager = class
             Description: "Open the project in explorer",
             ShouldRefreshPage: false,
             Commands: [
-                `apt ${EntryDirectory.replaceAll("\\", "/")} :OpenExplorer`
+                `abytekpt ${EntryDirectory.replaceAll("\\", "/")} :OpenExplorer`
             ],
             Category: "Base"
         };

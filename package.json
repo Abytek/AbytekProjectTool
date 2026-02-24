@@ -1,5 +1,5 @@
 {
-  "name": "apt",
+  "name": "abytekpt",
   "version": "1.0.0",
   "description": "",
   "main": "Source/APT/Bootstrap.js",
@@ -28,6 +28,6 @@
     "path": "^0.12.7"
   },
   "bin": {
-    "apt": "Source/APT/Bootstrap.js"
+    "abytekpt": "Source/APT/Bootstrap.js"
   }
 }

@@ -42,7 +42,7 @@ class F_Logger
             {
                 APT.Log("APT", `       Description: ${this.Description}`);
             }
-            APT.Log("APT", `       Syntax: apt ${this.NeedMainProjectEntryDirectory ? '<MainProjectEntryDirectory> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
+            APT.Log("APT", `       Syntax: abytekpt ${this.NeedMainProjectEntryDirectory ? '<MainProjectEntryDirectory> ' : ''}${this.AutomaticDetect ? '' : `:${this.CommandName}`} <AdditionalArguments...>`);
         }
     }
 }

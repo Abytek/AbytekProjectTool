@@ -32,7 +32,7 @@ AMJS.Namespace.OpenGUI = function(CommandManager)
                 const fs = require('fs');
                 const buildPath = path.join(guiPath, 'build');
                 if (!fs.existsSync(buildPath)) {
-                    APT.Log("APT", 'Production build not found. Please run "apt :BuildGUI" first.');
+                    APT.Log("APT", 'Production build not found. Please run "abytekpt :BuildGUI" first.');
                     return true;
                 }
                 

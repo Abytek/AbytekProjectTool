@@ -52,7 +52,7 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
     hasOnToggleMaximize: !!onToggleMaximize, 
     showMaximizeButton 
   });
-  const [commandType, setCommandType] = useState<string>('apt');
+  const [commandType, setCommandType] = useState<string>('abytekpt');
   const [command, setCommand] = useState<string>('');
   
   // Add debugging for state changes
@@ -87,7 +87,7 @@ const ConsolePanel: React.FC<ConsolePanelProps> = ({
 
   const commandTypes = [
     { value: 'native', label: 'Native CLI' },
-    { value: 'apt', label: 'APT' },
+    { value: 'abytekpt', label: 'Abytek Project Tool' },
     { value: 'node', label: 'Node.js' },
     { value: 'python', label: 'Python' }
   ];

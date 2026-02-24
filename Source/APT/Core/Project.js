@@ -167,7 +167,7 @@ AMJS.Namespace.F_Project = class
 
     GenerateAPTCommandOnThis()
     {
-        return `apt ${this.EntryDirectory.replaceAll("\\", "/")}`;
+        return `abytekpt ${this.EntryDirectory.replaceAll("\\", "/")}`;
     }
 
     PreImport()

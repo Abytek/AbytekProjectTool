@@ -1,3 +1,3 @@
 cd "$(dirname "$0")/.."
-apt :CleanData
-npm uninstall -g apt
+abytekpt :CleanData
+npm uninstall -g aabytekptt

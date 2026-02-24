@@ -7,7 +7,7 @@ AMJS.ImportNamespace("../Commands");
  * Handles parsing of CLI arguments and routing to appropriate command handlers.
  * 
  * CLI Format:
- * apt [MainProjectEntryDirectory] [:Command] [AdditionalArguments...]
+ * abytekpt [MainProjectEntryDirectory] [:Command] [AdditionalArguments...]
  * 
  * Special Input Categories:
  * - ProjectDefault: Default settings for project instances

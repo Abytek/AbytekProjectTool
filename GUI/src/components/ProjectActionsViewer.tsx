@@ -93,9 +93,9 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
       }]);
 
       for (const command of action.Commands) {
-        // Parse command to determine type (apt commands vs native commands)
-        const isAptCommand = command.trim().startsWith('apt ');
-        const commandType = isAptCommand ? 'apt' : 'native';
+        // Parse command to determine type (abytekpt commands vs native commands)
+        const isAptCommand = command.trim().startsWith('abytekpt ');
+        const commandType = isAptCommand ? 'abytekpt' : 'native';
         const actualCommand = isAptCommand ? command.trim().substring(4) : command.trim();
 
         const sessionId = socketService.generateSessionId();

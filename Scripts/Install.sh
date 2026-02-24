@@ -1,2 +1,2 @@
 cd "$(dirname "$0")/.."
-npm install && npm install -g && apt :BuildGUI
+npm install && npm install -g && abytekpt :BuildGUI
