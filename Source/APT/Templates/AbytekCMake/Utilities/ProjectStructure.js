@@ -41,7 +41,7 @@ AMJS.Namespace.ShouldGenerateCMakeLists = function(ProjectStructure)
 {
     const ProjectEntryDirectory = ProjectStructure.Project.EntryDirectory;
     const AbytekCMakeFilePath = path.join(ProjectEntryDirectory, "AbytekCMake.txt");
-    return fs.existsSync(AbytekCMakeFilePath);
+    return !ProjectStructure.IsEngine; // fs.existsSync(AbytekCMakeFilePath);
 }
 AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
 {
@@ -59,7 +59,11 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
     const ParsedProjectName = ProjectStructure.Project.Name.replaceAll("\\", "/").replaceAll("/", ".").replaceAll(":", "");
 
     const AbytekCMakeFilePath = path.join(ProjectEntryDirectory, "AbytekCMake.txt");
-    const AbytekCMakeContent = fs.readFileSync(AbytekCMakeFilePath).toString();
+    const AbytekCMakeContent = "";
+    if (fs.existsSync(AbytekCMakeFilePath))
+    {
+        AbytekCMakeContent = fs.readFileSync(AbytekCMakeFilePath).toString();
+    }
 
     const CMakeListsPath = path.join(ProjectEntryDirectory, "CMakeLists.txt");
     const CMakeListsContent = `

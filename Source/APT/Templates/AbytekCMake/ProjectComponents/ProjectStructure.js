@@ -21,6 +21,16 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         let Config = CMakeProjectStructure.Config;
         let Generator = CMakeProjectStructure.Generator;
 
+        this.IsEngine = false;
+        if ('Abytek' in AMJS.ModuleSystem.GlobalContext)
+        {
+            this.IsEngine = (AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject == this.Project);
+        }
+        else
+        {
+            this.IsEngine = true;
+        }
+
         const AProjectType = APT.Common.ForwardString(
             APT.Common.TrySetPropertyByPath(
                 Project.AdditionalOptions,
