@@ -97,8 +97,8 @@ AMJS.Namespace.F_Project = class
     GenerateDefaultActions()
     {
         return [
-            APT.Core.System.ProjectManager.GenerateImportAction(this.EntryDirectory),
-            APT.Core.System.ProjectManager.GenerateRefreshAction(this.EntryDirectory),
+            // APT.Core.System.ProjectManager.GenerateImportAction(this.EntryDirectory),
+            // APT.Core.System.ProjectManager.GenerateRefreshAction(this.EntryDirectory),
             APT.Core.System.ProjectManager.GenerateOpenExplorerAction(this.EntryDirectory)
         ];
     }
@@ -183,6 +183,12 @@ AMJS.Namespace.F_Project = class
         };
 
         this.ImportDependencies();
+
+        // Pre-import callbacks
+        for (let PreImportCallback of APT.Core.PreImportProjectCallbacks)
+        {
+            PreImportCallback(this);
+        }
     }
     ImportDependencies()
     {
@@ -205,3 +211,8 @@ AMJS.Namespace.F_Project = class
         APT.Log("APT", `Imported dependencies for project ${this.EntryDirectory}:\n`, APT.Common.NiceJSONStringify(Object.keys(this.Dependencies)));
     }
 };
+
+AMJS.Namespace.RegisterPreImportProjectCallback = function(Callback)
+{
+    APT.Core.PreImportProjectCallbacks.push(Callback);
+}

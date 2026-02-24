@@ -1,7 +1,7 @@
 
 AMJS.Namespace.DefaultPlatformTags = [
-    "POSIX",
-    "Android",
+    APT.Common.PlatformTags.ANDROID,
+    APT.Common.PlatformTags.POSIX,
 ]
 
 AMJS.Namespace.DefaultPlatformTags_AsString = '';

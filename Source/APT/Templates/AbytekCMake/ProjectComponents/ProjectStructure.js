@@ -28,7 +28,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         }
         else
         {
-            this.IsEngine = true;
+            throw new Error("Abytek Engine was not imported");
         }
 
         const AProjectType = APT.Common.ForwardString(
@@ -63,6 +63,9 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
 
         this.Project.EnsureComponent(
+            APT.Templates.Windows.ProjectComponents.F_Support
+        );
+        this.Project.EnsureComponent(
             APT.Templates.Android.ProjectComponents.F_Support
         );
     }
@@ -72,6 +75,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             APT.Templates.AbytekCMake.Utilities.GenerateCMakeLists(this);
         }
+        APT.Templates.AbytekCMake.Utilities.GenerateEnginePathFile(this);
     }
     
     GenerateActions(Actions)

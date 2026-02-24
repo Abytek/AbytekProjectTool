@@ -6,6 +6,10 @@ const { execSync } = require('child_process');
 
 AMJS.Import("./Project")
 
+// for automatic project pre-import setup
+// function signature: (Project) => {}
+AMJS.Namespace.PreImportProjectCallbacks = [];
+
 /**
  * Manages project instances and their lifecycle.
  * Handles project importing, instantiation, and instance data management.
