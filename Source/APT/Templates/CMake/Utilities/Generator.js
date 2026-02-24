@@ -5,6 +5,7 @@ AMJS.Import("./ProjectStructure");
 AMJS.Import("./Generator_VisualStudio2022");
 AMJS.Import("./Generator_UnixMakefiles");
 AMJS.Import("./Generator_Ninja");
+AMJS.Import("./Generator_AndroidStudio");
 
 AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
 {
@@ -25,6 +26,10 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
     else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.NINJA)
     {
         AMJS.Namespace.GenerateProjectFiles_Ninja(ProjectStructure);
+    }
+    else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.ANDROID_STUDIO)
+    {
+        AMJS.Namespace.GenerateProjectFiles_AndroidStudio(ProjectStructure);
     }
     else
     {

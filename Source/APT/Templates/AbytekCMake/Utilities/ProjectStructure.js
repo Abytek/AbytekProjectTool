@@ -73,6 +73,8 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
 
         add_subdirectory("${EngineEntryDirectory}" "${EngineProjectBuildDirectory}")
 
+        set(FETCHCONTENT_BASE_DIR "\${CMAKE_CURRENT_BINARY_DIR}/Dependencies")
+
         include(Abytek/Utilities/SetGlobal)
         include(Abytek/Utilities/SetupModules)
 
@@ -81,6 +83,13 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
         include(Abytek/SetupDependencies)
 
         Abytek_SetGlobal(CMAKE_MODULE_PATH "${"${CMAKE_MODULE_PATH}"};${"${CMAKE_CURRENT_LIST_DIR}"}/CMake")
+
+        if(EXISTS "\${CMAKE_CURRENT_LIST_DIR}/Modules")
+            Abytek_SetupModules_MultiplePhases(
+                "${ParsedProjectName}" 
+                "\${CMAKE_CURRENT_LIST_DIR}/Modules"
+            )
+        endif()
 
         ${AbytekCMakeContent}
     `;

@@ -51,6 +51,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             "InstanceData.APT.Templates.AbytekCMake.ProjectComponents.ProjectStructure.DefaultDirectConfig",
             APT.Templates.CMake.Utilities.GetDefaultDirectConfig()
         );
+
+        this.Project.EnsureComponent(
+            APT.Templates.Android.ProjectComponents.F_Support
+        );
     }
     Init()
     {

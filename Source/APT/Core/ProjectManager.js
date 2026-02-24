@@ -196,7 +196,10 @@ AMJS.Namespace.F_ProjectManager = class
                         console.error(`❌ Error reading ${file}:`, APT.Common.NiceJSONStringify(ValidatedResult.Errors));
                         return;
                     }
-                    jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryDirectory));
+                    if (fs.existsSync(parsed.EntryDirectory))
+                    {
+                        jsonData.push(ThisProjectManager.GenerateProjectLink(parsed.EntryDirectory));
+                    }
                 } catch (err) {
                     console.error(`❌ Error reading ${file}:`, err.message);
                 }
@@ -279,12 +282,39 @@ AMJS.Namespace.F_ProjectManager = class
             {
                 return false;
             }
+            if (!fs.existsSync(Last.EntryDirectory))
+            {
+                return false;
+            }
         }
         if (("GitDetails" in Finder) && ("GitDetails" in Last))
         {
             let FinderGitDetails = Finder.GitDetails;
             let LastGitDetails = Last.GitDetails;
-            if (FinderGitDetails.RemoteURL != LastGitDetails.RemoteURL)
+
+            let TryMatchGitRemoteURL = (A, B) => {
+                if (A == null)
+                {
+                    return false;
+                }
+                if (B == null)
+                {
+                    return false;
+                }
+                let AClone = "" + A;
+                let BClone = "" + B;
+                if (!AClone.endsWith(".git"))
+                {
+                    AClone += ".git";
+                }
+                if (!BClone.endsWith(".git"))
+                {
+                    BClone += ".git";
+                }
+                return AClone == BClone;
+            };
+
+            if (!TryMatchGitRemoteURL(FinderGitDetails.RemoteURL, LastGitDetails.RemoteURL))
             {
                 return false;
             }

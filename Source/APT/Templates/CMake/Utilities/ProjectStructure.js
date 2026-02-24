@@ -46,6 +46,12 @@ AMJS.Namespace.GetDefaultConfig = function(Generator)
     {
         return AMJS.Namespace.Configs.AUTO;
     }
+    if (
+        (Generator == AMJS.Namespace.Generators.ANDROID_STUDIO)
+    )
+    {
+        return AMJS.Namespace.Configs.AUTO;
+    }
     return AMJS.Namespace.GetDefaultDirectConfig();
 }
 AMJS.Namespace.EnsureDirectConfig = function(Config)
@@ -65,6 +71,7 @@ AMJS.Namespace.Generators =
     UNIX_MAKE_FILES: "UnixMakefiles",
     XCODE: "Xcode",
     NINJA: "Ninja",
+    ANDROID_STUDIO: "AndroidStudio"
 }
 
 AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
@@ -77,6 +84,10 @@ AMJS.Namespace.GetDefaultGenerator = function(PlatformTags)
     {
         return AMJS.Namespace.Generators.XCODE;
     }
+    if (PlatformTags.includes(APT.Common.PlatformTags.ANDROID))
+    {
+        return AMJS.Namespace.Generators.ANDROID_STUDIO;
+    }
     return AMJS.Namespace.Generators.UNIX_MAKE_FILES;
 }
 
@@ -88,6 +99,12 @@ AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
     {
         if (
             (Generator == AMJS.Namespace.Generators.VS2022)
+        )
+        {
+            return true;
+        }
+        else if (
+            (Generator == AMJS.Namespace.Generators.ANDROID_STUDIO)
         )
         {
             return true;
@@ -117,13 +134,4 @@ AMJS.Namespace.CalculateCMakeParentBuildDirectory = function(BuildDirectory, Gen
 AMJS.Namespace.CalculateCMakeBuildDirectory = function(BuildDirectory, Generator, DirectConfig)
 {
     return AMJS.Namespace.CalculateCMakeParentBuildDirectory(BuildDirectory, Generator);
-}
-
-AMJS.Namespace.SupportAutoCMakeConfiguration = function(PlatformTags)
-{
-    if (PlatformTags.includes(APT.Common.PlatformTags.WINDOWS))
-    {
-        return true;
-    }
-    return false;
 }
