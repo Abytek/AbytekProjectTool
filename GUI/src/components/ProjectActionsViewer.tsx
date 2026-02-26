@@ -96,7 +96,7 @@ const ProjectActionsViewer: React.FC<ProjectActionsViewerProps> = ({ projectPath
         // Parse command to determine type (abytekpt commands vs native commands)
         const isAptCommand = command.trim().startsWith('abytekpt ');
         const commandType = isAptCommand ? 'abytekpt' : 'native';
-        const actualCommand = isAptCommand ? command.trim().substring(4) : command.trim();
+        const actualCommand = isAptCommand ? command.trim().substring('abytekpt '.length) : command.trim();
 
         const sessionId = socketService.generateSessionId();
 
