@@ -52,15 +52,24 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectory"
             ) ?? this.Project.EntryDirectory
         );
-        this.BuildDirectory = APT.Common.Assert(
-            APT.Common.ForwardString(
-                APT.Common.FindPropertyByPath(
-                    this.Project.AdditionalOptions,
-                    "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
-                )
-            ),
-            "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
+        const BuildDirectoryFromOptions = APT.Common.ForwardString(
+            APT.Common.FindPropertyByPath(
+                this.Project.AdditionalOptions,
+                "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
+            )
         );
+        // this.BuildDirectory = APT.Common.Assert(
+        //     BuildDirectoryFromOptions,
+        //     "requires InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory"
+        // );
+        if (BuildDirectoryFromOptions)
+        {
+            this.BuildDirectory = BuildDirectoryFromOptions;
+        }
+        else
+        {
+            this.BuildDirectory = path.join(this.Project.EntryDirectory, "Build/CMake/Auto");
+        }
         this.ExtraArguments = APT.Common.FindPropertyByPath(
             this.Project.AdditionalOptions,
             "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments"
