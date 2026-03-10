@@ -10,11 +10,11 @@ AMJS.Import("../../Common/ProjectComponents/ProjectStructure");
 // Constructor-phase properties:
 //      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Generator
 //      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.Config
+//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments
 //
 // Init-phase properties:
 //      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.SourceDirectory
 //      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory
-//      InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments
 AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
 {
     constructor(Project)
@@ -42,6 +42,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             this.Generator,
             PlatformTags
         );
+        this.ExtraArguments = APT.Common.FindPropertyByPath(
+            this.Project.AdditionalOptions,
+            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments"
+        ) ?? [];
     }
 
     Init()
@@ -70,10 +74,6 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             this.BuildDirectory = path.join(this.Project.EntryDirectory, "Build/CMake/Auto");
         }
-        this.ExtraArguments = APT.Common.FindPropertyByPath(
-            this.Project.AdditionalOptions,
-            "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.ExtraArguments"
-        ) ?? [];
     }
     Start()
     {
