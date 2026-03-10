@@ -29,6 +29,8 @@ AMJS.Namespace.F_Project = class
 
         this.IsFinalized = false;
 
+        this.IsMain = (APT.Templates.Common.Utilities.GetDefaultProjectEntryDirectory() == path.normalize(EntryDirectory));
+
         this.Preset = APT.Core.System.ProjectManager.GenerateProjectPreset(this.EntryDirectory);
         this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.EntryDirectory);
     }

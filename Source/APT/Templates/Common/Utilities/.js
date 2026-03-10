@@ -1,4 +1,6 @@
 
+const path = require("path")
+
 AMJS.Namespace.GetDefaultShouldConfigureProjects = function()
 {
     let Result = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault').ShouldConfigureProjects;
@@ -52,7 +54,12 @@ AMJS.Namespace.GetDefaultProjectEntryDirectory = function()
     {
         return null;
     }
-    return APT.Common.ForwardString(Result[0]);
+    Result = APT.Common.ForwardString(Result[0]);
+    if (Result != null)
+    {
+        return path.normalize(Result);
+    }
+    return null;
 }
 
 AMJS.Namespace.GetDefaultEnvironmentName = function()
