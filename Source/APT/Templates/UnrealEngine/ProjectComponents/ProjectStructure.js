@@ -221,6 +221,19 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
         Actions.push(
             {
+                Name: "Open Visual Studio 2026",
+                Description: "Open Visual Studio 2026",
+                Category: "[Unreal Engine] Editors",
+                Commands: [
+                    `${this.Project.GenerateAPTCommandOnThis()} `
+                    + `:OpenEditor `
+                    + `:GlobalDefault.Editor VisualStudio2026 `
+                    + `:GlobalDefault.ShouldConfigureProjects false `
+                ]
+            }
+        );
+        Actions.push(
+            {
                 Name: "Open Visual Studio Code",
                 Description: "Open Visual Studio Code",
                 Category: "[Unreal Engine] Editors",

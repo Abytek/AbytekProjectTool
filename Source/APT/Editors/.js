@@ -1,5 +1,6 @@
 
 AMJS.ImportSubnamespace("VisualStudio2022");
+AMJS.ImportSubnamespace("VisualStudio2026");
 AMJS.ImportSubnamespace("VisualStudioCode");
 
 AMJS.Namespace.GetDefaultEditor = function()
@@ -18,6 +19,11 @@ AMJS.Namespace.OpenEditor = function(Project, Editor)
     if (ParsedEditor == "VisualStudio2022")
     {
         APT.Editors.VisualStudio2022.OpenEditor(Project);
+        return true;
+    }
+    else if (ParsedEditor == "VisualStudio2026")
+    {
+        APT.Editors.VisualStudio2026.OpenEditor(Project);
         return true;
     }
     else if (ParsedEditor == "VisualStudioCode")

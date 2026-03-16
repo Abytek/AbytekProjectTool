@@ -3,6 +3,7 @@ const fs = require('fs');
 
 AMJS.Import("./ProjectStructure");
 AMJS.Import("./Generator_VisualStudio2022");
+AMJS.Import("./Generator_VisualStudio2026");
 AMJS.Import("./Generator_UnixMakefiles");
 AMJS.Import("./Generator_Ninja");
 AMJS.Import("./Generator_AndroidStudio");
@@ -18,6 +19,10 @@ AMJS.Namespace.GenerateProjectFiles = function(ProjectStructure)
     if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.VS2022)
     {
         AMJS.Namespace.GenerateProjectFiles_VisualStudio2022(ProjectStructure);
+    }
+    else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.VS2026)
+    {
+        AMJS.Namespace.GenerateProjectFiles_VisualStudio2026(ProjectStructure);
     }
     else if (ProjectStructure.Generator == APT.Templates.CMake.Utilities.Generators.UNIX_MAKE_FILES)
     {
