@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.ImportNamespace("../Utilities");
 AMJS.ImportNamespace("../../CMake/ProjectComponents");
 
@@ -21,15 +23,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         let Config = CMakeProjectStructure.Config;
         let Generator = CMakeProjectStructure.Generator;
 
-        this.IsEngine = false;
-        if ('Abytek' in AMJS.ModuleSystem.GlobalContext)
-        {
-            this.IsEngine = (AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject == this.Project);
-        }
-        else
-        {
-            throw new Error("Abytek Engine was not imported");
-        }
+        this.IsEngine = (APT.Templates.AbytekCMake.Utilities.GetEngineProject() == this.Project);
 
         const AProjectType = APT.Common.ForwardString(
             APT.Common.TrySetPropertyByPath(
@@ -55,6 +49,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
                 APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams)
             )
         );
+        this.BuildDirectory = BuildDirectory;
 
         this.DefaultDirectConfig = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
@@ -68,6 +63,8 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         this.Project.EnsureComponent(
             APT.Templates.Android.ProjectComponents.F_Support
         );
+        
+        APT.Templates.AbytekCMake.Utilities.CleanCMakeDefinitionsFile(this);
     }
     Init()
     {
