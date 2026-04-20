@@ -23,7 +23,7 @@ AMJS.Namespace.CalculateTopmostBuildDirectory = function(ProjectEntryDirectory)
 // - AProjectType
 // - Generator
 // - Config
-AMJS.Namespace.CalculateBuildDirectory = function(Options)
+AMJS.Namespace.CalculateBuildDirectoryConfig = function(Options)
 {
     APT.Common.Assert(Options);
     const ProjectEntryDirectory = APT.Common.Assert(Options.ProjectEntryDirectory);
@@ -34,7 +34,29 @@ AMJS.Namespace.CalculateBuildDirectory = function(Options)
 
     const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectEntryDirectory);
 
-    return path.join(TopmostBuildDirectory, AProjectType, PlatformTags.sort().join("."), Generator, Config);
+    const Signature = path.join(AProjectType, PlatformTags.sort().join("."), Generator, Config).replaceAll("\\", "/").replaceAll("/", "-");
+
+    function shortHash(str) {
+        let hash = 0x811c9dc5;
+
+        for (let i = 0; i < str.length; i++) {
+            hash ^= str.charCodeAt(i);
+            hash = Math.imul(hash, 0x01000193);
+        }
+
+        // unsigned 32-bit
+        hash >>>= 0;
+
+        // base36 + lấy 4 ký tự
+        return hash.toString(36).slice(0, 4);
+    }
+    const SignatureHash = shortHash(Signature);
+
+    return {
+        Path: path.join(TopmostBuildDirectory, SignatureHash),
+        Signature: Signature,
+        SignatureHash: SignatureHash,
+    };
 }
 
 AMJS.Namespace.ShouldGenerateCMakeLists = function(ProjectStructure)
@@ -110,4 +132,12 @@ AMJS.Namespace.GenerateEnginePathFile = function(ProjectStructure)
     }
     const EnginePathFilePath = path.join(CMakeProjectStructure.BuildDirectory, "AbytekEnginePath.txt");
     fs.writeFileSync(EnginePathFilePath, AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject.EntryDirectory);
+}
+AMJS.Namespace.GenerateBuildDirectorySignatureFile = function(ProjectStructure)
+{
+    const BuildDirectorySignaturePath = path.join(
+        AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectStructure.Project.EntryDirectory), 
+        `${ProjectStructure.BuildDirectorySignature}.txt`
+    );
+    fs.writeFileSync(BuildDirectorySignaturePath, ProjectStructure.BuildDirectorySignatureHash);
 }

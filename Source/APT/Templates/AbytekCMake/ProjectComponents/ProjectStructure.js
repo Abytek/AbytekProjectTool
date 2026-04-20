@@ -42,14 +42,17 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             Config,
             Generator
         };
+        const BuildDirectoryConfig = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectoryConfig(CalculateBuildDirectoryParams);
         const BuildDirectory = APT.Common.ForwardString(
             APT.Common.TrySetPropertyByPath(
                 Project.AdditionalOptions,
                 "InstanceData.APT.Templates.CMake.ProjectComponents.ProjectStructure.BuildDirectory",
-                APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectory(CalculateBuildDirectoryParams)
+                BuildDirectoryConfig.Path
             )
         );
         this.BuildDirectory = BuildDirectory;
+        this.BuildDirectorySignature = BuildDirectoryConfig.Signature;
+        this.BuildDirectorySignatureHash = BuildDirectoryConfig.SignatureHash;
 
         this.DefaultDirectConfig = APT.Common.TrySetPropertyByPath(
             Project.AdditionalOptions,
@@ -72,6 +75,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             APT.Templates.AbytekCMake.Utilities.GenerateCMakeLists(this);
         }
+        APT.Templates.AbytekCMake.Utilities.GenerateBuildDirectorySignatureFile(this);
         APT.Templates.AbytekCMake.Utilities.GenerateEnginePathFile(this);
     }
     
