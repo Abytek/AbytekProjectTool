@@ -40,7 +40,8 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             PlatformTags,
             AProjectType,
             Config,
-            Generator
+            Generator,
+            EnvironmentName: Project.EnvironmentName
         };
         const BuildDirectoryConfig = APT.Templates.AbytekCMake.Utilities.CalculateBuildDirectoryConfig(CalculateBuildDirectoryParams);
         const BuildDirectory = APT.Common.ForwardString(

@@ -31,10 +31,11 @@ AMJS.Namespace.CalculateBuildDirectoryConfig = function(Options)
     const AProjectType = APT.Common.Assert(Options.AProjectType);
     const Config = APT.Common.Assert(Options.Config);
     const Generator = APT.Common.Assert(Options.Generator);
+    const EnvironmentName = APT.Common.Assert(Options.EnvironmentName);
 
     const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectEntryDirectory);
 
-    const Signature = path.join(AProjectType, PlatformTags.sort().join("."), Generator, Config).replaceAll("\\", "/").replaceAll("/", "-");
+    const Signature = path.join(EnvironmentName, AProjectType, PlatformTags.sort().join("."), Generator, Config).replaceAll("\\", "/").replaceAll("/", "-");
 
     function shortHash(str) {
         let hash = 0x811c9dc5;

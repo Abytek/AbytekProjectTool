@@ -176,9 +176,16 @@ AMJS.Namespace.F_Project = class
     {
         APT.Log("APT", `Pre import project ${this.EntryDirectory}`);
 
+        this.EnvironmentName = APT.Common.ForwardString(
+            APT.Common.TrySetPropertyByPath(
+                this.AdditionalOptions,
+                "InstanceData.APT.EnvironmentName",
+                APT.Templates.Common.Utilities.GetDefaultEnvironmentName()
+            )
+        );
         this.EnvConfig = APT.Core.System.Environment.SetupEnvironment(
             [ this.EntryDirectory ],
-            APT.Templates.Common.Utilities.GetDefaultEnvironmentName(),
+            this.EnvironmentName,
             this.Preset.EnvironmentConfigDirectory
         ) || {
             Dependencies: new Object()
