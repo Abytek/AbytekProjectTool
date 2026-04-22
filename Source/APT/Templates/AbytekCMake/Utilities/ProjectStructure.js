@@ -136,8 +136,14 @@ AMJS.Namespace.GenerateEnginePathFile = function(ProjectStructure)
 }
 AMJS.Namespace.GenerateBuildDirectorySignatureFile = function(ProjectStructure)
 {
+    const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectStructure.Project.EntryDirectory);
+    if (!fs.existsSync(TopmostBuildDirectory))
+    {
+        fs.mkdirSync(TopmostBuildDirectory, { recursive: true });
+    }
+
     const BuildDirectorySignaturePath = path.join(
-        AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectStructure.Project.EntryDirectory), 
+        TopmostBuildDirectory, 
         `${ProjectStructure.BuildDirectorySignature}.txt`
     );
     fs.writeFileSync(BuildDirectorySignaturePath, ProjectStructure.BuildDirectorySignatureHash);
