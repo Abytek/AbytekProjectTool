@@ -174,20 +174,26 @@ AMJS.Namespace.F_Environment = class
     }
     async AsyncSetupEnvironment(BaseDirectories, EnvName, ConfigDirectoryPath)
     {
+        if (!fs.existsSync(ConfigDirectoryPath))
+        {
+            return {
+                Dependencies: new Object()
+            };
+        }
+
         let EnvConfig = this.LoadEnvironmentConfig(BaseDirectories, EnvName, ConfigDirectoryPath);
         if (!EnvConfig)
         {
-            return null;
+            return {
+                Dependencies: new Object()
+            };
         }
 
         APT.Log("APT", `APT.SetupEnvironment(${APT.Common.NiceJSONStringify(BaseDirectories)}):\n`, APT.Common.NiceJSONStringify(EnvConfig));
 
         this.ApplyCLIInputs(EnvConfig);
 
-        if (!await this.AsyncSetupEnvironmentDependencies(EnvConfig))
-        {
-            return null;
-        }
+        await this.AsyncSetupEnvironmentDependencies(EnvConfig);
         return EnvConfig;
     }
     ApplyCLIInputs(EnvConfig)
@@ -220,6 +226,10 @@ AMJS.Namespace.F_Environment = class
                     this.ImportDependentProject(ProjectLink.EntryDirectory, DependencyName, Dependency);
                     continue;
                 }
+                else
+                {
+                    throw new Error(`Cannot import dependency "${DependencyName}"`);
+                }
             }
 
             {
@@ -227,10 +237,14 @@ AMJS.Namespace.F_Environment = class
                 if (TestProjectEntryDirectory)
                 {
                     this.ImportDependentProject(TestProjectEntryDirectory, DependencyName, Dependency);
+                    continue;
+                }
+                else
+                {
+                    throw new Error(`Cannot import dependency "${DependencyName}"`);
                 }
             }
         }
-        return true;
     }
     async AsyncSetupEnvironmentDependency_GitRepo(DependencyName, Dependency)
     {

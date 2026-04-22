@@ -187,9 +187,7 @@ AMJS.Namespace.F_Project = class
             [ this.EntryDirectory ],
             this.EnvironmentName,
             this.Preset.EnvironmentConfigDirectory
-        ) || {
-            Dependencies: new Object()
-        };
+        );
 
         this.ImportDependencies();
 

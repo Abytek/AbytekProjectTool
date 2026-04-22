@@ -242,6 +242,10 @@ AMJS.Namespace.F_ProjectManager = class
                 },
                 EntryDirectory: {
                     type: "string"
+                },
+                AdditionalOptions: {
+                    type: "object",
+                    additionalProperties: true
                 }
             },
             additionalProperties: false,
