@@ -68,7 +68,10 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             APT.Templates.Android.ProjectComponents.F_Support
         );
         
-        APT.Templates.AbytekCMake.Utilities.CleanCMakeDefinitionsFile(this);
+        if (this.IsEngine)
+        {
+            APT.Templates.AbytekCMake.Utilities.CleanCMakeDefinitionsFile(this);
+        }
     }
     Init()
     {
