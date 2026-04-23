@@ -70,9 +70,15 @@ AMJS.Namespace.F_ProjectManager = class
      * @returns {APT.Core.F_Project|false} Project instance or false if not found/required
      * @throws {Error} If Required is true and project entry file is not found
      */
-    ImportProject(BaseDirectories, RelativeProjectEntryDirectory, AdditionalOptions = new Object(), Required = true)
+    ImportProject(BaseProject, BaseDirectories, RelativeProjectEntryDirectory, AdditionalOptions = new Object(), Required = true)
     {
         APT.Log("APT", `Import project ${RelativeProjectEntryDirectory}`);
+
+        let SharedAdditionalOptionKeys = [];
+        if (BaseProject)
+        {
+            SharedAdditionalOptionKeys = BaseProject.SharedAdditionalOptionKeys;
+        }
 
         // Parse additional options and merge instance data
         let ParsedAdditionalOptions = APT.Common.SimpleDeepCopy(this.System.CommandManager.CLIInput.get('ProjectDefault') ?? new Object());
@@ -114,7 +120,7 @@ AMJS.Namespace.F_ProjectManager = class
         APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
 
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions, SharedAdditionalOptionKeys);
         this.Projects.set(ProjectKey, Project);
 
         let ProjectManager = this;
@@ -137,7 +143,7 @@ AMJS.Namespace.F_ProjectManager = class
                         Context.APT.ImportProject = function(RelativeProjectEntryDirectory2, AdditionalOptions2 = new Object(), Required2 = true)
                         {
                             const NewAdditionalOptions = Project.ShareAdditionalOptions(AdditionalOptions2);
-                            return ProjectManager.ImportProject([ AbsoluteProjectEntryDirectory ], RelativeProjectEntryDirectory2, NewAdditionalOptions, Required2);
+                            return ProjectManager.ImportProject(Project, [ AbsoluteProjectEntryDirectory ], RelativeProjectEntryDirectory2, NewAdditionalOptions, Required2);
                         }
                         Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
                         {

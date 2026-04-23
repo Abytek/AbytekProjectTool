@@ -13,7 +13,7 @@ AMJS.Namespace.OpenEditor = function(CommandManager)
         }
         
         let ProjectManager = CommandManager.System.ProjectManager;
-        let Project = ProjectManager.ImportProject([], MainProjectEntryDirectory);
+        let Project = ProjectManager.ImportProject(null, [], MainProjectEntryDirectory);
         
         if (!APT.Editors.OpenEditor(Project))
         {

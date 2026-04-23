@@ -17,7 +17,7 @@ AMJS.Namespace.F_Project = class
      * @param {string} EntryDirectory - Path to project entry directory	
      * @param {Object} AdditionalOptions - Project configuration options
      */
-    constructor(EntryDirectory, AdditionalOptions)
+    constructor(EntryDirectory, AdditionalOptions, SharedAdditionalOptionKeys)
     {
         this.EntryDirectory = EntryDirectory;
         this.EntryFile = path.join(EntryDirectory, "APTProject.js");
@@ -34,7 +34,7 @@ AMJS.Namespace.F_Project = class
         this.Preset = APT.Core.System.ProjectManager.GenerateProjectPreset(this.EntryDirectory);
         this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.EntryDirectory);
 
-        this.SharedAdditionalOptionKeys = [];
+        this.SharedAdditionalOptionKeys = SharedAdditionalOptionKeys;
         this.Dependencies = new Object();
     }
 

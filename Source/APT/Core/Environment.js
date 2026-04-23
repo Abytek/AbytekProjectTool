@@ -339,7 +339,7 @@ AMJS.Namespace.F_Environment = class
         {
             Required = Dependency.Required;
         }
-        let DependentProject = ProjectManager.ImportProject([], EntryDirectory, AdditionalOptions, Required);
+        let DependentProject = ProjectManager.ImportProject(Project, [], EntryDirectory, AdditionalOptions, Required);
         Project.Dependencies[DependencyName] = DependentProject;
         return DependentProject;
     }

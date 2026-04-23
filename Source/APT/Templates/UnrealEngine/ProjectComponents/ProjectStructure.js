@@ -121,7 +121,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
     {
         if (!this.IsEngine)
         {
-            this.EngineProject = APT.Core.System.ProjectManager.ImportProject([], this.EngineProjectEntryDirectory, this.EngineProjectAdditionalOptions);
+            this.EngineProject = APT.Core.System.ProjectManager.ImportProject(this.Project, [], this.EngineProjectEntryDirectory, this.EngineProjectAdditionalOptions);
         }
         if (this.Project.EnsureComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).ShouldConfigureProject)
         {
