@@ -1,4 +1,17 @@
 
+const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+AMJS.Namespace.ShouldBuildTargetOnThisProjectStructure = function(ProjectStructure)
+{
+    const GlobalDefault = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault');
+    return (
+        ProjectStructure.Project.IsMain
+        && APT.Common.ForwardBool(GlobalDefault.BuildTargetOnMainProject)
+    );
+}
+
 AMJS.Namespace.Build = function(ProjectStructure, TargetName, DirectConfig)
 {
     if (ProjectStructure == null)
