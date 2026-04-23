@@ -136,7 +136,8 @@ AMJS.Namespace.F_ProjectManager = class
                         Context.APT.Project = Project;
                         Context.APT.ImportProject = function(RelativeProjectEntryDirectory2, AdditionalOptions2 = new Object(), Required2 = true)
                         {
-                            return ProjectManager.ImportProject([ AbsoluteProjectEntryDirectory ], RelativeProjectEntryDirectory2, AdditionalOptions2, Required2);
+                            const NewAdditionalOptions = Project.ShareAdditionalOptions(AdditionalOptions2);
+                            return ProjectManager.ImportProject([ AbsoluteProjectEntryDirectory ], RelativeProjectEntryDirectory2, NewAdditionalOptions, Required2);
                         }
                         Context.APT.LoadEnvironmentConfig = function(EnvName, ConfigDirectoryPath)
                         {
@@ -144,11 +145,11 @@ AMJS.Namespace.F_ProjectManager = class
                         }
                         Context.APT.AsyncSetupEnvironment = async function(EnvName, ConfigDirectoryPath)
                         {
-                            return await APT.Core.System.Environment.AsyncSetupEnvironment([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
+                            return await APT.Core.System.Environment.AsyncSetupEnvironment(Project, [ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
                         }
                         Context.APT.SetupEnvironment = function(EnvName, ConfigDirectoryPath)
                         {
-                            return APT.Core.System.Environment.SetupEnvironment([ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
+                            return APT.Core.System.Environment.SetupEnvironment(Project, [ AbsoluteProjectEntryDirectory ], EnvName, ConfigDirectoryPath);
                         }
 
                         Project.PreImport();

@@ -33,6 +33,8 @@ AMJS.Namespace.F_Project = class
 
         this.Preset = APT.Core.System.ProjectManager.GenerateProjectPreset(this.EntryDirectory);
         this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.EntryDirectory);
+
+        this.SharedAdditionalOptionKeys = [];
     }
 
     /**
@@ -71,6 +73,19 @@ AMJS.Namespace.F_Project = class
             return Component;
         }
         return this.AddComponent(ComponentClass, ...Args);
+    }
+    ShareAdditionalOptions(Source)
+    {
+        let Result = APT.Common.SimpleDeepCopy(Source);
+        for (const SharedAdditionalOptionKey of this.SharedAdditionalOptionKeys)
+        {
+            APT.Common.SetPropertyByPath(
+                Result,
+                SharedAdditionalOptionKey,
+                Source[SharedAdditionalOptionKey]
+            );
+        }
+        return Result;
     }
 
     ApplyPrototype(...Prototypes)
@@ -184,6 +199,7 @@ AMJS.Namespace.F_Project = class
             )
         );
         this.EnvConfig = APT.Core.System.Environment.SetupEnvironment(
+            this,
             [ this.EntryDirectory ],
             this.EnvironmentName,
             this.Preset.EnvironmentConfigDirectory
