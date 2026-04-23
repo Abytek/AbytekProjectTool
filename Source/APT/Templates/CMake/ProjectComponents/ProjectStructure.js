@@ -85,16 +85,18 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         if (APT.Templates.CMake.Utilities.ShouldBuildTargetOnThisProjectStructure(this))
         {
             const GlobalDefault = APT.Core.System.CommandManager.CLIInput.get('GlobalDefault');
-            const TargetToBuild = GlobalDefault.TargetToBuild;
+            let TargetToBuild = GlobalDefault.TargetToBuild;
             if (TargetToBuild == null)
             {
                 throw new Error("requires GlobalDefault.TargetToBuild to build main project");
             }
-            const DirectConfig = GlobalDefault.DirectConfig;
+            TargetToBuild = APT.Common.ForwardString(TargetToBuild[0]);
+            let DirectConfig = GlobalDefault.DirectConfig;
             if (DirectConfig == null)
             {
                 throw new Error("requires GlobalDefault.DirectConfig to build main project");
             }
+            DirectConfig = APT.Common.ForwardString(DirectConfig[0]);
             APT.Templates.CMake.Utilities.Build(this, TargetToBuild, DirectConfig);
         }
     }
