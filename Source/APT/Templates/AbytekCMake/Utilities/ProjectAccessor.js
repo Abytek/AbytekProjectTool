@@ -3,7 +3,6 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-AMJS.Import("../Utilities/ProjectStructure");
 AMJS.Import("./ProjectStructure");
 
 AMJS.Namespace.F_ProjectAccessor = class
@@ -129,24 +128,6 @@ AMJS.Namespace.F_ProjectAccessor = class
         }
 
         let CMakeProjectStructure = Project.GetComponent(APT.Templates.CMake.ProjectComponents.F_ProjectStructure);
-        let CMakeBuildDirectory = APT.Templates.CMake.Utilities.CalculateCMakeBuildDirectory(
-            CMakeProjectStructure.BuildDirectory, 
-            CMakeProjectStructure.Generator,
-            this.Config
-        );
-
-        let TargetNameArgument = '';
-        if (TargetName)
-        {
-            TargetNameArgument = `--target ${TargetName}`;   
-        }
-            
-        execSync(
-            `cmake --build "${CMakeBuildDirectory}" --config "${this.Config}" ${TargetNameArgument}
-            `, { 
-                stdio: 'inherit' 
-            }
-        );
-        APT.Log("APT.Templates.AbytekCMake", `Built ${Project.EntryDirectory} (Config: ${this.Config})`);
+        APT.Templates.CMake.Utilities.Build(CMakeProjectStructure, TargetName, this.Config);
     }
 }
