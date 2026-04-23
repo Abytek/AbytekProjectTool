@@ -35,6 +35,7 @@ AMJS.Namespace.F_Project = class
         this.ProjectLink = APT.Core.System.ProjectManager.SetupProjectLink(this.EntryDirectory);
 
         this.SharedAdditionalOptionKeys = [];
+        this.Dependencies = new Object();
     }
 
     /**
@@ -205,33 +206,11 @@ AMJS.Namespace.F_Project = class
             this.Preset.EnvironmentConfigDirectory
         );
 
-        this.ImportDependencies();
-
         // Pre-import callbacks
         for (let PreImportCallback of APT.Core.PreImportProjectCallbacks)
         {
             PreImportCallback(this);
         }
-    }
-    ImportDependencies()
-    {
-        APT.Log("APT", `Importing dependencies for project ${this.EntryDirectory}`);
-
-        this.Dependencies = new Object();
-        for (let DependencyName in this.EnvConfig.Dependencies)
-        {
-            let Dependency = this.EnvConfig.Dependencies[DependencyName];
-            let ProjectLink = APT.Core.System.ProjectManager.SearchProjectLink(Dependency);
-            if (ProjectLink)
-            {
-                this.Dependencies[DependencyName] = APT.Core.System.ProjectManager.ImportProject(
-                    [], 
-                    ProjectLink.EntryDirectory
-                );
-            }
-        }
-
-        APT.Log("APT", `Imported dependencies for project ${this.EntryDirectory}:\n`, APT.Common.NiceJSONStringify(Object.keys(this.Dependencies)));
     }
 };
 
