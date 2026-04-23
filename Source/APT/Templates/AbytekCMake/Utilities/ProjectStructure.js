@@ -101,6 +101,7 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
         include(Abytek/Utilities/SetGlobal)
 
         if(NOT ABYTEK_MANUALLY_SET_PROJECT_DIR)
+            Abytek_SetGlobal(ABYTEK_PROJECT_ENVIRONMENT_NAME "${ProjectStructure.Project.EnvironmentName}")
             Abytek_SetGlobal(ABYTEK_PROJECT_DIR "\${CMAKE_CURRENT_LIST_DIR}")
             Abytek_SetGlobal(ABYTEK_PROJECT_BUILD_DIR "\${CMAKE_CURRENT_BINARY_DIR}")
             set(ABYTEK_MANUALLY_SET_PROJECT_DIR 1)

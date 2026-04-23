@@ -74,7 +74,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         }
 
         APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
-            "ABYTEK_ENVIRONMENT_NAME",
+            "ABYTEK_ENGINE_ENVIRONMENT_NAME",
             Project.EnvironmentName
         );
         APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
