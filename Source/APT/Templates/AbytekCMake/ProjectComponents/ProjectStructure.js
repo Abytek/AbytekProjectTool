@@ -72,6 +72,23 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         {
             APT.Templates.AbytekCMake.Utilities.CleanCMakeDefinitionsFile(this);
         }
+
+        APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
+            "ABYTEK_ENVIRONMENT_NAME",
+            Project.EnvironmentName
+        );
+        APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
+            "ABYTEK_APROJECT_TYPE",
+            AProjectType
+        );
+        APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
+            "ABYTEK_CMAKE_CONFIG",
+            Config
+        );
+        APT.Templates.AbytekCMake.Utilities.AddCMakeDefinition(
+            "ABYTEK_CMAKE_GENERATOR",
+            Generator
+        );
     }
     Init()
     {
