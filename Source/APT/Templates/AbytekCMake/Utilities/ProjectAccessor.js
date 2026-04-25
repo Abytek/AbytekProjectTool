@@ -115,6 +115,10 @@ AMJS.Namespace.F_ProjectAccessor = class
     {
         return this.ResolveModuleAutoProperty(Project, TargetName, "TargetFile");
     }
+    ResolveModuleTargetFileDirectory(Project, TargetName)
+    {
+        return this.ResolveModuleAutoProperty(Project, TargetName, "TargetFileDirectory");
+    }
 
     Build(Project, TargetName)
     {

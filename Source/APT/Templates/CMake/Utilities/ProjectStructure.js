@@ -52,7 +52,7 @@ AMJS.Namespace.GetDefaultConfig = function(Generator)
         (Generator == AMJS.Namespace.Generators.ANDROID_STUDIO)
     )
     {
-        return AMJS.Namespace.Configs.AUTO;
+        return AMJS.Namespace.Configs.DEBUG;
     }
     return AMJS.Namespace.GetDefaultDirectConfig();
 }
@@ -142,12 +142,6 @@ AMJS.Namespace.IsConfigCompatibleWithGenerator = function(Config, Generator)
         if (
             (Generator == AMJS.Namespace.Generators.VS2022)
             || (Generator == AMJS.Namespace.Generators.VS2026)
-        )
-        {
-            return true;
-        }
-        else if (
-            (Generator == AMJS.Namespace.Generators.ANDROID_STUDIO)
         )
         {
             return true;

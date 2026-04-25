@@ -139,7 +139,8 @@ AMJS.Namespace.GenerateEnginePathFile = function(ProjectStructure)
     {
         fs.mkdirSync(CMakeProjectStructure.BuildDirectory, { recursive: true });
     }
-    const EnginePathFilePath = path.join(CMakeProjectStructure.BuildDirectory, "AbytekEnginePath.txt");
+    const TopmostBuildDirectory = AMJS.Namespace.CalculateTopmostBuildDirectory(ProjectStructure.Project.EntryDirectory);
+    const EnginePathFilePath = path.join(TopmostBuildDirectory, "AbytekEnginePath.txt");
     fs.writeFileSync(EnginePathFilePath, AMJS.ModuleSystem.GlobalContext.Abytek.EngineProject.EntryDirectory);
 }
 AMJS.Namespace.GenerateBuildDirectorySignatureFile = function(ProjectStructure)
@@ -155,4 +156,51 @@ AMJS.Namespace.GenerateBuildDirectorySignatureFile = function(ProjectStructure)
         `${ProjectStructure.BuildDirectorySignature}.txt`
     );
     fs.writeFileSync(BuildDirectorySignaturePath, ProjectStructure.BuildDirectorySignatureHash);
+}
+AMJS.Namespace.CalculateProjectInstanceJSFile = function(ProjectStructure)
+{
+    return path.join(
+        ProjectStructure.BuildDirectory,
+        "AbytekCMake",
+        "ProjectInstance.js"
+    );
+}
+AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
+{
+    const AbytekCMakeDirectory = path.dirname(ProjectStructure.ProjectInstanceJSFile);
+    if (!fs.existsSync(AbytekCMakeDirectory))
+    {
+        fs.mkdirSync(AbytekCMakeDirectory, { recursive: true });
+    }
+
+    let PlatformTags = ProjectStructure.Project.GetComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).PlatformTags;
+
+    const ImportJSFile = path.join(
+        ProjectStructure.BuildDirectory,
+        "AbytekCMake",
+        "Import.js"
+    ).replaceAll("\\", "/");
+
+    let FileContent = `
+        const os = require("os");
+        const fs = require("fs");
+        const path = require("path");
+        const ImportJSFile = "${ImportJSFile}";
+        let ProjectInstance = new Object();
+    `;
+
+    // Android requires prepare from android studio
+    if (PlatformTags.includes(APT.Common.PlatformTags.ANDROID))
+    {
+        FileContent += `
+            ProjectInstance.Prepare = function()
+            {
+            };
+        `;
+    }
+
+    FileContent += `
+        module.exports = ProjectInstance;
+    `;
+    fs.writeFileSync(ProjectStructure.ProjectInstanceJSFile, FileContent);
 }

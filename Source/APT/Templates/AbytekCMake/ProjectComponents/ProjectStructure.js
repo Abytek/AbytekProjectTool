@@ -89,6 +89,8 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             "ABYTEK_CMAKE_GENERATOR",
             Generator
         );
+
+        this.ProjectInstanceJSFile = APT.Templates.AbytekCMake.Utilities.CalculateProjectInstanceJSFile(this);
     }
     Init()
     {
@@ -97,6 +99,7 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
             APT.Templates.AbytekCMake.Utilities.GenerateCMakeLists(this);
         }
         APT.Templates.AbytekCMake.Utilities.GenerateBuildDirectorySignatureFile(this);
+        APT.Templates.AbytekCMake.Utilities.GenerateProjectInstanceJSFile(this);
         APT.Templates.AbytekCMake.Utilities.GenerateEnginePathFile(this);
     }
     
