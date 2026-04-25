@@ -91,6 +91,24 @@ AMJS.Namespace.F_ProjectStructure = class extends APT.Core.A_ProjectComponent
         );
 
         this.ProjectInstanceJSFile = APT.Templates.AbytekCMake.Utilities.CalculateProjectInstanceJSFile(this);
+
+        // For cmake-first platforms
+        {
+            let EngineProject = APT.Templates.AbytekCMake.Utilities.GetEngineProject();
+            let EngineAbytekCMakeProjectStructure = null;
+            if (this.IsEngine)
+            {
+                EngineAbytekCMakeProjectStructure = this;
+            }
+            else
+            {
+                EngineAbytekCMakeProjectStructure = EngineProject.GetComponent(APT.Templates.AbytekCMake.ProjectComponents.F_ProjectStructure);
+            }
+            CMakeProjectStructure.ExtraArguments.push(`-DABYTEK_ENGINE_DIR=${EngineProject.EntryDirectory.replaceAll("\\", "/")}`);
+            CMakeProjectStructure.ExtraArguments.push(`-DABYTEK_ENGINE_BUILD_DIR=${EngineAbytekCMakeProjectStructure.BuildDirectory.replaceAll("\\", "/")}`);
+            CMakeProjectStructure.ExtraArguments.push(`-DABYTEK_PROJECT_DIR=${this.Project.EntryDirectory.replaceAll("\\", "/")}`);
+            CMakeProjectStructure.ExtraArguments.push(`-DABYTEK_PROJECT_BUILD_DIR=${this.BuildDirectory.replaceAll("\\", "/")}`);
+        }
     }
     Init()
     {

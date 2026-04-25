@@ -105,7 +105,7 @@ AMJS.Namespace.GenerateCMakeLists = function(ProjectStructure)
             set(ABYTEK_MANUALLY_SET_PROJECT_DIR 1)
         endif()
 
-        add_subdirectory("${EngineEntryDirectory}" "${EngineProjectBuildDirectory}")
+        add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
 
         set(FETCHCONTENT_BASE_DIR "\${CMAKE_CURRENT_BINARY_DIR}/Dependencies")
 
