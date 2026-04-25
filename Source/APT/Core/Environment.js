@@ -332,7 +332,6 @@ AMJS.Namespace.F_Environment = class
         {
             AdditionalOptions = Dependency.AdditionalOptions;
         }
-        AdditionalOptions = Project.ShareAdditionalOptions(AdditionalOptions);
 
         let Required = true;
         if ("Required" in Dependency)

@@ -74,7 +74,13 @@ AMJS.Namespace.F_ProjectManager = class
     {
         APT.Log("APT", `Import project ${RelativeProjectEntryDirectory}`);
 
-        let SharedAdditionalOptionKeys = [];
+        let SharedAdditionalOptionKeys = [
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.PlatformTags",
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.ShouldConfigureProject",
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportDebug",
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportOptimization",
+            "InstanceData.APT.Templates.Common.ProjectComponents.ProjectStructure.SupportMinSize"
+        ];
         if (BaseProject)
         {
             SharedAdditionalOptionKeys = BaseProject.SharedAdditionalOptionKeys;
@@ -93,6 +99,10 @@ AMJS.Namespace.F_ProjectManager = class
             }
         }
         ParsedAdditionalOptions.InstanceData = InstanceData;
+        if (BaseProject)
+        {
+            ParsedAdditionalOptions = BaseProject.ShareAdditionalOptions(ParsedAdditionalOptions);
+        }
 
         // Resolve absolute project directory path
         let AbsoluteProjectEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeProjectEntryDirectory);

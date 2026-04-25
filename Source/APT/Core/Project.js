@@ -80,10 +80,18 @@ AMJS.Namespace.F_Project = class
         let Result = APT.Common.SimpleDeepCopy(Source);
         for (const SharedAdditionalOptionKey of this.SharedAdditionalOptionKeys)
         {
-            APT.Common.SetPropertyByPath(
+            let SourceValue = APT.Common.FindPropertyByPath(
+                Source,
+                SharedAdditionalOptionKey
+            );
+            if (SourceValue == null)
+            {
+                continue;
+            }
+            APT.Common.TrySetPropertyByPath(
                 Result,
                 SharedAdditionalOptionKey,
-                Source[SharedAdditionalOptionKey]
+                SourceValue
             );
         }
         return Result;
