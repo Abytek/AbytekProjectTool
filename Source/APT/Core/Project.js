@@ -203,7 +203,7 @@ AMJS.Namespace.F_Project = class
             this,
             [ this.EntryDirectory ],
             this.EnvironmentName,
-            this.Preset.EnvironmentConfigDirectory
+            path.join(this.EntryDirectory, this.Preset.EnvironmentConfigDirectory)
         );
 
         // Pre-import callbacks
