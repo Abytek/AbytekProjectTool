@@ -198,6 +198,7 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
         const AndroidProjectDirectory = "${AndroidProjectDirectory}";
         const ImportJSFile = "${ImportJSFile}";
         let ProjectInstance = new Object();
+        ProjectInstance.Prepare = function() {};
     `;
     
     // Android requires prepare from android studio
