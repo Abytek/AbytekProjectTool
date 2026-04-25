@@ -175,6 +175,14 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
 
     let PlatformTags = ProjectStructure.Project.GetComponent(APT.Templates.Common.ProjectComponents.F_ProjectStructure).PlatformTags;
 
+    const AndroidProjectDirectory = path.join(
+        ProjectStructure.Project.EntryDirectory,
+        "Platforms",
+        "Android",
+        "Projects",
+        "Application"
+    ).replaceAll("\\", "/");
+
     const ImportJSFile = path.join(
         ProjectStructure.BuildDirectory,
         "AbytekCMake",
@@ -185,19 +193,91 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
         const os = require("os");
         const fs = require("fs");
         const path = require("path");
+        const { spawnSync } = require("child_process");
+
+        const AndroidProjectDirectory = "${AndroidProjectDirectory}";
         const ImportJSFile = "${ImportJSFile}";
         let ProjectInstance = new Object();
     `;
-
+    
     // Android requires prepare from android studio
     if (PlatformTags.includes(APT.Common.PlatformTags.ANDROID))
     {
         FileContent += `
             ProjectInstance.Prepare = function()
             {
+                const result = spawnSync(
+                    process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+                    [
+                        "externalNativeBuildDebug",
+                        "-PABYTEK_PROJECT_ENVIRONMENT_NAME=${ProjectStructure.Project.EnvironmentName}"
+                    ], 
+                    {
+                        cwd: AndroidProjectDirectory,
+                        stdio: "inherit",
+                        shell: true,
+                        env: process.env,
+                    }
+                );
+                if (result.status != 0)
+                {
+                    throw new Error("Failed to prepare android project");
+                }
             };
         `;
     }
+
+    FileContent += `
+        ProjectInstance.LoadModules = function()
+        {
+            let Contexts = [];
+            let AbytekCMakeListFiles = require(ImportJSFile);
+            for (let AbytekCMakeListFile of AbytekCMakeListFiles) 
+            {
+                let List = require(AbytekCMakeListFile);
+                Contexts.push(require(List.JSContextFile));
+            }
+
+            // Module names
+            let ModuleNames = [];
+            for (let Context of Contexts)
+            {
+                for (let ModuleName in Context.ModuleFiles)
+                {
+                    ModuleNames.push(ModuleName);
+                }
+            }
+
+            // Module files
+            let ModuleFiles = new Object();
+            for (let Context of Contexts)
+            {
+                for (let ModuleName in Context.ModuleFiles)
+                {
+                    ModuleFiles[ModuleName] = Context.ModuleFiles[ModuleName];
+                }
+            }
+
+            // Modules
+            let Modules = new Object();
+            for (let Context of Contexts)
+            {
+                for (let ModuleName in Context.ModuleFiles)
+                {
+                    Modules[ModuleName] = Context.RequireModule(ModuleName);
+                }
+            }
+            this.Modules = Modules;
+        };
+    `;
+
+    FileContent += `
+        ProjectInstance.Load = function()
+        {
+            ProjectInstance.Prepare();
+            ProjectInstance.LoadModules();
+        };
+    `;
 
     FileContent += `
         module.exports = ProjectInstance;
