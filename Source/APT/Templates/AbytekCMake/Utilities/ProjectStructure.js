@@ -237,6 +237,7 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
                 let List = require(AbytekCMakeListFile);
                 Contexts.push(require(List.JSContextFile));
             }
+            this.AbytekCMakeListFiles = AbytekCMakeListFiles;
 
             // Module names
             let ModuleNames = [];
@@ -247,6 +248,7 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
                     ModuleNames.push(ModuleName);
                 }
             }
+            this.ModuleNames = ModuleNames;
 
             // Module files
             let ModuleFiles = new Object();
@@ -257,6 +259,7 @@ AMJS.Namespace.GenerateProjectInstanceJSFile = function(ProjectStructure)
                     ModuleFiles[ModuleName] = Context.ModuleFiles[ModuleName];
                 }
             }
+            this.ModuleFiles = ModuleFiles;
 
             // Modules
             let Modules = new Object();
