@@ -52,11 +52,10 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         describe: 'path to the main project'
                     })
 
-                    // .option('define', {
-                    //     type: 'object', // 👈 quan trọng
-                    //     describe: 'defines: --define.KEY value'
-                    // })
-                    ,
+                    .option('Data', {
+                        type: 'object', // 👈 quan trọng
+                        describe: 'Data: --Data.KEY VALUE'
+                    }),
 
                 (Argv) => {
                     let Command_ImportMainProject = ProjectManager.Command_ImportMainProject;

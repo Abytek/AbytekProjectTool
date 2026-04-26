@@ -44,5 +44,7 @@ APT.Core.F_Console = class extends APT.Core.A_SystemChild
             .demandCommand()
             .help()
             .parse();
+
+        APT.Log("APT", `Built console commands: ${APT.Common.NiceJSONStringify(this.Argv)}`);
     }
 }
