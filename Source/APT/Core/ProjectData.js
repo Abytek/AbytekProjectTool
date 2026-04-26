@@ -111,7 +111,7 @@ APT.Core.F_ProjectData = class
         }
         if (this.HasPrivate(Key))
         {
-            return GetPrivate(Key);
+            return this.GetPrivate(Key);
         }
         APT.FatalError("APT", `Not found key: ${Key}`);
         return null;
@@ -124,7 +124,7 @@ APT.Core.F_ProjectData = class
         }
         if (this.HasPrivate(Key))
         {
-            return FindPrivate(Key);
+            return this.FindPrivate(Key);
         }
         return null;
     }

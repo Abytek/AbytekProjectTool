@@ -1,5 +1,5 @@
 
-APT.Extensions.Environment.Setup(this);
+APT.Extensions.AbytekCMake.Setup(this);
 
 APT.On(
     "PrepareSignature",
@@ -12,5 +12,7 @@ APT.On(
     "Import",
     function()
     {
+        let Environment = APT.Get("Environment");
+        let AbytekCMake = APT.Get("AbytekCMake");
     }
 );
