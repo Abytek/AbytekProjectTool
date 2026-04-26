@@ -5,6 +5,15 @@ const path = require("path");
 AMJS.Import("./Common");
 
 
+APT.Extensions.CMake.GetDefaultConfigureOptions = function()
+{
+    let Options = new Object();
+    Options.Generator = APT.Extensions.CMake.GetDefaultGenerator();
+    Options.Config = APT.Extensions.CMake.GetDefaultConfigForGenerator(Options.Generator);
+    Options.ExtraArguments = [];
+    return Options;
+}
+
 APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Options)
 {
     if (!SourceDirectory || !BuildDirectory) 
@@ -12,21 +21,22 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
         throw new Error("Requires SourceDirectory and BuildDirectory");
     }
 
+    let DefaultOptions = APT.Extensions.CMake.GetDefaultConfigureOptions();
     if (Options == null)
     {
         Options = new Object();
     }
     if (Options.Generator == null)
     {
-        Options.Generator = APT.Extensions.CMake.GetDefaultGenerator();
+        Options.Generator = DefaultOptions.Generator;
     }
     if (Options.Config == null)
     {
-        Options.Config = APT.Extensions.CMake.GetDefaultConfigForGenerator(Options.Generator);
+        Options.Config = DefaultOptions.Config;
     }
     if (Options.ExtraArguments == null)
     {
-        Options.ExtraArguments = [];
+        Options.ExtraArguments = DefaultOptions.ExtraArguments;
     }
 
     SourceDirectory = path.resolve(SourceDirectory);
@@ -71,4 +81,5 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
     {
         throw new Error("CMake configuration failed");
     }
+    APT.Log("APT", `Configured CMake project`);
 }
