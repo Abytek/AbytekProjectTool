@@ -1,5 +1,5 @@
 
-AMJS.Import("./Instance")
+AMJS.Import("./ProjectComponent")
 
 APT.Extensions.Environment.Setup = function(Context)
 {
@@ -16,7 +16,7 @@ APT.Extensions.Environment.Setup = function(Context)
         {
             Context.APT.Set(
                 "Environment",
-                new APT.Extensions.Environment.F_Instance(Context)
+                new APT.Extensions.Environment.F_ProjectComponent(Context)
             );
         }
     );

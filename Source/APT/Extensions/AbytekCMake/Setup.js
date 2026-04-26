@@ -1,5 +1,5 @@
 
-AMJS.Import("./Instance")
+AMJS.Import("./ProjectComponent")
 
 APT.Extensions.AbytekCMake.Setup = function(Context)
 {
@@ -18,7 +18,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context)
         {
             Context.APT.Set(
                 "AbytekCMake",
-                new APT.Extensions.AbytekCMake.F_Instance(Context)
+                new APT.Extensions.AbytekCMake.F_ProjectComponent(Context)
             );
         }
     );

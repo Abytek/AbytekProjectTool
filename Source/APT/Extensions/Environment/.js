@@ -1,3 +1,3 @@
 
-AMJS.Import("./Instance");
+AMJS.Import("./ProjectComponent");
 AMJS.Import("./Setup");

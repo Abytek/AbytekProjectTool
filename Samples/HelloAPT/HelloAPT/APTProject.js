@@ -2,13 +2,6 @@
 APT.Extensions.AbytekCMake.Setup(this);
 
 APT.On(
-    "PrepareSignature",
-    function()
-    { 
-    }
-);
-
-APT.On(
     "Import",
     function()
     {

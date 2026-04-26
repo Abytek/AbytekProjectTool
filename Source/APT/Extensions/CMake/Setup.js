@@ -1,5 +1,5 @@
 
-AMJS.Import("./Instance")
+AMJS.Import("./ProjectComponent")
 
 APT.Extensions.CMake.Setup = function(Context)
 {
@@ -16,7 +16,7 @@ APT.Extensions.CMake.Setup = function(Context)
         {
             Context.APT.Set(
                 "CMake",
-                new APT.Extensions.CMake.F_Instance(Context)
+                new APT.Extensions.CMake.F_ProjectComponent(Context)
             );
         }
     );

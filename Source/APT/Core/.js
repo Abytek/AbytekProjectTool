@@ -5,4 +5,10 @@ const fs = require("fs");
 AMJS.Import("../Common");
 
 AMJS.Import("./System");
+AMJS.Import("./SystemChild");
 AMJS.Import("./Logger");
+AMJS.Import("./Console");
+AMJS.Import("./ProjectManager");
+AMJS.Import("./Project");
+AMJS.Import("./ProjectData");
+AMJS.Import("./ProjectComponent");
