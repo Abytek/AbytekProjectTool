@@ -25,7 +25,12 @@ APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
     const CMakeBuildDirectory = CMakeBuildDirectoryConfig.Path;
 
     let CMakeConfigureExtraArguments = [
-        ...APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments(Project, CMakeConfig)
+        ...APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments(
+            Environment,
+            Project.EntryDirectory,
+            CMakeBuildDirectory, 
+            CMakeConfig
+        )
     ];
 
     APT.Extensions.CMake.Configure(

@@ -197,13 +197,16 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
     fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
 }
 
-APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Project, Config)
+APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Environment, EntryDirectory, CMakeBuildDirectory, CMakeConfig)
 {
     let Result = [];
     Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5`);
-    if (!Config.IsAuto)
+    if (!CMakeConfig.IsAuto)
     {
-        Result.push(`-DCMAKE_BUILD_TYPE=${Config.DirectConfig}`);
+        Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
     }
+    Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${Environment}"`);
+    Result.push(`-DABYTEK_PROJECT_DIR="${EntryDirectory}"`);
+    Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${CMakeBuildDirectory}"`);
     return Result;
 }
