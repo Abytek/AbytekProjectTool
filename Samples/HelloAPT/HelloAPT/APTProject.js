@@ -1,7 +1,7 @@
 
 APT.On(
     "PrepareSignature",
-    function(SignatureData)
+    function()
     {
         APT.Log("HelloAPT", `PrepareSignature: ${APT.Project.EntryDirectory}`);   
     }

@@ -48,6 +48,11 @@ APT.Core.F_ProjectData = class
         }
         return this.GetPublic(Key);
     }
+    SetPublic(Key, Value)
+    {
+        APT.Common.Assert(this.HasPublic(Key) || !this.Has(Key), `Cannot set public key: ${Key}`);
+        this.Public[Key] = Value;
+    }
 
     HasPrivate(Key)
     {
@@ -79,6 +84,11 @@ APT.Core.F_ProjectData = class
             return this.AddPrivate(Key, Value);
         }
         return this.GetPrivate(Key);
+    }
+    SetPrivate(Key, Value)
+    {
+        APT.Common.Assert(this.HasPrivate(Key) || !this.Has(Key), `Cannot set private key: ${Key}`);
+        this.Private[Key] = Value;
     }
 
     Has(Key)
@@ -118,12 +128,21 @@ APT.Core.F_ProjectData = class
         }
         return null;
     }
+    GetOrAdd(Key, DefaultValue)
+    {
+        return this.GetOrAddPrivate(Key, DefaultValue);
+    }
+    Set(Key, Value)
+    {
+        return this.SetPrivate(Key, Value);
+    }
 
-    GetSignature()
+    GetSignature(ProjectEntryDirectory = "")
     {
         return APT.Common.NiceJSONStringify({
             Public: this.Public,
             Private: this.Private,
+            ProjectEntryDirectory
         });
     }
 }

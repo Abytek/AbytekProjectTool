@@ -219,7 +219,12 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         }     
         
         Project.ExecuteEvent("PrepareSignature");
-        // this.Projects.set(ProjectKey, Project);
+        let Signature = Project.SignatureData.GetSignature(Project.EntryDirectory);
+        if (this.Projects.has(Signature))
+        {
+            return this.Projects.get(Signature);
+        }
+        this.Projects.set(Signature, Project);
 
         Project.PreImport();
         Project.ExecuteEvent("Import");
