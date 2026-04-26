@@ -1,6 +1,4 @@
-AMJS.Import("./ProjectManager");
-AMJS.Import("./CommandManager");
-AMJS.Import("./Environment");
+AMJS.Import("./Logger");
 
 AMJS.Namespace.F_System = class
 {
