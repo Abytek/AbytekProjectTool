@@ -5,39 +5,68 @@ const path = require("path");
 AMJS.Import("./Common");
 
 
-APT.Extensions.CMake.Build = function(SourceDirectory, BuildDirectory, Target, DirectConfig)
+APT.Extensions.CMake.GetDefaultBuildOptions = function()
+{
+    let Options = new Object();
+    Options.Target = null;
+    Options.DirectConfig = APT.Extensions.CMake.GetDefaultDirectConfig();
+    Options.ExtraArguments = [];
+    return Options;
+}
+
+APT.Extensions.CMake.Build = function(SourceDirectory, BuildDirectory, Options)
 {
     if (!SourceDirectory || !BuildDirectory) 
     {
         throw new Error("Requires SourceDirectory and BuildDirectory");
     }
 
-    if (DirectConfig == null)
+    let DefaultOptions = APT.Extensions.CMake.GetDefaultBuildOptions();
+    if (Options == null)
     {
-        DirectConfig = APT.Extensions.CMake.GetDefaultDirectConfig();
+        Options = new Object();
+    }
+    if (Options.DirectConfig == null)
+    {
+        Options.DirectConfig = DefaultOptions.DirectConfig;
+    }
+    if (Options.Target == null)
+    {
+        Options.Target = DefaultOptions.Target;
+    }
+    if (Options.ExtraArguments == null)
+    {
+        Options.ExtraArguments = DefaultOptions.ExtraArguments;
     }
 
     SourceDirectory = path.resolve(SourceDirectory);
     BuildDirectory = path.resolve(BuildDirectory);
 
-    const BuildArgs = [
+    const Arguments = [
         "--build", 
         APT.Common.ToCLIArgument(BuildDirectory)
     ];
-
-    if (Target) 
+    if (Options.Target) 
     {
-        BuildArgs.push(
+        Arguments.push(
             "--target", 
-            APT.Common.ToCLIArgument(Target)
+            APT.Common.ToCLIArgument(Options.Target)
         );
     }
+    Arguments.push(
+        "--config",
+        Options.DirectConfig
+    );
+    for (let ExtraArgument of Options.ExtraArguments)
+    {
+        Arguments.push(ExtraArgument);
+    }
 
-    APT.Log("APT", `Build CMake project with command: cmake ${BuildArgs.join(' ')}`);
+    APT.Log("APT", `Build CMake project with command: cmake ${Arguments.join(' ')}`);
 
     result = spawnSync(
         "cmake", 
-        BuildArgs, 
+        Arguments, 
         {
             stdio: "inherit",
             shell: true
