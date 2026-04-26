@@ -8,6 +8,9 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
     {
         super(Context);
 
+        let Environment = this.Get("AbytekCMake.Environment");
+        let PlatformTags = this.Get("AbytekCMake.PlatformTags");
+        let Editor = this.Get("AbytekCMake.Editor");
         let Name = this.GetOrAdd("AbytekCMake.Name", "AbytekProject");
         let PrepareEnabled = this.GetOrAdd("AbytekCMake.Prepare.Enabled", this.Project.IsMain);
         let CMakeDefinitions = this.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
@@ -57,9 +60,9 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         // Generate engine path file
         APT.Extensions.AbytekCMake.GenerateEnginePathFile(
             this.Project.EntryDirectory,
-            this.Get("AbytekCMake.Environment"),
-            this.Get("AbytekCMake.PlatformTags"),
-            this.Get("AbytekCMake.Editor"),
+            Environment,
+            PlatformTags,
+            Editor,
             Engine.EntryDirectory
         );       
 
@@ -71,6 +74,15 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
                 Name
             );
         }
+
+        // Apply cmake definitions
+        APT.Extensions.AbytekCMake.ApplyCMakeDefinitions(
+            CMakeDefinitions,
+            this.Project.EntryDirectory,
+            Environment,
+            PlatformTags,
+            Editor
+        );
 
         // Prepare if needed
         if (PrepareEnabled)

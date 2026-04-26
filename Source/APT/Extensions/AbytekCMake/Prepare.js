@@ -1,6 +1,6 @@
 
 AMJS.Import("./Common");
-AMJS.Import("./ConfigureCMake");
+AMJS.Import("./CMakeConfigure");
 
 
 APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
@@ -9,7 +9,7 @@ APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
     
     let CMakeConfig = APT.Extensions.CMake.MakeAutoConfig();
 
-    APT.Extensions.AbytekCMake.ConfigureCMake(
+    APT.Extensions.AbytekCMake.CMakeConfigure(
         Project,
         CMakeConfig
     );

@@ -2,7 +2,7 @@
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekCMake.ConfigureCMake = function(Project, CMakeConfig)
+APT.Extensions.AbytekCMake.CMakeConfigure = function(Project, CMakeConfig)
 {
     let Editor = Project.Data.Get("AbytekCMake.Editor");
     let Environment = Project.Data.Get("AbytekCMake.Environment");
