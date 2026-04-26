@@ -7,6 +7,11 @@ APT.Extensions.AbytekCMake.GetDefaultSetupOptions = function()
 {
     let Options = new Object();
     Options.IsEngine = false;
+    Options.EngineLinkQuery = {
+        GitDetails: {
+            RemoteURL: "git@github.com:Abytek/Abytek.git"
+        }
+    };
     return Options;
 }
 
@@ -22,6 +27,10 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
     if (Options.IsEngine == null)
     {
         Options.IsEngine = DefaultOptions.IsEngine;
+    }
+    if (Options.EngineLinkQuery == null)
+    {
+        Options.EngineLinkQuery = DefaultOptions.EngineLinkQuery;
     }
 
     Context.APT.On(
@@ -63,8 +72,12 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 }
                 GlobalContext.AbytekCMake.Engines.push(Context.APT.Project);
             }
-
-            APT.Common.Assert("AbytekCMake" in GlobalContext, "Not found Abytek Engine");
+            else
+            {
+                let EngineDirectory = APT.Extensions.ProjectLinker.Find(Options.EngineLinkQuery);
+                APT.Common.Assert(EngineDirectory, "Not found Abytek Engine");
+                Context.APT.ImportProject(EngineDirectory);
+            }
 
             Context.APT.Set(
                 "AbytekCMake",

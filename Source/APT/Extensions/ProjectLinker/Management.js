@@ -72,3 +72,21 @@ APT.Extensions.ProjectLinker.Find = function(Query)
     }
     return null;
 }
+APT.Extensions.ProjectLinker.Ensure = function(Query)
+{
+    // If available
+    {
+        let EntryDirectory = APT.Extensions.ProjectLinker.Find(Query);
+        if (EntryDirectory)
+        {
+            return EntryDirectory;
+        }
+    }
+
+    // Git clone
+    if ("GitDetails" in Query)
+    {
+        const GitDetails = Query.GitDetails;
+    }
+    return null;
+}
