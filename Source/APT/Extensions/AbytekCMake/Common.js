@@ -70,6 +70,12 @@ APT.Extensions.AbytekCMake.CalculateBuildDirectory = function(EntryDirectory)
 {
     return path.join(EntryDirectory, "Build");
 }
+APT.Extensions.AbytekCMake.EnsureBuildDirectory = function(EntryDirectory)
+{
+    const Path = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
+    fs.mkdirSync(Path, { recursive: true });
+    return Path;
+}
 
 APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignature = function(
     Environment,
@@ -147,6 +153,7 @@ APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, Env
 {
     APT.Log("APT", `Generating engine path file, entry directory: ${EntryDirectory}, environment: ${Environment}, platform tags: ${PlatformTags}, engine entry directory: ${EngineEntryDirectory}`);
     const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, Environment, PlatformTags, Editor);
+    APT.Extensions.AbytekCMake.EnsureBuildDirectory(EntryDirectory);
     fs.writeFileSync(EnginePathFile, EngineEntryDirectory);
     APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
 }
@@ -156,6 +163,8 @@ APT.Extensions.AbytekCMake.CalculateCMakeListsFile = function(EntryDirectory)
 }
 APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, ProjectName)
 {
+    APT.Extensions.AbytekCMake.EnsureBuildDirectory(EntryDirectory);
+
     const AbytekCMakeFile = path.join(EntryDirectory, "AbytekCMake.txt");
     const AbytekCMakeFileContent = "";
     if (fs.existsSync(AbytekCMakeFile))
@@ -267,14 +276,14 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     }
 
     Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${ProjectEnvironment}"`);
-    Result.push(`-DABYTEK_PROJECT_DIR="${Project.EntryDirectory}"`);
-    Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${ProjectCMakeBuildDirectoryConfig.Path}"`);
+    Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(Project.EntryDirectory)}"`);
+    Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Path)}"`);
     Result.push(`-DABYTEK_PROJECT_SIGNATURE="${ProjectSignature}"`);
 
     Result.push(`-DABYTEK_ENGINE_ENVIRONMENT_NAME="${EngineEnvironment}"`);
     Result.push(`-DABYTEK_ENGINE_EDITOR="${EngineEditor}"`);
-    Result.push(`-DABYTEK_ENGINE_DIR="${EngineProject.EntryDirectory}"`);
-    Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${EngineCMakeBuildDirectoryConfig.Path}"`);
+    Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineProject.EntryDirectory)}"`);
+    Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Path)}"`);
     Result.push(`-DABYTEK_ENGINE_SIGNATURE="${EngineSignature}"`);
     
     Result.push(`-DABYTEK_CMAKE_EDITOR="${EngineEditor}"`);

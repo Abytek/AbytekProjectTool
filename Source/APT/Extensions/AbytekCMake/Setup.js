@@ -70,8 +70,6 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             }
             else
             {
-                let EngineDirectory = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery);
-                APT.Common.Assert(EngineDirectory, "Not found Abytek Engine");
                 let EngineData = new APT.Core.F_ProjectData();
                 for (let DataKey of APT.Extensions.AbytekCMake.GetSignatureDataKeys())
                 {
@@ -80,7 +78,8 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                         Context.APT.Get(DataKey)
                     );
                 }
-                Context.APT.ImportProject(EngineDirectory, EngineData);
+
+                APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery, EngineData);
             }
 
             Context.APT.Set(
