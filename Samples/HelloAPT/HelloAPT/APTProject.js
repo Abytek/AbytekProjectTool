@@ -1,10 +1,10 @@
 
+APT.Extensions.Environment.Setup(this);
+
 APT.On(
     "PrepareSignature",
     function()
-    {
-        APT.TransferSignature("HelloAPT", "WOW");
-        APT.Log("HelloAPT", `PrepareSignature: ${APT.Project.EntryDirectory}`);   
+    { 
     }
 );
 
@@ -12,9 +12,5 @@ APT.On(
     "Import",
     function()
     {
-        APT.Log("HelloAPT", `Import: ${APT.Project.EntryDirectory}`);   
-        let NewData = new APT.Core.F_ProjectData();
-        NewData.Set("HelloAPT", "WOW");
-        APT.ImportProject(".", NewData);
     }
 );
