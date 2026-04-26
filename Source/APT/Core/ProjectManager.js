@@ -133,64 +133,162 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         Project.Context = Context;
                         Context.APT.Project = Project;
                         {
-                            Context.APT.HasPublic = function(Key)
+                            Context.APT.HasPublic = function(Key, IsSignature = false)
                             {
-                                return Project.Data.HasPublic(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.HasPublic(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.HasPublic(Key);
+                                }
                             }
-                            Context.APT.AddPublic = function(Key, Value)
+                            Context.APT.AddPublic = function(Key, Value, IsSignature = false)
                             {
-                                return Project.Data.AddPublic(Key, Value);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.AddPublic(Key, Value);
+                                }
+                                else
+                                {
+                                    return Project.Data.AddPublic(Key, Value);
+                                }
                             }
-                            Context.APT.GetPublic = function(Key)
+                            Context.APT.GetPublic = function(Key, IsSignature = false)
                             {
-                                return Project.Data.GetPublic(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetPublic(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.GetPublic(Key);
+                                }
                             }
-                            Context.APT.FindPublic = function(Key)
+                            Context.APT.FindPublic = function(Key, IsSignature = false)
                             {
-                                return Project.Data.FindPublic(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.FindPublic(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.FindPublic(Key);
+                                }
                             }
-                            Context.APT.GetOrAddPublic = function(Key, DefaultValue)
+                            Context.APT.GetOrAddPublic = function(Key, DefaultValue, IsSignature = false)
                             {
-                                return Project.Data.GetOrAddPublic(Key, DefaultValue);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetOrAddPublic(Key, DefaultValue);
+                                }
+                                else
+                                {
+                                    return Project.Data.GetOrAddPublic(Key, DefaultValue);
+                                }
                             }
 
-                            Context.APT.HasPrivate = function(Key)
+                            Context.APT.HasPrivate = function(Key, IsSignature = false)
                             {
-                                return Project.Data.HasPrivate(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.HasPrivate(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.HasPrivate(Key);
+                                }
                             }
-                            Context.APT.AddPrivate = function(Key, Value)
+                            Context.APT.AddPrivate = function(Key, Value, IsSignature = false)
                             {
-                                return Project.Data.AddPrivate(Key, Value);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.AddPrivate(Key, Value);
+                                }
+                                else
+                                {
+                                    return Project.Data.AddPrivate(Key, Value);
+                                }
                             }
-                            Context.APT.GetPrivate = function(Key)
+                            Context.APT.GetPrivate = function(Key, IsSignature = false)
                             {
-                                return Project.Data.GetPrivate(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetPrivate(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.GetPrivate(Key);
+                                }
                             }
-                            Context.APT.FindPrivate = function(Key)
+                            Context.APT.FindPrivate = function(Key, IsSignature = false)
                             {
-                                return Project.Data.FindPrivate(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.FindPrivate(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.FindPrivate(Key);
+                                }
                             }
-                            Context.APT.GetOrAddPrivate = function(Key, DefaultValue)
+                            Context.APT.GetOrAddPrivate = function(Key, DefaultValue, IsSignature = false)
                             {
-                                return Project.Data.GetOrAddPrivate(Key, DefaultValue);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetOrAddPrivate(Key, DefaultValue);
+                                }
+                                else
+                                {
+                                    return Project.Data.GetOrAddPrivate(Key, DefaultValue);
+                                }
                             }
 
-                            Context.APT.Has = function(Key)
+                            Context.APT.Has = function(Key, IsSignature = false)
                             {
-                                return Project.Data.Has(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.Has(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.Has(Key);
+                                }
                             }
-                            Context.APT.Get = function(Key)
+                            Context.APT.Get = function(Key, IsSignature = false)
                             {
-                                return Project.Data.Get(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.Get(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.Get(Key);
+                                }
                             }
-                            Context.APT.Find = function(Key)
+                            Context.APT.Find = function(Key, IsSignature = false)
                             {
-                                return Project.Data.Find(Key);
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.Find(Key);
+                                }
+                                else
+                                {
+                                    return Project.Data.Find(Key);
+                                }
                             }
 
-                            Context.APT.GetSignature = function()
+                            Context.APT.GetSignature = function(IsSignature = false)
                             {
-                                return Project.Data.GetSignature();
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetSignature();
+                                }
+                                else
+                                {
+                                    return Project.Data.GetSignature();
+                                }
                             }
                         }
                         Context.APT.ImportProject = function(RelativeEntryDirectory2, Data2, Required2 = true)
@@ -220,6 +318,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         
         Project.ExecuteEvent("PrepareSignature");
         let Signature = Project.SignatureData.GetSignature(Project.EntryDirectory);
+        APT.Log("APT", `Project signature: ${Signature}`);
         if (this.Projects.has(Signature))
         {
             return this.Projects.get(Signature);
