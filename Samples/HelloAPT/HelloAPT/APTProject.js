@@ -1,8 +1,16 @@
 
 APT.On(
+    "PrepareSignature",
+    function()
+    {
+        APT.Log("HelloAPT", `PrepareSignature: ${APT.Project.EntryDirectory}`);   
+    }
+);
+
+APT.On(
     "Init",
     function()
     {
-        console.log(`HelloAPT ${APT.Project.EntryDirectory}`);
+        APT.Log("HelloAPT", `Init: ${APT.Project.EntryDirectory}`);   
     }
 );

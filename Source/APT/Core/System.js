@@ -1,10 +1,15 @@
 AMJS.Import("./Logger");
+AMJS.Import("./ProjectManager");
 
 AMJS.Namespace.F_System = class
 {
     constructor()
     {
-        this.Logger = new AMJS.Namespace.F_Logger(this);
+        this.Logger = new APT.Core.F_Logger(this);
+
+        this.Childs = [];
+
+        this.AddChild(new APT.Core.F_ProjectManager(this));
 
         // // Apply LoggerDefault
         // if (this.CommandManager.CLIInput.has('GlobalDefault'))
@@ -45,5 +50,21 @@ AMJS.Namespace.F_System = class
         {
             process.exit(0);
         }
+    }
+
+    GetChild(Name)
+    {
+        for (let Child of this.Childs)
+        {
+            if (Child.Name == Name)
+            {
+                return Child;
+            }
+        }
+        return null;
+    }
+    AddChild(Child)
+    {
+        this.Childs.push(Child);
     }
 };

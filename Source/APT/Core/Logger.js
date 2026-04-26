@@ -28,6 +28,7 @@ AMJS.Namespace.F_Logger = class
         APT.Log = (Category, ...Args) => this.Log(Category, ...Args);
         APT.Warning = (Category, ...Args) => this.Warning(Category, ...Args);
         APT.Error = (Category, ...Args) => this.Error(Category, ...Args);
+        APT.FatalError = (Category, ...Args) => this.FatalError(Category, ...Args);
     }
 
     CurrentTimestapString()
@@ -124,6 +125,11 @@ AMJS.Namespace.F_Logger = class
     Error(Category, ...Args)
     {
         this.Write({ Type: "Error", Category: (Category ?? "Temp"), Args });
+    }
+    FatalError(Category, ...Args)
+    {
+        this.Write({ Type: "FatalError", Category: (Category ?? "Temp"), Args });
+        throw new Error(...Args);
     }
     HideType(Type)
     {

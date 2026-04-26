@@ -1,2 +1,4 @@
 
-AMJS.Import("./Data");
+AMJS.Import("./Build");
+AMJS.Import("./Configure");
+AMJS.Import("./Setup");
