@@ -1,5 +1,6 @@
 
 const path = require("path");
+const fs = require("fs");
 
 APT.Core.F_Project = class
 {
@@ -11,12 +12,8 @@ APT.Core.F_Project = class
         this.Data = Data;
 
         this.Events = {
-            PrepareSignature()
-            {
-            },
-            Init()
-            {
-            }
+            PrepareSignature: [],
+            Import: []
         };
     }
 
@@ -25,5 +22,15 @@ APT.Core.F_Project = class
     }
     PostImport()
     {
+    }
+
+    ExecuteEvent(EventName, ...Args)
+    {
+        APT.Common.Assert(EventName in this.Events, `Not found event: ${EventName}`);
+        let Event = this.Events[EventName];
+        for (let Listener of Event)
+        {
+            Listener(...Args);
+        }
     }
 }

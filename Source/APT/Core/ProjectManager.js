@@ -6,6 +6,8 @@ const Ajv = require("ajv");
 const { execSync } = require('child_process');
 
 AMJS.Import("./SystemChild");
+AMJS.Import("./Project");
+AMJS.Import("./ProjectData");
 
 
 APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
@@ -70,12 +72,19 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
             return;
         }
         APT.Log("APT", `Start importing main project: ${this.Command_ImportMainProject.MainProjectEntryDirectory}`);
+        this.MainProject = this.ImportProject(
+            [
+                process.cwd()
+            ],
+            this.Command_ImportMainProject.MainProjectEntryDirectory
+        );
         APT.Log("APT", `Imported main project`);
     }
 
     ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true)
     {
-        APT.Log("APT", `Import project ${RelativeProjectEntryDirectory}`);
+        APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
+        APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
 
         if (Data == null)
         {
@@ -104,14 +113,9 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
 
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, ParsedAdditionalOptions, SharedAdditionalOptionKeys);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, Data);
 
         let ProjectManager = this;
-
-        let PostImportModuleCallback = function()
-        {
-            Project.Events.PrepareSignature();
-        }
 
         if (Project.HasEntryFile)
         {
@@ -150,7 +154,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                 return Project.Data.GetOrAddPublic(Key, DefaultValue);
                             }
 
-                            Context.APT.HasPrivate(Key)
+                            Context.APT.HasPrivate = function(Key)
                             {
                                 return Project.Data.HasPrivate(Key);
                             }
@@ -199,9 +203,9 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
-                            Project.Events[EventName] = Callback;   
+                            APT.Common.Assert(EventName in Project.Events, `Not found event: ${EventName}`);
+                            Project.Events[EventName].push(Callback);   
                         }
-                        PostImportModuleCallback();
                     },
                     IsAnonymous: true
                 }
@@ -212,14 +216,13 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                 this.Projects.delete(ProjectKey);
                 return false;
             }
-        }
-        else
-        {
-            PostImportModuleCallback();
-        }        
+        }     
         
-        this.Projects.set(ProjectKey, Project);
+        Project.ExecuteEvent("PrepareSignature");
+        // this.Projects.set(ProjectKey, Project);
 
+        Project.PreImport();
+        Project.ExecuteEvent("Import");
         Project.PostImport();
 
         APT.Log("APT", `Imported project at: ${AbsoluteProjectEntryDirectory}`);
