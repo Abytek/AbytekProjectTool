@@ -316,7 +316,8 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             Context.APT.TransferSignature = function(Key, DefaultValue)
                             {
                                 let Value = Project.Data.GetOrAdd(Key, DefaultValue);
-                                return Project.SignatureData.Set(Key, Value);
+                                Project.SignatureData.Set(Key, Value);
+                                return Value;
                             }
                         }
                         Context.APT.ImportProject = function(RelativeEntryDirectory2, Data2, Required2 = true)
@@ -349,6 +350,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Project signature: ${Signature}`);
         if (this.Projects.has(Signature))
         {
+            APT.Log("APT", `Found project, already imported: ${Signature}`);
             return this.Projects.get(Signature);
         }
         this.Projects.set(Signature, Project);

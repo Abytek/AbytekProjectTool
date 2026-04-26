@@ -13,5 +13,8 @@ APT.On(
     function()
     {
         APT.Log("HelloAPT", `Import: ${APT.Project.EntryDirectory}`);   
+        let NewData = new APT.Core.F_ProjectData();
+        NewData.Set("HelloAPT", "WOW");
+        APT.ImportProject(".", NewData);
     }
 );
