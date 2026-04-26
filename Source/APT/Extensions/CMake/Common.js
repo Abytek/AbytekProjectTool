@@ -25,7 +25,7 @@ APT.Extensions.CMake.MakeConfig = function(DirectConfig, IsAuto = false)
 }
 APT.Extensions.CMake.MakeAutoConfig = function()
 {
-    return APT.Extensions.CMake.MakeConfig(true, null);
+    return APT.Extensions.CMake.MakeConfig(null, true);
 }
 
 APT.Extensions.CMake.GetDefaultDirectConfig = function()
