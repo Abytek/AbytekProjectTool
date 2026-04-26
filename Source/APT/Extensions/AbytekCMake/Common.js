@@ -173,6 +173,13 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
             project("${ProjectName}" LANGUAGES C CXX)
         endif()
 
+        set(CMAKE_MODULE_PATH "\${CMAKE_MODULE_PATH};\${ABYTEK_ENGINE_DIR}/CMake")
+        include(Abytek/Utilities/SetGlobal)
+        include(Abytek/Utilities/ReadKeyValueFile)
+
+        Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_PROJECT_SIGNATURE}.txt")
+        Abytek_ReadKeyValueFile(\${ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE})
+
         add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
 
         set(FETCHCONTENT_BASE_DIR "\${CMAKE_CURRENT_BINARY_DIR}/Dependencies")
@@ -201,6 +208,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
 {
     let ProjectEnvironment = null;
     let ProjectCMakeBuildDirectoryConfig = null;
+    let ProjectSignature = null;
     {
         let Editor = Project.Data.Get("AbytekCMake.Editor");
         ProjectEnvironment = Project.Data.Get("AbytekCMake.Environment");
@@ -211,6 +219,8 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
         {
             CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
         }
+
+        ProjectSignature = APT.Extensions.AbytekCMake.CalculateSignature(ProjectEnvironment, PlatformTags, Editor);
 
         ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             Project.EntryDirectory,
@@ -224,22 +234,27 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     let EngineProject = Project.Data.Get("AbytekCMake.Engine");
     let EngineEnvironment = null;
     let EngineCMakeBuildDirectoryConfig = null;
+    let EngineSignature = null;
+    let EngineEditor = null;
+    let EngineCMakeGenerator = null;
     {
-        let Editor = EngineProject.Data.Get("AbytekCMake.Editor");
+        EngineEditor = EngineProject.Data.Get("AbytekCMake.Editor");
         EngineEnvironment = EngineProject.Data.Get("AbytekCMake.Environment");
         let PlatformTags = EngineProject.Data.Get("AbytekCMake.PlatformTags");
         
-        let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
+        EngineCMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(EngineEditor);
         if (CMakeConfig == null)
         {
-            CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
+            CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(EngineCMakeGenerator);
         }
+
+        EngineSignature = APT.Extensions.AbytekCMake.CalculateSignature(EngineEnvironment, PlatformTags, EngineEditor);
 
         EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             EngineProject.EntryDirectory,
             EngineEnvironment,
             PlatformTags,
-            CMakeGenerator,
+            EngineCMakeGenerator,
             CMakeConfig
         );
     }
@@ -250,11 +265,28 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     {
         Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
     }
+
     Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${ProjectEnvironment}"`);
     Result.push(`-DABYTEK_PROJECT_DIR="${Project.EntryDirectory}"`);
     Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${ProjectCMakeBuildDirectoryConfig.Path}"`);
+    Result.push(`-DABYTEK_PROJECT_SIGNATURE="${ProjectSignature}"`);
+
     Result.push(`-DABYTEK_ENGINE_ENVIRONMENT_NAME="${EngineEnvironment}"`);
+    Result.push(`-DABYTEK_ENGINE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_ENGINE_DIR="${EngineProject.EntryDirectory}"`);
     Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${EngineCMakeBuildDirectoryConfig.Path}"`);
+    Result.push(`-DABYTEK_ENGINE_SIGNATURE="${EngineSignature}"`);
+    
+    Result.push(`-DABYTEK_CMAKE_EDITOR="${EngineEditor}"`);
+    Result.push(`-DABYTEK_CMAKE_GENERATOR="${EngineCMakeGenerator}"`);
+    if (CMakeConfig.IsAuto)
+    {
+        Result.push(`-DABYTEK_CMAKE_CONFIG="Auto"`);
+    }
+    else
+    {
+        Result.push(`-DABYTEK_CMAKE_CONFIG="${CMakeConfig.DirectConfig}"`);
+    }
+
     return Result;
 }
