@@ -3,6 +3,8 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { execSync } = require('child_process');
+const simpleGit = require('simple-git');
+const deasync = require('deasync');
 
 AMJS.Import("./Assert");
 AMJS.Import("./Files");
@@ -72,4 +74,45 @@ APT.Common.TryMatchGitDetails = function(Current, Query)
         }
     }
     return true;
+}
+APT.Common.GitClone = function(GitDetails, Directory)
+{
+    APT.Log("APT", `Start cloning repo:`);
+    APT.Log("APT", `\t- GitDetails: ${GitDetails}`);
+    APT.Log("APT", `\t- Directory: ${Directory}`);
+
+    let Succeeded = false;
+    let Done = false;
+    let AsyncClone = async function()
+    {
+        const Git = simpleGit();
+        await Git.clone(GitDetails.RemoteURL, Directory)
+            .then(
+                () => {
+                    APT.Log("APT", `Repo cloned to ${Directory}`);
+                    Succeeded = true;
+                }
+            )
+            .catch(
+                err => {
+                    if (fs.existsSync(Directory))
+                    {
+                        fs.rmdirSync(Directory);
+                    }
+                    Succeeded = false;
+                    console.error('Clone failed:', err)
+                }
+            );
+    }
+    AsyncClone()
+        .then(
+            () => { 
+                Done = true; 
+            }
+        );
+    while (!Done)
+    {
+        deasync.runLoopOnce();
+    }
+    return Succeeded;
 }

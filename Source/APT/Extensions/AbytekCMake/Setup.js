@@ -74,9 +74,10 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             }
             else
             {
-                let EngineDirectory = APT.Extensions.ProjectLinker.Find(Options.EngineLinkQuery);
+                let EngineDirectory = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery);
                 APT.Common.Assert(EngineDirectory, "Not found Abytek Engine");
-                Context.APT.ImportProject(EngineDirectory);
+                let Project = Context.APT.ImportProject(EngineDirectory);
+                APT.Common.Assert(EngineDirectory, "Failed to import Abytek Engine");
             }
 
             Context.APT.Set(

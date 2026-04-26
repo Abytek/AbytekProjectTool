@@ -8,6 +8,35 @@ const deasync = require('deasync');
 AMJS.Import("./Common");
 
 
+APT.Extensions.ProjectLinker.AllocateProjectDirectory = function()
+{
+    let LockHandle = APT.Extensions.ProjectLinker.LockLinkDirectory();
+
+    const DataDirectory = APT.Common.EnsureDataDirectory();
+    const LinkDirectory = APT.Extensions.ProjectLinker.EnsureLinkDirectory();
+    
+    const NextProjectIndexFile = path.join(DataDirectory, ".NextProjectIndex");
+    if (!fs.existsSync(NextProjectIndexFile))
+    {
+        fs.writeFileSync(NextProjectIndexFile, "0");
+    }
+
+    let ProjectIndex = fs.readFileSync(NextProjectIndexFile, "utf8");
+    ProjectIndex = parseInt(ProjectIndex);
+    if (ProjectIndex == NaN)
+    {
+        throw new Error("Project index is Nan, corrupted");
+    }
+
+    const ProjectDirectory = path.join(DataDirectory, "D", ProjectIndex.toString());
+    fs.mkdirSync(ProjectDirectory, { recursive: true });
+
+    fs.writeFileSync(NextProjectIndexFile, (ProjectIndex + 1).toString());
+
+    APT.Extensions.ProjectLinker.UnlockLinkDirectory(LockHandle);
+    return ProjectDirectory;
+}
+
 APT.Extensions.ProjectLinker.Link = function(EntryDirectory)
 {
     let LockHandle = APT.Extensions.ProjectLinker.LockLinkDirectory();
@@ -87,6 +116,8 @@ APT.Extensions.ProjectLinker.Ensure = function(Query)
     if ("GitDetails" in Query)
     {
         const GitDetails = Query.GitDetails;
+        const ProjectEntryDirectory = APT.Extensions.ProjectLinker.AllocateProjectDirectory();
+        let Result = APT.Common.GitClone(GitDetails, ProjectEntryDirectory);
     }
     return null;
 }
