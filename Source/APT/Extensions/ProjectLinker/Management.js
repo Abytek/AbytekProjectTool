@@ -37,6 +37,8 @@ APT.Extensions.ProjectLinker.Link = function(EntryDirectory)
     const LinkFile = path.join(LinkDirectory, LinkIndex.toString() + ".txt");
     fs.writeFileSync(LinkFile, EntryDirectory);
 
+    fs.writeFileSync(NextLinkIndexFile, (LinkIndex + 1).toString());
+
     APT.Extensions.ProjectLinker.UnlockLinkDirectory(LockHandle);
 }
 
