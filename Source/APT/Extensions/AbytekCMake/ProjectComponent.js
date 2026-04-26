@@ -20,7 +20,7 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         let Engine = null;
         if (Options.IsEngine)
         {
-            Engine = this.Project;
+            Engine = this.Set("AbytekCMake.Engine", this.Project);
         }
         else
         {
@@ -47,7 +47,6 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
                 {
                     continue;
                 }
-
                 Engine = this.Set("AbytekCMake.Engine", EngineToCheck);
             }
             if (!Engine)

@@ -37,11 +37,11 @@ APT.Extensions.ProjectLinker.AllocateProjectDirectory = function()
     return ProjectDirectory;
 }
 
-APT.Extensions.ProjectLinker.Link = function(EntryDirectory)
+APT.Extensions.ProjectLinker.LinkDirectory = function(EntryDirectory)
 {
     let LockHandle = APT.Extensions.ProjectLinker.LockLinkDirectory();
 
-    if (APT.Extensions.ProjectLinker.Find({ EntryDirectory }))
+    if (APT.Extensions.ProjectLinker.FindDirectory({ EntryDirectory }))
     {
         APT.Extensions.ProjectLinker.UnlockLinkDirectory(LockHandle);
         return;
@@ -71,7 +71,7 @@ APT.Extensions.ProjectLinker.Link = function(EntryDirectory)
     APT.Extensions.ProjectLinker.UnlockLinkDirectory(LockHandle);
 }
 
-APT.Extensions.ProjectLinker.Find = function(Query)
+APT.Extensions.ProjectLinker.FindDirectory = function(Query)
 {
     const FinalizedQuery = APT.Extensions.ProjectLinker.FinalizeQuery(Query);
 
@@ -101,11 +101,11 @@ APT.Extensions.ProjectLinker.Find = function(Query)
     }
     return null;
 }
-APT.Extensions.ProjectLinker.Ensure = function(Query)
+APT.Extensions.ProjectLinker.EnsureDirectory = function(Query)
 {
     // If available
     {
-        let EntryDirectory = APT.Extensions.ProjectLinker.Find(Query);
+        let EntryDirectory = APT.Extensions.ProjectLinker.FindDirectory(Query);
         if (EntryDirectory)
         {
             return EntryDirectory;
@@ -118,6 +118,32 @@ APT.Extensions.ProjectLinker.Ensure = function(Query)
         const GitDetails = Query.GitDetails;
         const ProjectEntryDirectory = APT.Extensions.ProjectLinker.AllocateProjectDirectory();
         let Result = APT.Common.GitClone(GitDetails, ProjectEntryDirectory);
+        APT.Common.Assert(Result, `Failed to clone repo at: ${ProjectEntryDirectory}`);
+        return ProjectEntryDirectory;
     }
     return null;
+}
+
+APT.Extensions.ProjectLinker.Find = function(Query, ...ProjectImportArgs)
+{
+    let EntryDirectory = APT.Extensions.ProjectLinker.FindDirectory(Query);
+    if (!EntryDirectory)
+    {
+        return null;
+    }
+    return APT.Core.System.GetChild("ProjectManager").ImportProject(
+        [], 
+        EntryDirectory, 
+        ...ProjectImportArgs
+    );
+}
+APT.Extensions.ProjectLinker.Ensure = function(Query, ...ProjectImportArgs)
+{
+    let EntryDirectory = APT.Extensions.ProjectLinker.EnsureDirectory(Query);
+    APT.Common.Assert(EntryDirectory, `Not found project link for: ${APT.Common.NiceJSONStringify(Query)}`);
+    return APT.Core.System.GetChild("ProjectManager").ImportProject(
+        [], 
+        EntryDirectory, 
+        ...ProjectImportArgs
+    );
 }

@@ -9,6 +9,6 @@ APT.Extensions.ProjectLinker.F_ProjectComponent = class extends APT.Core.A_Proje
     {
         super(Context);
 
-        APT.Extensions.ProjectLinker.Link(this.Project.EntryDirectory);
+        APT.Extensions.ProjectLinker.LinkDirectory(this.Project.EntryDirectory);
     }
 }

@@ -22,7 +22,7 @@ APT.Extensions.CMake.F_ProjectComponent = class extends APT.Core.A_ProjectCompon
         }
         
         let BuildOptions = this.GetOrAdd("CMake.Build.Options", APT.Extensions.CMake.GetDefaultBuildOptions());
-        if (this.GetOrAdd("CMake.Build.Enabled", this.Project.IsMain))
+        if (this.GetOrAdd("CMake.Build.Enabled", false))
         {
             APT.Extensions.CMake.Build(
                 SourceDirectory,
