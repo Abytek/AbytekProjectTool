@@ -3,7 +3,7 @@ const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const Ajv = require("ajv");
 
-AMJS.Namespace.F_Logger = class
+APT.Core.F_Logger = class
 {
     /**
      * Creates a new F_Logger instance

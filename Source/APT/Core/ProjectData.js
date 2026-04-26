@@ -1,5 +1,5 @@
 
-AMJS.Namespace.F_Data = class
+APT.Core.F_Data = class
 {
     constructor(Source)
     {

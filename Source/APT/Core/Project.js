@@ -1,7 +1,7 @@
 
 const path = require("path");
 
-AMJS.Namespace.F_Project = class
+APT.Core.F_Project = class
 {
     constructor(EntryDirectory, Data)
     {

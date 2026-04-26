@@ -1,7 +1,7 @@
 AMJS.Import("./Logger");
 AMJS.Import("./ProjectManager");
 
-AMJS.Namespace.F_System = class
+APT.Core.F_System = class
 {
     constructor()
     {

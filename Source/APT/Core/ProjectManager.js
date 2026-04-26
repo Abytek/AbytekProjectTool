@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 AMJS.Import("./SystemChild");
 
 
-AMJS.Namespace.F_ProjectManager = class extends APT.Core.A_SystemChild
+APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 {
     constructor(System)
     {

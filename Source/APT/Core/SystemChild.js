@@ -1,6 +1,6 @@
 AMJS.Import("./Logger");
 
-AMJS.Namespace.A_SystemChild = class
+APT.Core.A_SystemChild = class
 {
     constructor(System, Name)
     {

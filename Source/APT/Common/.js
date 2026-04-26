@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 const Ajv = require("ajv");
 const crypto = require('crypto');
 
-AMJS.Namespace.StringToUUID = function(input) 
+APT.Common.StringToUUID = function(input) 
 {
   const hash = crypto.createHash('sha1').update(input).digest('hex'); // 40 chars
 
@@ -19,7 +19,7 @@ AMJS.Namespace.StringToUUID = function(input)
   ].join('-');
 }
 
-AMJS.Namespace.StringToShortID = function(input) 
+APT.Common.StringToShortID = function(input) 
 {
   if (!input || typeof input !== 'string') {
     throw new Error('Input must be a non-empty string');
@@ -44,7 +44,7 @@ AMJS.Namespace.StringToShortID = function(input)
   return result.padStart(12, '0');
 }
 
-AMJS.Namespace.StringToShortIDBase36 = function(input) 
+APT.Common.StringToShortIDBase36 = function(input) 
 {
   if (!input || typeof input !== 'string') {
     throw new Error('Input must be a non-empty string');
@@ -68,7 +68,7 @@ AMJS.Namespace.StringToShortIDBase36 = function(input)
   return result.slice(0, 8);
 }
 
-AMJS.Namespace.NiceJSONStringify = function(Object)
+APT.Common.NiceJSONStringify = function(Object)
 {
     return JSON.stringify(Object, null, 2);
 }
@@ -80,7 +80,7 @@ AMJS.Namespace.NiceJSONStringify = function(Object)
  * @returns {*} The input value if assertion passes
  * @throws {Error} If assertion fails
  */
-AMJS.Namespace.Assert = function(Value, ...Args)
+APT.Common.Assert = function(Value, ...Args)
 {
     if (!Value)
     {
@@ -94,7 +94,7 @@ AMJS.Namespace.Assert = function(Value, ...Args)
  * Enumeration of supported platform tags
  * @enum {string}
  */
-AMJS.Namespace.PlatformTags = 
+APT.Common.PlatformTags = 
 {
     WINDOWS: "Windows",
     MACOS: "macOS",
@@ -111,28 +111,28 @@ AMJS.Namespace.PlatformTags =
  * Gets platform tags for the current host system
  * @returns {string[]|null} Array of platform tags or null if platform is unknown
  */
-AMJS.Namespace.GetHostPlatformTags = function()
+APT.Common.GetHostPlatformTags = function()
 {
     if (os.platform() == 'win32')
     {
         return [
-            AMJS.Namespace.PlatformTags.WINDOWS,
+            APT.Common.PlatformTags.WINDOWS,
         ];    
     }
     if (os.platform() == 'darwin')
     {
         return [
-            AMJS.Namespace.PlatformTags.MACOS,
-            AMJS.Namespace.PlatformTags.UNIX,
-            AMJS.Namespace.PlatformTags.POSIX,
+            APT.Common.PlatformTags.MACOS,
+            APT.Common.PlatformTags.UNIX,
+            APT.Common.PlatformTags.POSIX,
         ];    
     }
     if (os.platform() == 'linux')
     {
         return [
-            AMJS.Namespace.PlatformTags.LINUX,
-            AMJS.Namespace.PlatformTags.UNIX,
-            AMJS.Namespace.PlatformTags.POSIX,
+            APT.Common.PlatformTags.LINUX,
+            APT.Common.PlatformTags.UNIX,
+            APT.Common.PlatformTags.POSIX,
         ];    
     }
     if (
@@ -142,8 +142,8 @@ AMJS.Namespace.GetHostPlatformTags = function()
     )
     {
         return [
-            AMJS.Namespace.PlatformTags.UNIX,
-            AMJS.Namespace.PlatformTags.POSIX,
+            APT.Common.PlatformTags.UNIX,
+            APT.Common.PlatformTags.POSIX,
         ];    
     }
     return null;
@@ -157,7 +157,7 @@ AMJS.Namespace.GetHostPlatformTags = function()
  * @param {*} Value - Value to set
  * @returns {*} Existing value if key exists, or new value if key was created
  */
-AMJS.Namespace.TrySetPropertyByPath = function(InObject, Key, Value)
+APT.Common.TrySetPropertyByPath = function(InObject, Key, Value)
 {
     let KeyParts = Key.split(".");
     let ParsedKeyParts = [];
@@ -171,7 +171,7 @@ AMJS.Namespace.TrySetPropertyByPath = function(InObject, Key, Value)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
+    APT.Common.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
@@ -201,7 +201,7 @@ AMJS.Namespace.TrySetPropertyByPath = function(InObject, Key, Value)
  * @param {*} Value - Value to set
  * @returns {*} The set value
  */
-AMJS.Namespace.SetPropertyByPath = function(InObject, Key, Value)
+APT.Common.SetPropertyByPath = function(InObject, Key, Value)
 {
     let KeyParts = Key.split(".");
     let ParsedKeyParts = [];
@@ -215,7 +215,7 @@ AMJS.Namespace.SetPropertyByPath = function(InObject, Key, Value)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
+    APT.Common.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
@@ -238,7 +238,7 @@ AMJS.Namespace.SetPropertyByPath = function(InObject, Key, Value)
  * @returns {*} The value at the specified path
  * @throws {Error} If path doesn't exist
  */
-AMJS.Namespace.GetPropertyByPath = function(InObject, Key)
+APT.Common.GetPropertyByPath = function(InObject, Key)
 {
     let KeyParts = Key.split(".");
     let ParsedKeyParts = [];
@@ -252,15 +252,15 @@ AMJS.Namespace.GetPropertyByPath = function(InObject, Key)
 
     let NumKeyParts = ParsedKeyParts.length;
     let Subobject = InObject;
-    AMJS.Namespace.Assert(NumKeyParts > 0, `invalid key ${Key}`);
+    APT.Common.Assert(NumKeyParts > 0, `invalid key ${Key}`);
     for(let Idx = 0; Idx < (NumKeyParts - 1); ++Idx)
     {
         let KeyPart = ParsedKeyParts[Idx];
-        AMJS.Namespace.Assert(KeyPart in Subobject, `key ${Key} not added`);
+        APT.Common.Assert(KeyPart in Subobject, `key ${Key} not added`);
         Subobject = Subobject[KeyPart];
     }
     let LastKeyPart = ParsedKeyParts[NumKeyParts - 1];
-    AMJS.Namespace.Assert(LastKeyPart in Subobject, `key ${Key} not added`);
+    APT.Common.Assert(LastKeyPart in Subobject, `key ${Key} not added`);
     return Subobject[LastKeyPart];
 }
 
@@ -271,7 +271,7 @@ AMJS.Namespace.GetPropertyByPath = function(InObject, Key)
  * @param {string} Key - Dot-notation path (e.g. "a.b.c")
  * @returns {*|null} The value at the specified path or null if not found
  */
-AMJS.Namespace.FindPropertyByPath = function(InObject, Key)
+APT.Common.FindPropertyByPath = function(InObject, Key)
 {
     let KeyParts = Key.split(".");
     let ParsedKeyParts = [];
@@ -306,7 +306,7 @@ AMJS.Namespace.FindPropertyByPath = function(InObject, Key)
     return Subobject[LastKeyPart];
 }
 
-AMJS.Namespace.FindPropertyByPathThenReset = function(InObject, Key)
+APT.Common.FindPropertyByPathThenReset = function(InObject, Key)
 {
     let KeyParts = Key.split(".");
     let ParsedKeyParts = [];
@@ -349,7 +349,7 @@ AMJS.Namespace.FindPropertyByPathThenReset = function(InObject, Key)
  * @param {string} [ArrayCombinatorKeyword="/"] - String to join array elements with
  * @returns {string|null} Converted string or null if input is null
  */
-AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
+APT.Common.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
 {
     if (Value == null)
     {
@@ -367,7 +367,7 @@ AMJS.Namespace.ForwardString = function(Value, ArrayCombinatorKeyword = "/")
  * @param {*} Value - Value to convert
  * @returns {boolean} true for various "truthy" strings/numbers, false otherwise
  */
-AMJS.Namespace.ForwardBool = function(Value)
+APT.Common.ForwardBool = function(Value)
 {
     if (
         (Value == 1)
@@ -393,7 +393,7 @@ AMJS.Namespace.ForwardBool = function(Value)
  * @param {*} Value - Value to copy
  * @returns {*} Deep copy of the value
  */
-AMJS.Namespace.SimpleDeepCopy = function(Value)
+APT.Common.SimpleDeepCopy = function(Value)
 {
     return JSON.parse(
         JSON.stringify(Value)
@@ -404,7 +404,7 @@ AMJS.Namespace.SimpleDeepCopy = function(Value)
  * Gets the data directory raw path
  * @returns {string} Absolute raw path to data directory
  */
-AMJS.Namespace.GetDataDirectoryRaw = function()
+APT.Common.GetDataDirectoryRaw = function()
 {
     return path.join(__dirname, "../../../Data");
 }
@@ -413,42 +413,42 @@ AMJS.Namespace.GetDataDirectoryRaw = function()
  * Gets the data directory path
  * @returns {string} Absolute path to data directory
  */
-AMJS.Namespace.GetDataDirectory = function()
+APT.Common.GetDataDirectory = function()
 {
     const Raw = this.GetDataDirectoryRaw();
-    if (!(AMJS.Namespace.GetHostPlatformTags().includes(AMJS.Namespace.PlatformTags.WINDOWS)))
+    if (!(APT.Common.GetHostPlatformTags().includes(APT.Common.PlatformTags.WINDOWS)))
     {
         return Raw;
     }
     return path.join(path.parse(Raw).root, ".APT");
 }
 
-AMJS.Namespace.GetProjectImportedDirectory = function(EntryDirectory)
+APT.Common.GetProjectImportedDirectory = function(EntryDirectory)
 {
-    const Result = path.join(AMJS.Namespace.GetDataDirectory(), "Imported");
+    const Result = path.join(APT.Common.GetDataDirectory(), "Imported");
     if (EntryDirectory == null)
     {
         return Result;
     }
-    return path.join(Result, AMJS.Namespace.StringToUUID(path.normalize(EntryDirectory)));
+    return path.join(Result, APT.Common.StringToUUID(path.normalize(EntryDirectory)));
 }
 
 /**
  * Gets the logs directory path
  * @returns {string} Absolute path to logs directory
  */
-AMJS.Namespace.GetLogsDirectory = function()
+APT.Common.GetLogsDirectory = function()
 {
-    return path.join(AMJS.Namespace.GetDataDirectory(), "Logs");
+    return path.join(APT.Common.GetDataDirectory(), "Logs");
 }
 
 /**
  * Gets the cache directory path
  * @returns {string} Absolute path to cache directory
  */
-AMJS.Namespace.GetCacheDirectory = function()
+APT.Common.GetCacheDirectory = function()
 {
-    return path.join(AMJS.Namespace.GetDataDirectory(), "Cache");
+    return path.join(APT.Common.GetDataDirectory(), "Cache");
 }
 
 /**
@@ -456,9 +456,9 @@ AMJS.Namespace.GetCacheDirectory = function()
  * @param {string} Key - Cache key
  * @returns {string} Absolute path to cache file
  */
-AMJS.Namespace.CalculateCacheFile = function(Key)
+APT.Common.CalculateCacheFile = function(Key)
 {
-    return path.join(AMJS.Namespace.GetCacheDirectory(), Key);
+    return path.join(APT.Common.GetCacheDirectory(), Key);
 }
 
 /**
@@ -466,9 +466,9 @@ AMJS.Namespace.CalculateCacheFile = function(Key)
  * @param {string} Key - Cache key
  * @returns {boolean} true if cache exists and is a file
  */
-AMJS.Namespace.HasCache = function(Key)
+APT.Common.HasCache = function(Key)
 {
-    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    const CacheFile = APT.Common.CalculateCacheFile(Key);
     if (!fs.existsSync(CacheFile))
     {
         return false;
@@ -485,9 +485,9 @@ AMJS.Namespace.HasCache = function(Key)
  * @returns {*|null} The cached value or null if skipped (already exists)
  * @throws {Error} If Required is true and key already exists
  */
-AMJS.Namespace.Cache = function(Key, Value, Required = true)
+APT.Common.Cache = function(Key, Value, Required = true)
 {
-    if (AMJS.Namespace.HasCache(Key))
+    if (APT.Common.HasCache(Key))
     {
         if (Required)
         {
@@ -495,7 +495,7 @@ AMJS.Namespace.Cache = function(Key, Value, Required = true)
         }
         return null;
     }
-    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    const CacheFile = APT.Common.CalculateCacheFile(Key);
     {
         const Dir = path.dirname(CacheFile);
         if (!fs.existsSync(Dir))
@@ -513,9 +513,9 @@ AMJS.Namespace.Cache = function(Key, Value, Required = true)
  * @param {*} Value - Value to cache
  * @returns {*|null} The cached value or null if skipped
  */
-AMJS.Namespace.TryCache = function(Key, Value)
+APT.Common.TryCache = function(Key, Value)
 {
-    return AMJS.Namespace.Cache(Key, Value, false);
+    return APT.Common.Cache(Key, Value, false);
 }
 
 /**
@@ -525,9 +525,9 @@ AMJS.Namespace.TryCache = function(Key, Value)
  * @returns {boolean} true if cache was removed, false if it didn't exist
  * @throws {Error} If Required is true and key doesn't exist
  */
-AMJS.Namespace.Uncache = function(Key, Required = true)
+APT.Common.Uncache = function(Key, Required = true)
 {
-    if (!(AMJS.Namespace.HasCache(Key)))
+    if (!(APT.Common.HasCache(Key)))
     {
         if (Required)
         {
@@ -535,7 +535,7 @@ AMJS.Namespace.Uncache = function(Key, Required = true)
         }
         return false;
     }
-    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    const CacheFile = APT.Common.CalculateCacheFile(Key);
     fs.unlinkSync(CacheFile);
     return true;
 }
@@ -545,9 +545,9 @@ AMJS.Namespace.Uncache = function(Key, Required = true)
  * @param {string} Key - Cache key
  * @returns {boolean} true if cache was removed, false if it didn't exist
  */
-AMJS.Namespace.TryUncache = function(Key)
+APT.Common.TryUncache = function(Key)
 {
-    return AMJS.Namespace.Uncache(Key, false);
+    return APT.Common.Uncache(Key, false);
 }
 
 /**
@@ -557,9 +557,9 @@ AMJS.Namespace.TryUncache = function(Key)
  * @returns {string|boolean} Cache contents as string, or false if not found
  * @throws {Error} If Required is true and key doesn't exist
  */
-AMJS.Namespace.ReadCache = function(Key, Required = true)
+APT.Common.ReadCache = function(Key, Required = true)
 {
-    if (!(AMJS.Namespace.HasCache(Key)))
+    if (!(APT.Common.HasCache(Key)))
     {
         if (Required)
         {
@@ -567,7 +567,7 @@ AMJS.Namespace.ReadCache = function(Key, Required = true)
         }
         return false;
     }
-    const CacheFile = AMJS.Namespace.CalculateCacheFile(Key);
+    const CacheFile = APT.Common.CalculateCacheFile(Key);
     return fs.readFileSync(CacheFile).toString();
 }
 
@@ -576,22 +576,22 @@ AMJS.Namespace.ReadCache = function(Key, Required = true)
  * @param {string} Key - Cache key
  * @returns {string|boolean} Cache contents as string, or false if not found
  */
-AMJS.Namespace.TryReadCache = function(Key)
+APT.Common.TryReadCache = function(Key)
 {
-    return AMJS.Namespace.ReadCache(Key, false);
+    return APT.Common.ReadCache(Key, false);
 }
 
 /**
  * Gets all cache entries
  * @returns {Object.<string, string>} Object mapping cache keys to their values
  */
-AMJS.Namespace.GatherCache = function()
+APT.Common.GatherCache = function()
 {
-    let Items = fs.readdirSync(AMJS.Namespace.GetCacheDirectory(), { withFileTypes: true, recursive: false });
+    let Items = fs.readdirSync(APT.Common.GetCacheDirectory(), { withFileTypes: true, recursive: false });
     let Result = new Object();
     for(let Item of Items)
     {
-        Result[Item.name] = AMJS.Namespace.ReadCache(Item.name);
+        Result[Item.name] = APT.Common.ReadCache(Item.name);
     }
     return Result;
 }
@@ -602,7 +602,7 @@ AMJS.Namespace.GatherCache = function()
  * @param {string} Content - Content to write
  * @throws {Error} If path exists but is not a file
  */
-AMJS.Namespace.SmartWriteFile = function(File, Content)
+APT.Common.SmartWriteFile = function(File, Content)
 {
     if (!(fs.existsSync(File)))
     {
@@ -627,12 +627,12 @@ AMJS.Namespace.SmartWriteFile = function(File, Content)
  * Gets the project links directory path
  * @returns {string} Absolute path to project links directory
  */
-AMJS.Namespace.GetProjectLinksDirectory = function()
+APT.Common.GetProjectLinksDirectory = function()
 {
-    return path.join(AMJS.Namespace.GetDataDirectory(), "ProjectLinks");
+    return path.join(APT.Common.GetDataDirectory(), "ProjectLinks");
 }
 
-AMJS.Namespace.MergeData = function(ResultObject, AObject)
+APT.Common.MergeData = function(ResultObject, AObject)
 {
     if (typeof ResultObject != "object")
     {
@@ -650,7 +650,7 @@ AMJS.Namespace.MergeData = function(ResultObject, AObject)
                 if (typeof ResultPropertySrc == "object")
                 {
                     let ResultPropertyDst = APT.Common.SimpleDeepCopy(ResultPropertySrc);
-                    AMJS.Namespace.MergeData(ResultPropertyDst, AProperty);
+                    APT.Common.MergeData(ResultPropertyDst, AProperty);
                     ResultObject[Key] = ResultPropertyDst;
                     continue;
                 }
