@@ -16,4 +16,8 @@ APT.Core.F_Console = class extends APT.Core.A_SystemChild
             }
         }
     }
+
+    OnStage_SetupConsole()
+    {
+    }
 }

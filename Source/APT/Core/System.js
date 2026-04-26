@@ -137,6 +137,20 @@ APT.Core.F_System = class
             }
         }
 
+        for (let StageDefinition of this.SortedStageDefinitions)
+        {
+            APT.Log("APT", `Begin stage: ${StageDefinition.Name}`);
+            for (let Child of this.Childs)
+            {
+                const OnStageFunctionName = "OnStage_" + StageDefinition.Name;
+                if (OnStageFunctionName in Child)
+                {
+                    Child[OnStageFunctionName]();
+                }
+            }
+            APT.Log("APT", `End stage: ${StageDefinition.Name}`);
+        }
+
         APT.Log("APT", "Started APT");
         
         if (this.AutomaticExit)

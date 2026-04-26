@@ -26,6 +26,10 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         }
     }
 
+    OnStage_ImportMainProject()
+    {
+    }
+
     ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true)
     {
         APT.Log("APT", `Import project ${RelativeProjectEntryDirectory}`);
