@@ -278,6 +278,28 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     return Project.Data.Find(Key);
                                 }
                             }
+                            Context.APT.GetOrAdd = function(Key, DefaultValue, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.GetOrAdd(Key, DefaultValue);
+                                }
+                                else
+                                {
+                                    return Project.Data.GetOrAdd(Key, DefaultValue);
+                                }
+                            }
+                            Context.APT.Set = function(Key, Value, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.Set(Key, Value);
+                                }
+                                else
+                                {
+                                    return Project.Data.Set(Key, Value);
+                                }
+                            }
 
                             Context.APT.GetSignature = function(IsSignature = false)
                             {
