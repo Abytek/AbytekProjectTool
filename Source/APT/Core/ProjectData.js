@@ -52,6 +52,7 @@ APT.Core.F_ProjectData = class
     {
         APT.Common.Assert(this.HasPublic(Key) || !this.Has(Key), `Cannot set public key: ${Key}`);
         this.Public[Key] = Value;
+        return Value;
     }
 
     HasPrivate(Key)
@@ -89,6 +90,7 @@ APT.Core.F_ProjectData = class
     {
         APT.Common.Assert(this.HasPrivate(Key) || !this.Has(Key), `Cannot set private key: ${Key}`);
         this.Private[Key] = Value;
+        return Value;
     }
 
     Has(Key)

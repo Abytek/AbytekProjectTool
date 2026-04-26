@@ -187,6 +187,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     return Project.Data.GetOrAddPublic(Key, DefaultValue);
                                 }
                             }
+                            Context.APT.SetPublic = function(Key, Value, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.SetPublic(Key, Value);
+                                }
+                                else
+                                {
+                                    return Project.Data.SetPublic(Key, Value);
+                                }
+                            }
 
                             Context.APT.HasPrivate = function(Key, IsSignature = false)
                             {
@@ -241,6 +252,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                 else
                                 {
                                     return Project.Data.GetOrAddPrivate(Key, DefaultValue);
+                                }
+                            }
+                            Context.APT.SetPrivate = function(Key, Value, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.SetPrivate(Key, Value);
+                                }
+                                else
+                                {
+                                    return Project.Data.SetPrivate(Key, Value);
                                 }
                             }
 

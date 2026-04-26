@@ -17,7 +17,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
     let DefaultOptions = APT.Extensions.AbytekCMake.GetDefaultSetupOptions();
     if (Options == null)
     {
-        Options = new Options();
+        Options = new Object();
     }
     if (Options.IsEngine == null)
     {
@@ -64,11 +64,11 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 GlobalContext.AbytekCMake.Engines.push(Context.APT.Project);
             }
 
-            console.log(Context.APT.Project.SignatureData.GetSignature());
+            APT.Common.Assert("AbytekCMake" in GlobalContext, "Not found Abytek Engine");
 
             Context.APT.Set(
                 "AbytekCMake",
-                new APT.Extensions.AbytekCMake.F_ProjectComponent(Context)
+                new APT.Extensions.AbytekCMake.F_ProjectComponent(Context, Options)
             );
         }
     );
