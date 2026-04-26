@@ -109,6 +109,12 @@ APT.Core.F_Logger = class
             console.error(Message); 
             fs.appendFileSync(this.LogFile, `${Message}\n`);
         }
+        else if (Content.Type == "FatalError")
+        {
+            console.error(Message); 
+            fs.appendFileSync(this.LogFile, `${Message}\n`);
+            throw new Error(Message);
+        }
         else
         {
             throw new Error(`Invalid write type:`, Content.Type);
@@ -129,7 +135,6 @@ APT.Core.F_Logger = class
     FatalError(Category, ...Args)
     {
         this.Write({ Type: "FatalError", Category: (Category ?? "Temp"), Args });
-        throw new Error(...Args);
     }
     HideType(Type)
     {

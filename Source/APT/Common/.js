@@ -94,7 +94,7 @@ APT.Common.Assert = function(Value, ...Args)
  * Enumeration of supported platform tags
  * @enum {string}
  */
-APT.Common.PlatformTags = 
+APT.Common.E_PlatformTag = 
 {
     WINDOWS: "Windows",
     MACOS: "macOS",
@@ -116,23 +116,23 @@ APT.Common.GetHostPlatformTags = function()
     if (os.platform() == 'win32')
     {
         return [
-            APT.Common.PlatformTags.WINDOWS,
+            APT.Common.E_PlatformTag.WINDOWS,
         ];    
     }
     if (os.platform() == 'darwin')
     {
         return [
-            APT.Common.PlatformTags.MACOS,
-            APT.Common.PlatformTags.UNIX,
-            APT.Common.PlatformTags.POSIX,
+            APT.Common.E_PlatformTag.MACOS,
+            APT.Common.E_PlatformTag.UNIX,
+            APT.Common.E_PlatformTag.POSIX,
         ];    
     }
     if (os.platform() == 'linux')
     {
         return [
-            APT.Common.PlatformTags.LINUX,
-            APT.Common.PlatformTags.UNIX,
-            APT.Common.PlatformTags.POSIX,
+            APT.Common.E_PlatformTag.LINUX,
+            APT.Common.E_PlatformTag.UNIX,
+            APT.Common.E_PlatformTag.POSIX,
         ];    
     }
     if (
@@ -142,8 +142,8 @@ APT.Common.GetHostPlatformTags = function()
     )
     {
         return [
-            APT.Common.PlatformTags.UNIX,
-            APT.Common.PlatformTags.POSIX,
+            APT.Common.E_PlatformTag.UNIX,
+            APT.Common.E_PlatformTag.POSIX,
         ];    
     }
     return null;
@@ -416,7 +416,7 @@ APT.Common.GetDataDirectoryRaw = function()
 APT.Common.GetDataDirectory = function()
 {
     const Raw = this.GetDataDirectoryRaw();
-    if (!(APT.Common.GetHostPlatformTags().includes(APT.Common.PlatformTags.WINDOWS)))
+    if (!(APT.Common.GetHostPlatformTags().includes(APT.Common.E_PlatformTag.WINDOWS)))
     {
         return Raw;
     }
@@ -660,4 +660,13 @@ APT.Common.MergeData = function(ResultObject, AObject)
         ResultObject[Key] = AProperty;
     }
     return ResultObject;
+}
+
+APT.Common.ToCLIArgument = function(Value)
+{
+    return `\"${
+        Value
+        .replaceAll("\"", "\\\"")
+        .replaceAll("\\", "\\\\")
+    }\"`;
 }
