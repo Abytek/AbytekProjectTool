@@ -1,4 +1,5 @@
 AMJS.Import("./Logger");
+AMJS.Import("./Console");
 AMJS.Import("./ProjectManager");
 
 APT.Core.F_System = class
@@ -9,6 +10,7 @@ APT.Core.F_System = class
 
         this.Childs = [];
 
+        this.AddChild(new APT.Core.F_Console(this));
         this.AddChild(new APT.Core.F_ProjectManager(this));
 
         // // Apply LoggerDefault
@@ -42,14 +44,48 @@ APT.Core.F_System = class
         // }
         
         this.AutomaticExit = true;
+
+        this.Init();
+        this.PostInit();
     }
 
     Start()
     {
+        APT.Log("APT", "Start APT");
+
+        for (let Child of this.Childs)
+        {
+            Child.Start();
+        }
+
+        APT.Log("APT", "Started APT");
+        
         if (this.AutomaticExit)
         {
             process.exit(0);
         }
+        else
+        {
+            APT.Log("APT", "APT stopped");
+        }
+    }
+    Init()
+    {
+        APT.Log("APT", "Start initialize APT");
+        for (let Child of this.Childs)
+        {
+            Child.Init();
+        }
+        APT.Log("APT", "Initialized APT");
+    }
+    PostInit()
+    {
+        APT.Log("APT", "Start post initialize APT");
+        for (let Child of this.Childs)
+        {
+            Child.PostInit();
+        }
+        APT.Log("APT", "Post initialized APT");
     }
 
     GetChild(Name)
