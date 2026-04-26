@@ -1,1 +1,0 @@
-console.log(APT.Core.System.CommandManager.CLIInput);
