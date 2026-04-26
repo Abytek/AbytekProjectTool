@@ -38,7 +38,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
         function()
         {
             Context.APT.TransferSignature(
-                "AbytekCMake.EnvironmentName", 
+                "AbytekCMake.Environment", 
                 "Development"
             );
             let PlatformTags = Context.APT.TransferSignature(
@@ -76,8 +76,15 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             {
                 let EngineDirectory = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery);
                 APT.Common.Assert(EngineDirectory, "Not found Abytek Engine");
-                let Project = Context.APT.ImportProject(EngineDirectory);
-                APT.Common.Assert(EngineDirectory, "Failed to import Abytek Engine");
+                let EngineData = new APT.Core.F_ProjectData();
+                for (let DataKey of APT.Extensions.AbytekCMake.GetSignatureDataKeys())
+                {
+                    EngineData.Set(
+                        DataKey,
+                        Context.APT.Get(DataKey)
+                    );
+                }
+                Context.APT.ImportProject(EngineDirectory, EngineData);
             }
 
             Context.APT.Set(

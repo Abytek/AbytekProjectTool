@@ -5,13 +5,6 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
     {
         super(Context);
 
-        let EngineCheckKeys = [
-            "AbytekCMake.EnvironmentName",
-            "AbytekCMake.PlatformTags",
-            "AbytekCMake.Generator",
-            "AbytekCMake.Config",
-        ];
-
         this.Set("AbytekCMake.Options", Options);
         let Engine = null;
         if (Options.IsEngine)
@@ -24,7 +17,7 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
             for (let EngineToCheck of GlobalContext.AbytekCMake.Engines)
             {
                 let IsMatched = true;
-                for (let EngineCheckKey of EngineCheckKeys)
+                for (let EngineCheckKey of APT.Extensions.AbytekCMake.GetSignatureDataKeys())
                 {
                     if (
                         APT.Common.NiceJSONStringify(
