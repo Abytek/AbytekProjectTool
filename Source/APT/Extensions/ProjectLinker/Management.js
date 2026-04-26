@@ -55,53 +55,18 @@ APT.Extensions.ProjectLinker.Find = function(Query)
                 return Link;
             }
         }
-        // if ("GitDetails" in Query)
-        // {
-        //     let FinderGitDetails = Finder.GitDetails;
-        //     let LastGitDetails = Last.GitDetails;
-
-        //     let TryMatchGitRemoteURL = (A, B) => {
-        //         if (A == null)
-        //         {
-        //             return false;
-        //         }
-        //         if (B == null)
-        //         {
-        //             return false;
-        //         }
-        //         let AClone = "" + A;
-        //         let BClone = "" + B;
-        //         if (!AClone.endsWith(".git"))
-        //         {
-        //             AClone += ".git";
-        //         }
-        //         if (!BClone.endsWith(".git"))
-        //         {
-        //             BClone += ".git";
-        //         }
-        //         return AClone == BClone;
-        //     };
-
-        //     if (!TryMatchGitRemoteURL(FinderGitDetails.RemoteURL, LastGitDetails.RemoteURL))
-        //     {
-        //         return false;
-        //     }
-        //     if ("Commit" in FinderGitDetails)
-        //     {
-        //         if (FinderGitDetails.Commit != LastGitDetails.Commit)
-        //         {
-        //             return false;
-        //         }
-        //     }
-        //     if ("Branch" in FinderGitDetails)
-        //     {
-        //         if (FinderGitDetails.Branch != LastGitDetails.Branch)
-        //         {
-        //             return false;
-        //         }
-        //     }
-        //     return true;
-        // }
+        if ("GitDetails" in Query)
+        {
+            let LinkGitDetails = APT.Common.LoadGitDetails(Link);
+            if (!LinkGitDetails)
+            {
+                continue;
+            }
+            if (APT.Common.TryMatchGitDetails(LinkGitDetails, Query.GitDetails))
+            {
+                return Link;
+            }
+        }
     }
     return null;
 }
