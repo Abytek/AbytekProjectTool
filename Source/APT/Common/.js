@@ -4,6 +4,7 @@ const fs = require("fs");
 const { execSync } = require('child_process');
 const Ajv = require("ajv");
 const crypto = require('crypto');
+const deasync = require('deasync');
 
 APT.Common.StringToUUID = function(input) 
 {
@@ -689,8 +690,14 @@ APT.Common.TryAcquireFileBasedLock = function(Path)
 }
 APT.Common.AcquireFileBasedLock = function(Path) 
 {
-    while (!APT.Common.TryAcquireFileBasedLock(Path))
+    while (true)
     {
+        let Result = APT.Common.TryAcquireFileBasedLock(Path);
+        if (Result)
+        {
+            return Result;
+        }
+        deasync.runLoopOnce();
     }
 }
 APT.Common.ReleaseFileBasedLock = function(FD, Path) 
