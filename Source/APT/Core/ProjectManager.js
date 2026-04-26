@@ -14,6 +14,11 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
     {
         super(System, "ProjectManager");
         this.Projects = new Map();
+        
+        this.Command_ImportMainProject = {
+            Enabled: false,
+            MainProjectEntryDirectory: null
+        };
     }
 
     GetStageDefinitions()
@@ -30,15 +35,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 
     OnStage_GatherConsoleCommands()
     {
+        let ProjectManager = this;
+
         let Console = this.System.GetChild("Console");
         Console.Argv = Console.Argv
             .command(
-                '$0 <MainProjectPath>',
+                '$0 <MainProjectEntryDirectory>',
                 'run tool',
                 (y) =>
                     y
                     // positional
-                    .positional('MainProjectPath', {
+                    .positional('MainProjectEntryDirectory', {
                         type: 'string',
                         describe: 'path to the main project'
                     })
@@ -50,14 +57,20 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                     ,
 
                 (Argv) => {
-                    const MainProjectPath = Argv.MainProjectPath;
-
-                    APT.Log("APT", 'Main project path:', MainProjectPath);
+                    let Command_ImportMainProject = ProjectManager.Command_ImportMainProject;
+                    Command_ImportMainProject.Enabled = true;
+                    Command_ImportMainProject.MainProjectEntryDirectory = Argv.MainProjectEntryDirectory;
                 }
             );
     }
     OnStage_ImportMainProject()
     {
+        if (!this.Command_ImportMainProject.Enabled)
+        {
+            return;
+        }
+        APT.Log("APT", `Start importing main project: ${this.Command_ImportMainProject.MainProjectEntryDirectory}`);
+        APT.Log("APT", `Imported main project`);
     }
 
     ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true)
