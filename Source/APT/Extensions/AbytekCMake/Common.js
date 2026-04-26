@@ -197,16 +197,64 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
     fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
 }
 
-APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Environment, EntryDirectory, CMakeBuildDirectory, CMakeConfig)
+APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Project, CMakeConfig)
 {
+    let ProjectEnvironment = null;
+    let ProjectCMakeBuildDirectoryConfig = null;
+    {
+        let Editor = Project.Data.Get("AbytekCMake.Editor");
+        ProjectEnvironment = Project.Data.Get("AbytekCMake.Environment");
+        let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
+        
+        let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
+        if (CMakeConfig == null)
+        {
+            CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
+        }
+
+        ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+            Project.EntryDirectory,
+            ProjectEnvironment,
+            PlatformTags,
+            CMakeGenerator,
+            CMakeConfig
+        );
+    }
+
+    let EngineProject = Project.Data.Get("AbytekCMake.Engine");
+    let EngineEnvironment = null;
+    let EngineCMakeBuildDirectoryConfig = null;
+    {
+        let Editor = EngineProject.Data.Get("AbytekCMake.Editor");
+        EngineEnvironment = EngineProject.Data.Get("AbytekCMake.Environment");
+        let PlatformTags = EngineProject.Data.Get("AbytekCMake.PlatformTags");
+        
+        let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
+        if (CMakeConfig == null)
+        {
+            CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
+        }
+
+        EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+            EngineProject.EntryDirectory,
+            EngineEnvironment,
+            PlatformTags,
+            CMakeGenerator,
+            CMakeConfig
+        );
+    }
+
     let Result = [];
-    Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5`);
+    Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
     if (!CMakeConfig.IsAuto)
     {
         Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
     }
-    Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${Environment}"`);
-    Result.push(`-DABYTEK_PROJECT_DIR="${EntryDirectory}"`);
-    Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${CMakeBuildDirectory}"`);
+    Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${ProjectEnvironment}"`);
+    Result.push(`-DABYTEK_PROJECT_DIR="${Project.EntryDirectory}"`);
+    Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${ProjectCMakeBuildDirectoryConfig.Path}"`);
+    Result.push(`-DABYTEK_ENGINE_ENVIRONMENT_NAME="${EngineEnvironment}"`);
+    Result.push(`-DABYTEK_ENGINE_DIR="${EngineProject.EntryDirectory}"`);
+    Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${EngineCMakeBuildDirectoryConfig.Path}"`);
     return Result;
 }
