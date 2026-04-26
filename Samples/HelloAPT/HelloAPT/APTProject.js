@@ -3,7 +3,7 @@ APT.On(
     "PrepareSignature",
     function()
     {
-        APT.Set("HelloAPT", true, true);
+        APT.TransferSignature("HelloAPT", "WOW");
         APT.Log("HelloAPT", `PrepareSignature: ${APT.Project.EntryDirectory}`);   
     }
 );

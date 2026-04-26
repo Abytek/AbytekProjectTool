@@ -44,7 +44,7 @@ APT.Core.F_ProjectData = class
     {
         if (!this.HasPublic(Key))
         {
-            return this.AddPublic(Key, Value);
+            return this.AddPublic(Key, DefaultValue);
         }
         return this.GetPublic(Key);
     }
@@ -81,7 +81,7 @@ APT.Core.F_ProjectData = class
     {
         if (!this.HasPrivate(Key))
         {
-            return this.AddPrivate(Key, Value);
+            return this.AddPrivate(Key, DefaultValue);
         }
         return this.GetPrivate(Key);
     }

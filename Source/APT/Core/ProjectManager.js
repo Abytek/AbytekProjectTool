@@ -312,6 +312,12 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     return Project.Data.GetSignature();
                                 }
                             }
+
+                            Context.APT.TransferSignature = function(Key, DefaultValue)
+                            {
+                                let Value = Project.Data.GetOrAdd(Key, DefaultValue);
+                                return Project.SignatureData.Set(Key, Value);
+                            }
                         }
                         Context.APT.ImportProject = function(RelativeEntryDirectory2, Data2, Required2 = true)
                         {
