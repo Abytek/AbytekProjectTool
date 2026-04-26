@@ -7,13 +7,14 @@ AMJS.Import("./ProjectData");
 
 APT.Core.F_Project = class
 {
-    constructor(EntryDirectory, Data)
+    constructor(EntryDirectory, Data, IsMain)
     {
         this.EntryDirectory = EntryDirectory;
         this.EntryFile = path.join(EntryDirectory, "APTProject.js");
         this.HasEntryFile = fs.existsSync(this.EntryFile);
         this.Data = Data;
         this.SignatureData = new APT.Core.F_ProjectData();
+        this.IsMain = IsMain;
 
         this.Events = {
             PrepareSignature: [],

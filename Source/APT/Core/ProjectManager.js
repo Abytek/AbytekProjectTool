@@ -124,12 +124,15 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
             [
                 process.cwd()
             ],
-            this.Command_ImportMainProject.MainProjectEntryDirectory
+            this.Command_ImportMainProject.MainProjectEntryDirectory,
+            this.MainProjectDefines,
+            true,
+            true
         );
         APT.Log("APT", `Imported main project`);
     }
 
-    ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true)
+    ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
     {
         APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
@@ -161,7 +164,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
 
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, Data);
+        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, Data, ...ProjectCreationArgs);
 
         let ProjectManager = this;
 
