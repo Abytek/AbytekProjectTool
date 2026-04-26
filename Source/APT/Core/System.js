@@ -1,3 +1,4 @@
+
 AMJS.Import("./Logger");
 AMJS.Import("./Console");
 AMJS.Import("./ProjectManager");
@@ -99,35 +100,47 @@ APT.Core.F_System = class
                     }
                 }
 
-                let SortedStageDefinitionNames = [];
-
-                let AddStageDefinitionToSortedList = function(StageDefinitionName)
+                let DependencyLevels = new Object();
                 {
-                    if (SortedStageDefinitionNames.includes(StageDefinitionName))
+                    for (let StageDefinitionName in this.StageDefinitions)
                     {
-                        return;
+                        DependencyLevels[StageDefinitionName] = 0;
                     }
-                    SortedStageDefinitionNames.push(StageDefinitionName);
-                    
-                    let StageDefinition = System.StageDefinitions[StageDefinitionName];
-                    System.SortedStageDefinitions.push(StageDefinition);
 
-                    for (let DependencyName of StageDefinition.Dependencies)
+                    let ResolveStageDefinitionDependencyLevel = function(StageDefinitionName, Level = 0)
                     {
-                        AddStageDefinitionToSortedList(DependencyName);
+                        DependencyLevels[StageDefinitionName] = Math.max(
+                            DependencyLevels[StageDefinitionName],
+                            Level
+                        );
+                        
+                        let StageDefinition = System.StageDefinitions[StageDefinitionName];
+                        for (let DependencyName of StageDefinition.Dependencies)
+                        {
+                            ResolveStageDefinitionDependencyLevel(DependencyName, Level + 1);
+                        }
+                    }
+                    for (let StageDefinitionName in this.StageDefinitions)
+                    {
+                        if (SortedStageDefinitionNames_NonRoot.includes(StageDefinitionName))
+                        {
+                            continue;
+                        }
+                        ResolveStageDefinitionDependencyLevel(StageDefinitionName);
                     }
                 }
 
                 for (let StageDefinitionName in this.StageDefinitions)
                 {
-                    if (SortedStageDefinitionNames_NonRoot.includes(StageDefinitionName))
-                    {
-                        continue;
-                    }
-                    AddStageDefinitionToSortedList(StageDefinitionName);
+                    let StageDefinition = System.StageDefinitions[StageDefinitionName];
+                    this.SortedStageDefinitions.push(StageDefinition);
                 }
-
-                this.SortedStageDefinitions.reverse();
+                this.SortedStageDefinitions.sort(
+                    (A, B) => 
+                    {
+                        return DependencyLevels[B.Name] - DependencyLevels[A.Name];
+                    }
+                );
             }
             APT.Log("APT", "Sorted stage definitions:");
             for (let StageDefinition of this.SortedStageDefinitions)

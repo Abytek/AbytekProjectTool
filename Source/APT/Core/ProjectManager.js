@@ -1,3 +1,4 @@
+
 const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
@@ -20,12 +21,41 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         return {
             ImportMainProject: {
                 Dependencies: [
-                    "SetupConsole"
+                    "GatherConsoleCommands",
+                    "BuildConsoleCommands"
                 ]
             }
         }
     }
 
+    OnStage_GatherConsoleCommands()
+    {
+        let Console = this.System.GetChild("Console");
+        Console.Argv = Console.Argv
+            .command(
+                '$0 <MainProjectPath>',
+                'run tool',
+                (y) =>
+                    y
+                    // positional
+                    .positional('MainProjectPath', {
+                        type: 'string',
+                        describe: 'path to the main project'
+                    })
+
+                    // .option('define', {
+                    //     type: 'object', // 👈 quan trọng
+                    //     describe: 'defines: --define.KEY value'
+                    // })
+                    ,
+
+                (Argv) => {
+                    const MainProjectPath = Argv.MainProjectPath;
+
+                    APT.Log("APT", 'Main project path:', MainProjectPath);
+                }
+            );
+    }
     OnStage_ImportMainProject()
     {
     }

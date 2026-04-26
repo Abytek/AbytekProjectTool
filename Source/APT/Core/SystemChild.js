@@ -1,3 +1,4 @@
+
 AMJS.Import("./Logger");
 
 APT.Core.A_SystemChild = class
