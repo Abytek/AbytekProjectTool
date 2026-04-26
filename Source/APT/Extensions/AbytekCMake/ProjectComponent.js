@@ -58,6 +58,7 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
             this.Project.EntryDirectory,
             this.Get("AbytekCMake.Environment"),
             this.Get("AbytekCMake.PlatformTags"),
+            this.Get("AbytekCMake.Editor"),
             Engine.EntryDirectory
         );       
 

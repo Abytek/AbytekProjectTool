@@ -61,6 +61,10 @@ APT.Extensions.AbytekCMake.GetSignatureDataKeys = function()
         "AbytekCMake.Editor",
     ];
 }
+APT.Extensions.AbytekCMake.CalculateSignature = function(Environment, PlatformTags, Editor)
+{
+    return Environment + "-" + PlatformTags.join(".") + "-" + Editor;
+}
 
 APT.Extensions.AbytekCMake.CalculateBuildDirectory = function(EntryDirectory)
 {
@@ -128,21 +132,23 @@ APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
     };
 }
 
-APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(Environment, PlatformTags)
+APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(Environment, PlatformTags, Editor)
 {
-    return "AbytekEnginePath-" + Environment + "-" + PlatformTags.join(".") + ".txt";
+    return "AbytekEnginePath-" + APT.Extensions.AbytekCMake.CalculateSignature(Environment, PlatformTags, Editor) + ".txt";
 }
-APT.Extensions.AbytekCMake.CalculateEnginePathFile = function(EntryDirectory, Environment, PlatformTags)
+APT.Extensions.AbytekCMake.CalculateEnginePathFile = function(EntryDirectory, Environment, PlatformTags, Editor)
 {
     return path.join(
         APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
-        APT.Extensions.AbytekCMake.CalculateEnginePathFileName(Environment, PlatformTags)
+        APT.Extensions.AbytekCMake.CalculateEnginePathFileName(Environment, PlatformTags, Editor)
     );
 }
-APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, Environment, PlatformTags, EngineEntryDirectory)
+APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, Environment, PlatformTags, Editor, EngineEntryDirectory)
 {
-    const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, Environment, PlatformTags);
+    APT.Log("APT", `Generating engine path file, entry directory: ${EntryDirectory}, environment: ${Environment}, platform tags: ${PlatformTags}, engine entry directory: ${EngineEntryDirectory}`);
+    const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, Environment, PlatformTags, Editor);
     fs.writeFileSync(EnginePathFile, EngineEntryDirectory);
+    APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
 }
 APT.Extensions.AbytekCMake.CalculateCMakeListsFile = function(EntryDirectory)
 {
