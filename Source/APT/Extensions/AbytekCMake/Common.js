@@ -1,5 +1,6 @@
 
 const path = require("path");
+const fs = require("fs");
 
 
 APT.Extensions.AbytekCMake.E_Editor = {
@@ -45,12 +46,12 @@ APT.Extensions.AbytekCMake.GetSignatureDataKeys = function()
     ];
 }
 
-APT.Extensions.AbytekCMake.GenerateBuildDirectory = function(EntryDirectory)
+APT.Extensions.AbytekCMake.CalculateBuildDirectory = function(EntryDirectory)
 {
     return path.join(EntryDirectory, "Build");
 }
 
-APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignature = function(
+APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignature = function(
     Environment,
     PlatformTags,
     Generator,
@@ -65,7 +66,7 @@ APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignature = function(
     return [Environment, PlatformTags.sort().join("."), Generator, Config].join("-") + ".txt";
 }
 
-APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectoryConfig = function(
+APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
     EntryDirectory,
     Environment,
     PlatformTags,
@@ -79,8 +80,8 @@ APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectoryConfig = function(
     APT.Common.Assert(Generator, "Invalid generator");
     APT.Common.Assert(Config, "Invalid config");
 
-    const BuildDirectory = APT.Extensions.AbytekCMake.GenerateBuildDirectory(EntryDirectory);
-    const Signature = APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignature(
+    const BuildDirectory = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
+    const Signature = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignature(
         Environment,
         PlatformTags,
         Generator,
@@ -109,4 +110,67 @@ APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectoryConfig = function(
         Signature,
         SignatureHash,
     };
+}
+
+APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(Environment, PlatformTags)
+{
+    return "AbytekEnginePath-" + Environment + "-" + PlatformTags.join(".") + ".txt";
+}
+APT.Extensions.AbytekCMake.CalculateEnginePathFile = function(EntryDirectory, Environment, PlatformTags)
+{
+    return path.join(
+        APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
+        APT.Extensions.AbytekCMake.CalculateEnginePathFileName(Environment, PlatformTags)
+    );
+}
+APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, Environment, PlatformTags, EngineEntryDirectory)
+{
+    const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, Environment, PlatformTags);
+    fs.writeFileSync(EnginePathFile, EngineEntryDirectory);
+}
+APT.Extensions.AbytekCMake.CalculateCMakeListsFile = function(EntryDirectory)
+{
+    return path.join(EntryDirectory, "CMakeLists.txt");
+}
+APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, ProjectName)
+{
+    const AbytekCMakeFile = path.join(EntryDirectory, "AbytekCMake.txt");
+    const AbytekCMakeFileContent = "";
+    if (fs.existsSync(AbytekCMakeFile))
+    {
+        AbytekCMakeFileContent = fs.readFileSync(AbytekCMakeFile, "utf8");
+    }
+
+    const CMakeListsFile = APT.Extensions.AbytekCMake.CalculateCMakeListsFile(EntryDirectory);
+    const CMakeListsFileContent = `
+        cmake_minimum_required(VERSION 3.14)
+
+        if(APPLE)
+            project("${ProjectName}" LANGUAGES C CXX OBJC OBJCXX)
+        else()
+            project("${ProjectName}" LANGUAGES C CXX)
+        endif()
+
+        add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
+
+        set(FETCHCONTENT_BASE_DIR "\${CMAKE_CURRENT_BINARY_DIR}/Dependencies")
+
+        include(Abytek/Utilities/SetupModules)
+
+        include(Abytek/SetupIDE)
+        include(Abytek/SetupCompiler)
+        include(Abytek/SetupDependencies)
+
+        Abytek_SetGlobal(CMAKE_MODULE_PATH "${"${CMAKE_MODULE_PATH}"};${"${CMAKE_CURRENT_LIST_DIR}"}/CMake")
+
+        if(EXISTS "\${CMAKE_CURRENT_LIST_DIR}/Modules")
+            Abytek_SetupModules_MultiplePhases(
+                "${ProjectName}" 
+                "\${CMAKE_CURRENT_LIST_DIR}/Modules"
+            )
+        endif()
+
+        ${AbytekCMakeFileContent}
+    `;
+    fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
 }

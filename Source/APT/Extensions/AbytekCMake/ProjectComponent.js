@@ -1,17 +1,21 @@
 
+AMJS.Import("./Common");
+
+
 APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_ProjectComponent
 {
     constructor(Context, Options)
     {
         super(Context);
 
+        let Name = this.GetOrAdd("AbytekCMake.Name", "AbytekProject");
         this.Set("AbytekCMake.Options", Options);
 
         // Prepare engine
         let Engine = null;
         if (Options.IsEngine)
         {
-            Engine = this;
+            Engine = this.Project;
         }
         else
         {
@@ -40,12 +44,29 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
                 }
 
                 Engine = this.Set("AbytekCMake.Engine", EngineToCheck);
-                APT.Log("APT", `Found engine at \"${Engine.EntryDirectory}\" for project: ${this.Project.EntryDirectory}`);
             }
             if (!Engine)
             {
                 APT.FatalError("APT", `Not found engine for project: ${this.Project.EntryDirectory}`);
             }
+            APT.Log("APT", `Found engine at \"${Engine.EntryDirectory}\" for project: ${this.Project.EntryDirectory}`);
+        }
+
+        // Generate engine path file
+        APT.Extensions.AbytekCMake.GenerateEnginePathFile(
+            this.Project.EntryDirectory,
+            this.Get("AbytekCMake.Environment"),
+            this.Get("AbytekCMake.PlatformTags"),
+            Engine.EntryDirectory
+        );       
+
+        // Generate CMakeLists file if needed
+        if (!Options.IsEngine)
+        {
+            APT.Extensions.AbytekCMake.GenerateCMakeListsFile(
+                this.Project.EntryDirectory,
+                Name
+            );
         }
     }
 }
