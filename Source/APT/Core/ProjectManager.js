@@ -52,15 +52,62 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         describe: 'path to the main project'
                     })
 
-                    .option('Data', {
-                        type: 'object', // 👈 quan trọng
-                        describe: 'Data: --Data.KEY VALUE'
+                    .option('MainProjectDefines', {
+                        type: 'object',
+                        describe: 'MainProjectDefines: --MainProjectDefines.KEY VALUE'
+                    })
+                    .option('Defines', {
+                        type: 'object',
+                        describe: 'Defines: --Defines.KEY VALUE'
                     }),
 
                 (Argv) => {
                     let Command_ImportMainProject = ProjectManager.Command_ImportMainProject;
                     Command_ImportMainProject.Enabled = true;
                     Command_ImportMainProject.MainProjectEntryDirectory = Argv.MainProjectEntryDirectory;
+
+                    let DefinesToData = function(Defines)
+                    {
+                        let Result = new APT.Core.F_ProjectData();
+                        if (Defines == null)
+                        {
+                            return Result;
+                        }
+                        for (let Key in Defines)
+                        {
+                            APT.Common.Assert(
+                                (Key == "Public")
+                                || (Key == "Private"),
+                                `Invalid define scope: ${Key}, requires either Public or Private`
+                            );
+                        }
+                        if ("Public" in Defines)
+                        {
+                            let Public = Defines.Public;
+                            if (Public != null)
+                            {
+                                for (let Key of Public)
+                                {
+                                    Result.SetPublic(Key, Public[Key]);
+                                }
+                            }
+                        }
+                        if ("Private" in Defines)
+                        {
+                            let Private = Defines.Public;
+                            if (Private != null)
+                            {
+                                for (let Key of Private)
+                                {
+                                    Result.SetPrivate(Key, Private[Key]);
+                                }
+                            }
+                        }
+                        return Result;
+                    }
+
+                    ProjectManager.MainProjectDefines = DefinesToData(Argv.MainProjectDefines);
+                    ProjectManager.Defines = DefinesToData(Argv.Defines);
                 }
             );
     }
@@ -71,6 +118,8 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
             return;
         }
         APT.Log("APT", `Start importing main project: ${this.Command_ImportMainProject.MainProjectEntryDirectory}`);
+        APT.Log("APT", `Main project defines: ${this.MainProjectDefines.GetSignature()}`);
+        APT.Log("APT", `Defines: ${this.Defines.GetSignature()}`);
         this.MainProject = this.ImportProject(
             [
                 process.cwd()
