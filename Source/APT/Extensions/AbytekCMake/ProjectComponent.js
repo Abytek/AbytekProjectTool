@@ -9,6 +9,7 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         super(Context);
 
         let Name = this.GetOrAdd("AbytekCMake.Name", "AbytekProject");
+        let PrepareEnabled = this.GetOrAdd("AbytekCMake.Prepare.Enabled", true);
         this.Set("AbytekCMake.Options", Options);
 
         // Prepare engine
@@ -67,6 +68,12 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
                 this.Project.EntryDirectory,
                 Name
             );
+        }
+
+        // Prepare if needed
+        if (PrepareEnabled)
+        {
+            APT.Extensions.AbytekCMake.Prepare(this.Project);
         }
     }
 }

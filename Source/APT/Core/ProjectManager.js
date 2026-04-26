@@ -154,15 +154,6 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 
         APT.Log("APT", `Found project entry directory ${AbsoluteProjectEntryDirectory}`);
 
-        let DataSignature = Data.GetSignature();
-        if (this.Projects.has(DataSignature))
-        {
-            APT.Log("APT", `Found imported project ${AbsoluteProjectEntryDirectory}`);
-            return this.Projects.get(DataSignature);
-        }
-
-        APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
-
         // Create new project instance
         let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, Data, ...ProjectCreationArgs);
 
@@ -419,7 +410,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         }     
         
         Project.ExecuteEvent("PrepareSignature");
-        let Signature = Project.SignatureData.GetSignature(Project.EntryDirectory);
+        let Signature = Project.GetSignature();
         APT.Log("APT", `Project signature: ${Signature}`);
         if (this.Projects.has(Signature))
         {
@@ -427,6 +418,8 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
             return this.Projects.get(Signature);
         }
         this.Projects.set(Signature, Project);
+
+        APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
 
         Project.PreImport();
         Project.ExecuteEvent("Import");

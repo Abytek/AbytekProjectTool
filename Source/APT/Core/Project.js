@@ -38,4 +38,9 @@ APT.Core.F_Project = class
             Listener(...Args);
         }
     }
+
+    GetSignature()
+    {
+        return this.SignatureData.GetSignature(this.EntryDirectory);
+    }
 }
