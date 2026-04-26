@@ -12,7 +12,7 @@ APT.Extensions.AbytekCMake.GetDefaultSetupOptions = function()
 
 APT.Extensions.AbytekCMake.Setup = function(Context, Options)
 {
-    APT.Extensions.Environment.Setup(Context);
+    APT.Extensions.ProjectLinker.Setup(Context);
 
     let DefaultOptions = APT.Extensions.AbytekCMake.GetDefaultSetupOptions();
     if (Options == null)

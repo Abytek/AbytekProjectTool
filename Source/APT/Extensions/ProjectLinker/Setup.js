@@ -1,7 +1,7 @@
 
 AMJS.Import("./ProjectComponent")
 
-APT.Extensions.Environment.Setup = function(Context)
+APT.Extensions.ProjectLinker.Setup = function(Context)
 {
     Context.APT.On(
         "PrepareSignature",
@@ -15,8 +15,8 @@ APT.Extensions.Environment.Setup = function(Context)
         function()
         {
             Context.APT.Set(
-                "Environment",
-                new APT.Extensions.Environment.F_ProjectComponent(Context)
+                "ProjectLinker",
+                new APT.Extensions.ProjectLinker.F_ProjectComponent(Context)
             );
         }
     );

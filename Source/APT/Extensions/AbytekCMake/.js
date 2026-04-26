@@ -1,5 +1,5 @@
 
-AMJS.Import("../Environment");
+AMJS.Import("../ProjectLinker");
 AMJS.Import("../CMake");
 
 AMJS.Import("./ProjectComponent");
