@@ -34,7 +34,23 @@ APT.Extensions.AbytekCMake.GetDefaultEditor = function(PlatformTags)
     {
         return APT.Extensions.AbytekCMake.E_Editor.ANDROID_STUDIO;
     }
-    return null;
+    APT.FatalError("APT", `Unknown platform tags: ${PlatformTags}`);
+}
+APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor = function(Editor)
+{
+    if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2026))
+    {
+        return APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026;
+    }
+    if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2022))
+    {
+        return APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026;
+    }
+    if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.ANDROID_STUDIO))
+    {
+        return APT.Extensions.CMake.E_Generator.NINJA;
+    }
+    APT.FatalError("APT", `Unknown editor: ${Editor}`);
 }
 
 APT.Extensions.AbytekCMake.GetSignatureDataKeys = function()
@@ -173,4 +189,15 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
         ${AbytekCMakeFileContent}
     `;
     fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
+}
+
+APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Project, Config)
+{
+    let Result = [];
+    Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5`);
+    if (!Config.IsAuto)
+    {
+        Result.push(`-DCMAKE_BUILD_TYPE=${Config.DirectConfig}`);
+    }
+    return Result;
 }

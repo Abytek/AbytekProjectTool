@@ -32,7 +32,7 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
     }
     if (Options.Config == null)
     {
-        Options.Config = DefaultOptions.Config;
+        Options.Config = APT.Extensions.CMake.GetDefaultConfigForGenerator(Options.Generator);
     }
     if (Options.ExtraArguments == null)
     {
