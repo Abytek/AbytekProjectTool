@@ -57,37 +57,6 @@ APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
     APT.FatalError("APT", `Unknown generator: ${Generator}`);
 }
 
-APT.Extensions.CMake.GetInstalledVSVersions = function() 
-{
-  const vswherePath =
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe";
-
-  try {
-    const output = execSync(
-      `"${vswherePath}" -products * -property installationPath`,
-      { encoding: "utf8" }
-    );
-
-    const paths = output
-      .split("\n")
-      .map(v => v.trim())
-      .filter(Boolean);
-
-    const versions = [];
-
-    for (const p of paths) {
-      if (p.includes("\\2017\\")) versions.push("2017");
-      else if (p.includes("\\2019\\")) versions.push("2019");
-      else if (p.includes("\\2022\\")) versions.push("2022");
-      else if (p.includes("\\18\\")) versions.push("2026");
-    }
-
-    return [...new Set(versions)];
-  } catch (e) {
-    return [];
-  }
-}
-
 APT.Extensions.CMake.GetDefaultGenerator = function(PlatformTags)
 {
     if (PlatformTags == null)
@@ -96,7 +65,7 @@ APT.Extensions.CMake.GetDefaultGenerator = function(PlatformTags)
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
-        let InstalledVSVersions = APT.Extensions.CMake.GetInstalledVSVersions();
+        let InstalledVSVersions = APT.Common.GetInstalledVSVersions();
         if (InstalledVSVersions.includes("2026"))
         {
             return APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026;

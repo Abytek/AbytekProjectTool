@@ -45,13 +45,9 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 "AbytekCMake.PlatformTags", 
                 APT.Common.GetHostPlatformTags()
             );
-            let Generator = Context.APT.TransferSignature(
-                "AbytekCMake.Generator", 
-                APT.Extensions.CMake.GetDefaultGenerator(PlatformTags)
-            );
-            let Config = Context.APT.TransferSignature(
-                "AbytekCMake.Config", 
-                APT.Extensions.CMake.GetDefaultConfigForGenerator(Generator)
+            let Editor = Context.APT.TransferSignature(
+                "AbytekCMake.Editor", 
+                APT.Extensions.AbytekCMake.GetDefaultEditor(PlatformTags)
             );
         }
     );

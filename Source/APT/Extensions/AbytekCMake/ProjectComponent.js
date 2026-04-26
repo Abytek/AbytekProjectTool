@@ -6,6 +6,8 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         super(Context);
 
         this.Set("AbytekCMake.Options", Options);
+
+        // Prepare engine
         let Engine = null;
         if (Options.IsEngine)
         {

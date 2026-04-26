@@ -16,3 +16,4 @@ AMJS.Import("./Copy");
 AMJS.Import("./Cache");
 AMJS.Import("./Platform");
 AMJS.Import("./Files");
+AMJS.Import("./VisualStudio");
