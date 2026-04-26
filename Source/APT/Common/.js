@@ -670,3 +670,31 @@ APT.Common.ToCLIArgument = function(Value)
         .replaceAll("\\", "\\\\")
     }\"`;
 }
+
+APT.Common.TryAcquireFileBasedLock = function(Path) 
+{
+    try 
+    {
+        const fd = fs.openSync(Path, 'wx'); // fail nếu file tồn tại
+        return fd;
+    } 
+    catch (err) 
+    {
+        if (err.code === 'EEXIST') 
+        {
+            return null; // đã bị lock
+        }
+        throw err;
+    }
+}
+APT.Common.AcquireFileBasedLock = function(Path) 
+{
+    while (!APT.Common.TryAcquireFileBasedLock(Path))
+    {
+    }
+}
+APT.Common.ReleaseFileBasedLock = function(FD, Path) 
+{
+    fs.closeSync(FD);
+    fs.unlinkSync(Path);
+}
