@@ -241,6 +241,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     return Project.Data.SetPublic(Key, Value);
                                 }
                             }
+                            Context.APT.PushPublic = function(Key, Element, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.PushPublic(Key, Element);
+                                }
+                                else
+                                {
+                                    return Project.Data.PushPublic(Key, Element);
+                                }
+                            }
 
                             Context.APT.HasPrivate = function(Key, IsSignature = false)
                             {
@@ -308,6 +319,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     return Project.Data.SetPrivate(Key, Value);
                                 }
                             }
+                            Context.APT.PushPrivate = function(Key, Element, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.PushPrivate(Key, Element);
+                                }
+                                else
+                                {
+                                    return Project.Data.PushPrivate(Key, Element);
+                                }
+                            }
 
                             Context.APT.Has = function(Key, IsSignature = false)
                             {
@@ -362,6 +384,17 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                 else
                                 {
                                     return Project.Data.Set(Key, Value);
+                                }
+                            }
+                            Context.APT.Push = function(Key, Element, IsSignature = false)
+                            {
+                                if (IsSignature)
+                                {
+                                    return Project.SignatureData.Push(Key, Element);
+                                }
+                                else
+                                {
+                                    return Project.Data.Push(Key, Element);
                                 }
                             }
 

@@ -27,6 +27,10 @@ APT.Core.A_ProjectComponent = class
     {
         return this.Context.APT.GetOrAddPublic(Key, DefaultValue, IsSignature);
     }
+    PushPublic(Key, Element, IsSignature = false)
+    {
+        return this.Context.APT.PushPublic(Key, Element, IsSignature);
+    }
 
     HasPrivate(Key, IsSignature = false)
     {
@@ -48,6 +52,10 @@ APT.Core.A_ProjectComponent = class
     {
         return this.Context.APT.GetOrAddPrivate(Key, DefaultValue, IsSignature);
     }
+    PushPrivate(Key, Element, IsSignature = false)
+    {
+        return this.Context.APT.PushPrivate(Key, Element, IsSignature);
+    }
 
     Has(Key, IsSignature = false)
     {
@@ -68,6 +76,10 @@ APT.Core.A_ProjectComponent = class
     Set(Key, Value, IsSignature = false)
     {
         return this.Context.APT.Set(Key, Value, IsSignature);
+    }
+    Push(Key, Element, IsSignature = false)
+    {
+        return this.Context.APT.Push(Key, Element, IsSignature);
     }
 
     GetSignature(IsSignature = false)

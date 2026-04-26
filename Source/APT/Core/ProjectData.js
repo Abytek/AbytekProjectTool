@@ -54,6 +54,12 @@ APT.Core.F_ProjectData = class
         this.Public[Key] = Value;
         return Value;
     }
+    PushPublic(Key, Element)
+    {
+        let Value = this.GetOrAddPublic(Key, []);
+        Value.push(Element);
+        return this.SetPublic(Key, Value);
+    }
 
     HasPrivate(Key)
     {
@@ -91,6 +97,12 @@ APT.Core.F_ProjectData = class
         APT.Common.Assert(this.HasPrivate(Key) || !this.Has(Key), `Cannot set private key: ${Key}`);
         this.Private[Key] = Value;
         return Value;
+    }
+    PushPrivate(Key, Element)
+    {
+        let Value = this.GetOrAddPrivate(Key, []);
+        Value.push(Element);
+        return this.SetPrivate(Key, Value);
     }
 
     Has(Key)
@@ -137,6 +149,10 @@ APT.Core.F_ProjectData = class
     Set(Key, Value)
     {
         return this.SetPrivate(Key, Value);
+    }
+    Push(Key, Element)
+    {
+        return this.PushPrivate(Key, Element);
     }
 
     GetSignature(ProjectEntryDirectory = "")
