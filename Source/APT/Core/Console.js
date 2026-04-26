@@ -9,13 +9,11 @@ APT.Core.F_Console = class extends APT.Core.A_SystemChild
         super(System, "Console");
     }
 
-    Init()
+    GetStageDefinitions()
     {
-    }
-    PostInit()
-    {
-    }
-    Start()
-    {
+        return {
+            SetupConsole: {
+            }
+        }
     }
 }

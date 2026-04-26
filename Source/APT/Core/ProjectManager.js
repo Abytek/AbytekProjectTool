@@ -15,14 +15,15 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         this.Projects = new Map();
     }
 
-    Init()
+    GetStageDefinitions()
     {
-    }
-    PostInit()
-    {
-    }
-    Start()
-    {
+        return {
+            ImportMainProject: {
+                Dependencies: [
+                    "SetupConsole"
+                ]
+            }
+        }
     }
 
     ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true)

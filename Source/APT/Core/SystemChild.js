@@ -11,13 +11,8 @@ APT.Core.A_SystemChild = class
         this.Name = Name;
     }
 
-    Init()
+    GetStageDefinitions()
     {
-    }
-    PostInit()
-    {
-    }
-    Start()
-    {
+        return {};
     }
 }

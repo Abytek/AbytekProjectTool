@@ -45,17 +45,96 @@ APT.Core.F_System = class
         
         this.AutomaticExit = true;
 
-        this.Init();
-        this.PostInit();
+        this.StageDefinitions = new Object();
+        this.SortedStageDefinitions = [];
     }
 
     Start()
     {
         APT.Log("APT", "Start APT");
 
-        for (let Child of this.Childs)
+        let System = this;
+
+        // Prepare stages
         {
-            Child.Start();
+            APT.Log("APT", "Start gathering stage definitions");
+            {
+                for (let Child of this.Childs)
+                {
+                    let StageDefinitions = Child.GetStageDefinitions();
+                    for (let StageDefinitionName in StageDefinitions)
+                    {
+                        APT.Common.Assert(!(StageDefinitionName in this.StageDefinitions), `Already added stage definition "${StageDefinitionName}"`);
+                        let StageDefinition = StageDefinitions[StageDefinitionName];
+                        if (StageDefinition.Dependencies == null)
+                        {
+                            StageDefinition.Dependencies = [];
+                        }
+                        StageDefinition.Name = StageDefinitionName;
+                        this.StageDefinitions[StageDefinitionName] = StageDefinition;
+                    }
+                }
+            }
+            APT.Log("APT", "Gathered stage definitions:");
+            for (let StageDefinitionName in this.StageDefinitions)
+            {
+                let StageDefinition = this.StageDefinitions[StageDefinitionName];
+                APT.Log("APT", `\t- ${StageDefinitionName}:`);
+                APT.Log("APT", `\t\t+ Dependencies: [${StageDefinition.Dependencies}]`);
+            }
+
+            APT.Log("APT", "Start sorting stage definitions");
+            {
+                let SortedStageDefinitionNames_NonRoot = [];
+                for (let StageDefinitionName in this.StageDefinitions)
+                {
+                    let StageDefinition = this.StageDefinitions[StageDefinitionName];
+                    for (let DependencyName of StageDefinition.Dependencies)
+                    {
+                        if (SortedStageDefinitionNames_NonRoot.includes(DependencyName))
+                        {
+                            continue;
+                        }
+                        SortedStageDefinitionNames_NonRoot.push(DependencyName);
+                    }
+                }
+
+                let SortedStageDefinitionNames = [];
+
+                let AddStageDefinitionToSortedList = function(StageDefinitionName)
+                {
+                    if (SortedStageDefinitionNames.includes(StageDefinitionName))
+                    {
+                        return;
+                    }
+                    SortedStageDefinitionNames.push(StageDefinitionName);
+                    
+                    let StageDefinition = System.StageDefinitions[StageDefinitionName];
+                    System.SortedStageDefinitions.push(StageDefinition);
+
+                    for (let DependencyName of StageDefinition.Dependencies)
+                    {
+                        AddStageDefinitionToSortedList(DependencyName);
+                    }
+                }
+
+                for (let StageDefinitionName in this.StageDefinitions)
+                {
+                    if (SortedStageDefinitionNames_NonRoot.includes(StageDefinitionName))
+                    {
+                        continue;
+                    }
+                    AddStageDefinitionToSortedList(StageDefinitionName);
+                }
+
+                this.SortedStageDefinitions.reverse();
+            }
+            APT.Log("APT", "Sorted stage definitions:");
+            for (let StageDefinition of this.SortedStageDefinitions)
+            {
+                APT.Log("APT", `\t- ${StageDefinition.Name}:`);
+                APT.Log("APT", `\t\t+ Dependencies: [${StageDefinition.Dependencies}]`);
+            }
         }
 
         APT.Log("APT", "Started APT");
@@ -68,24 +147,6 @@ APT.Core.F_System = class
         {
             APT.Log("APT", "APT stopped");
         }
-    }
-    Init()
-    {
-        APT.Log("APT", "Start initialize APT");
-        for (let Child of this.Childs)
-        {
-            Child.Init();
-        }
-        APT.Log("APT", "Initialized APT");
-    }
-    PostInit()
-    {
-        APT.Log("APT", "Start post initialize APT");
-        for (let Child of this.Childs)
-        {
-            Child.PostInit();
-        }
-        APT.Log("APT", "Post initialized APT");
     }
 
     GetChild(Name)
