@@ -319,7 +319,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
             CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(EngineCMakeGenerator);
         }
 
-        EngineSignature = APT.Extensions.AbytekCMake.CalculateSignature(EngineEnvironment, PlatformTags, Editor);
+        EngineSignature = APT.Extensions.AbytekCMake.CalculateSignature(EngineEnvironment, PlatformTags, EngineEditor);
 
         EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             EngineProject.EntryDirectory,
