@@ -20,6 +20,9 @@ APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, CMa
     let Environment = Project.Data.Get("AbytekCMake.Environment");
     let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
     
+    let EngineProject = Project.Data.Get("AbytekCMake.Engine");
+    let EngineEnvironment = EngineProject.Data.Get("AbytekCMake.Environment");
+
     let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
     if (CMakeConfig == null)
     {
@@ -71,13 +74,28 @@ APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, CMa
     // Android requires prepare from android studio
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
+        let GradlewCommand = null;
+        if (CMakeConfig.DirectConfig == APT.Extensions.CMake.E_DirectConfig.DEBUG)
+        {
+            GradlewCommand = "externalNativeBuildDebug";
+        }
+        else if (CMakeConfig.DirectConfig == APT.Extensions.CMake.E_DirectConfig.RELEASE)
+        {
+            GradlewCommand = "externalNativeBuildRelease";
+        }
+        else 
+        {
+            APT.FatalError("APT", `Unknown direct config: ${CMakeConfig.DirectConfig}`);
+        }
+
         FileContent += `
             ProjectInstance.Prepare = function()
             {
                 const result = spawnSync(
                     process.platform === "win32" ? "gradlew.bat" : "./gradlew",
                     [
-                        "externalNativeBuildDebug",
+                        "${GradlewCommand}",
+                        "-PABYTEK_ENGINE_ENVIRONMENT_NAME=${EngineEnvironment}"
                         "-PABYTEK_PROJECT_ENVIRONMENT_NAME=${Environment}"
                     ], 
                     {
