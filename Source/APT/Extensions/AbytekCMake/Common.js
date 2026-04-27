@@ -3,6 +3,31 @@ const path = require("path");
 const fs = require("fs");
 
 
+APT.Extensions.AbytekCMake.E_Environment = {
+    DEVELOPMENT: "Development", 
+    COOKED: "Cooked",
+}
+APT.Extensions.AbytekCMake.GetDefaultEnvironment = function(PlatformTags)
+{
+    if (PlatformTags == null)
+    {
+        PlatformTags = APT.Common.GetHostPlatformTags();
+    }
+    if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
+    {
+        return APT.Extensions.AbytekCMake.E_Environment.DEVELOPMENT;
+    }
+    if (PlatformTags.includes(APT.Common.E_PlatformTag.MACOS))
+    {
+        return APT.Extensions.AbytekCMake.E_Environment.DEVELOPMENT;
+    }
+    if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
+    {
+        return APT.Extensions.AbytekCMake.E_Environment.COOKED;
+    }
+    APT.FatalError("APT", `Unknown platform tags: ${PlatformTags}`);
+}
+
 APT.Extensions.AbytekCMake.E_Editor = {
     VISUAL_STUDIO_2026: "VisualStudio2026", 
     VISUAL_STUDIO_2022: "VisualStudio2022", 
@@ -315,17 +340,16 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
         Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
     }
 
-    Result.push(`-DABYTEK_PROJECT_ENVIRONMENT_NAME="${ProjectEnvironment}"`);
     Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(Project.EntryDirectory)}"`);
     Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Path)}"`);
     Result.push(`-DABYTEK_PROJECT_SIGNATURE="${ProjectSignature}"`);
 
-    Result.push(`-DABYTEK_ENGINE_ENVIRONMENT_NAME="${EngineEnvironment}"`);
     Result.push(`-DABYTEK_ENGINE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineProject.EntryDirectory)}"`);
     Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Path)}"`);
     Result.push(`-DABYTEK_ENGINE_SIGNATURE="${EngineSignature}"`);
     
+    Result.push(`-DABYTEK_CMAKE_ENVIRONMENT="${EngineEnvironment}"`);
     Result.push(`-DABYTEK_CMAKE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_CMAKE_GENERATOR="${EngineCMakeGenerator}"`);
     Result.push(`-DABYTEK_CMAKE_CONFIG="${CMakeConfig}"`);

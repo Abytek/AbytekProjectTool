@@ -94,9 +94,7 @@ APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, CMa
     //             const result = spawnSync(
     //                 process.platform === "win32" ? "gradlew.bat" : "./gradlew",
     //                 [
-    //                     "${GradlewCommand}",
-    //                     "-PABYTEK_ENGINE_ENVIRONMENT_NAME=${EngineEnvironment}"
-    //                     "-PABYTEK_PROJECT_ENVIRONMENT_NAME=${Environment}"
+    //                     "${GradlewCommand}"
     //                 ], 
     //                 {
     //                     cwd: AndroidProjectDirectory,
