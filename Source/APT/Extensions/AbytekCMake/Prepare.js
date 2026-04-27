@@ -48,7 +48,7 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
     const result = spawnSync(
         process.platform === "win32" ? "gradlew.bat" : "./gradlew",
         [
-            "${GradlewCommand}"
+            GradlewCommand
         ], 
         {
             cwd: AndroidProjectDirectory,
