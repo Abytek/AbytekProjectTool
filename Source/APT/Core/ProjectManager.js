@@ -141,6 +141,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         {
             Data = new APT.Core.F_ProjectData();
         }
+        APT.Log("APT", `\t- Data: [${Data.GetSignature()}]`);
 
         let AbsoluteProjectEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
         if (!AbsoluteProjectEntryDirectory)
