@@ -94,7 +94,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         }
                         if ("Private" in Defines)
                         {
-                            let Private = Defines.Public;
+                            let Private = Defines.Private;
                             if (Private != null)
                             {
                                 for (let Key in Private)
