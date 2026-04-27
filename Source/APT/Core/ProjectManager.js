@@ -92,13 +92,13 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 
                                     let IsArray = false;
                                     let ParsedKey = Key.replaceAll("/", ".");
-                                    if (Key.length > 2)
+                                    if ((Key.length > 2) && !Array.isArray(Value))
                                     {
                                         IsArray = (Key.slice(Key.length - 2, Key.length) == "[]");
                                     }
                                     if (IsArray)
                                     {
-                                        ParsedKey = ParsedKey.slice(ParsedKey.length - 2);
+                                        ParsedKey = ParsedKey.slice(0, ParsedKey.length - 2);
                                         Result.PushPublic(ParsedKey, Value);
                                     }
                                     else
@@ -119,13 +119,13 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 
                                     let IsArray = false;
                                     let ParsedKey = Key.replaceAll("/", ".");
-                                    if (Key.length > 2)
+                                    if ((Key.length > 2) && !Array.isArray(Value))
                                     {
                                         IsArray = (Key.slice(Key.length - 2, Key.length) == "[]");
                                     }
                                     if (IsArray)
                                     {
-                                        ParsedKey = ParsedKey.slice(ParsedKey.length - 2);
+                                        ParsedKey = ParsedKey.slice(0, ParsedKey.length - 2);
                                         Result.PushPrivate(ParsedKey, Value);
                                     }
                                     else
