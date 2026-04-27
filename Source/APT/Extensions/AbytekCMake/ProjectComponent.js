@@ -11,9 +11,17 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         let Environment = this.Get("AbytekCMake.Environment");
         let PlatformTags = this.Get("AbytekCMake.PlatformTags");
         let Editor = this.Get("AbytekCMake.Editor");
+
         let Name = this.GetOrAdd("AbytekCMake.Name", "AbytekProject");
+
         let PrepareEnabled = this.GetOrAdd("AbytekCMake.Prepare.Enabled", this.Project.IsMain);
+        let PrepareCMakeConfig = this.GetOrAdd(
+            "AbytekCMake.Prepare.CMakeConfig", 
+            APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Editor)
+        );
+
         let CMakeDefinitions = this.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
+
         this.Set("AbytekCMake.Options", Options);
 
         // Prepare engine
@@ -86,7 +94,7 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
         // Prepare if needed
         if (PrepareEnabled)
         {
-            APT.Extensions.AbytekCMake.Prepare(this.Project);
+            APT.Extensions.AbytekCMake.Prepare(this.Project, PrepareCMakeConfig);
         }
     }
 }

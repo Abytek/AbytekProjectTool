@@ -52,6 +52,11 @@ APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor = function(Editor)
     }
     APT.FatalError("APT", `Unknown editor: ${Editor}`);
 }
+APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor = function(Editor)
+{
+    let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
+    return APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
+}
 
 APT.Extensions.AbytekCMake.GetSignatureDataKeys = function()
 {
@@ -89,7 +94,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignature = function(
     APT.Common.Assert(Generator, "Invalid generator");
     APT.Common.Assert(Config, "Invalid config");
 
-    return [Environment, PlatformTags.sort().join("."), Generator, Config].join("-") + ".txt";
+    return [Environment, PlatformTags.sort().join("."), Generator, Config.IsAuto ? "Auto" : Config.DirectConfig].join("-");
 }
 
 APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
@@ -136,6 +141,41 @@ APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
         Signature,
         SignatureHash,
     };
+}
+
+APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignatureFile = function(BuildDirectory, Signature)
+{
+    return path.join(
+        BuildDirectory,
+        "CMakeBuildDirectorySignature-" + Signature + ".txt"
+    );
+}
+
+APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile = function(Project, CMakeConfig)
+{
+    let Editor = Project.Data.Get("AbytekCMake.Editor");
+    let Environment = Project.Data.Get("AbytekCMake.Environment");
+    let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
+    
+    let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
+    if (CMakeConfig == null)
+    {
+        CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
+    }
+    
+    const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+        Project.EntryDirectory,
+        Environment,
+        PlatformTags,
+        CMakeGenerator,
+        CMakeConfig
+    );
+
+    const CMakeBuildDirectorySignatureFile = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignatureFile(
+        APT.Extensions.AbytekCMake.CalculateBuildDirectory(Project.EntryDirectory),
+        CMakeBuildDirectoryConfig.Signature
+    );
+    fs.writeFileSync(CMakeBuildDirectorySignatureFile, CMakeBuildDirectoryConfig.SignatureHash);
 }
 
 APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(Environment, PlatformTags, Editor)
