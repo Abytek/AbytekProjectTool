@@ -86,7 +86,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             let Public = Defines.Public;
                             if (Public != null)
                             {
-                                for (let Key of Public)
+                                for (let Key in Public)
                                 {
                                     Result.SetPublic(Key, Public[Key]);
                                 }
@@ -97,7 +97,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             let Private = Defines.Public;
                             if (Private != null)
                             {
-                                for (let Key of Private)
+                                for (let Key in Private)
                                 {
                                     Result.SetPrivate(Key, Private[Key]);
                                 }
