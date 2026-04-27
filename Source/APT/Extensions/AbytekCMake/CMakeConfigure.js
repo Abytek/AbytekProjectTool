@@ -35,7 +35,7 @@ APT.Extensions.AbytekCMake.CMakeConfigure = function(Project, CMakeConfig)
     let CMakeConfigureExtraArguments = [
         ...APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments(Project, CMakeConfig)
     ];
-
+    
     APT.Extensions.CMake.Configure(
         Project.EntryDirectory,
         CMakeBuildDirectory,

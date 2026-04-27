@@ -12,7 +12,7 @@ AMJS.Import("./ProjectInstance");
 APT.Extensions.AbytekCMake.PrepareWindows = function(Project, CMakeConfig)
 {
     APT.Log("APT", `Start preparing project: ${Project.GetSignature()}`);
-    
+
     APT.Extensions.AbytekCMake.CMakeConfigure(
         Project,
         CMakeConfig

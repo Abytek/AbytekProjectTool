@@ -252,7 +252,7 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
         include(Abytek/Utilities/SetGlobal)
         include(Abytek/Utilities/ReadKeyValueFile)
 
-        Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_PROJECT_SIGNATURE}.txt")
+        Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_CMAKE_SIGNATURE}.txt")
         Abytek_ReadKeyValueFile(\${ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE})
 
         add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
@@ -281,12 +281,10 @@ APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(EntryDirectory, Pro
 
 APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Project, CMakeConfig)
 {
-    let ProjectEnvironment = null;
     let ProjectCMakeBuildDirectoryConfig = null;
-    let ProjectSignature = null;
     {
         let Editor = Project.Data.Get("AbytekCMake.Editor");
-        ProjectEnvironment = Project.Data.Get("AbytekCMake.Environment");
+        let Environment = Project.Data.Get("AbytekCMake.Environment");
         let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
         
         let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
@@ -295,11 +293,9 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
             CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
         }
 
-        ProjectSignature = APT.Extensions.AbytekCMake.CalculateSignature(ProjectEnvironment, PlatformTags, Editor);
-
         ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             Project.EntryDirectory,
-            ProjectEnvironment,
+            Environment,
             PlatformTags,
             CMakeGenerator,
             CMakeConfig
@@ -309,9 +305,9 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     let EngineProject = Project.Data.Get("AbytekCMake.Engine");
     let EngineEnvironment = null;
     let EngineCMakeBuildDirectoryConfig = null;
-    let EngineSignature = null;
     let EngineEditor = null;
     let EngineCMakeGenerator = null;
+    let EngineSignature = null;
     {
         EngineEditor = EngineProject.Data.Get("AbytekCMake.Editor");
         EngineEnvironment = EngineProject.Data.Get("AbytekCMake.Environment");
@@ -323,7 +319,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
             CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(EngineCMakeGenerator);
         }
 
-        EngineSignature = APT.Extensions.AbytekCMake.CalculateSignature(EngineEnvironment, PlatformTags, EngineEditor);
+        EngineSignature = APT.Extensions.AbytekCMake.CalculateSignature(EngineEnvironment, PlatformTags, Editor);
 
         EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             EngineProject.EntryDirectory,
@@ -343,13 +339,11 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
 
     Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(Project.EntryDirectory)}"`);
     Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Path)}"`);
-    Result.push(`-DABYTEK_PROJECT_SIGNATURE="${ProjectSignature}"`);
 
-    Result.push(`-DABYTEK_ENGINE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineProject.EntryDirectory)}"`);
     Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Path)}"`);
-    Result.push(`-DABYTEK_ENGINE_SIGNATURE="${EngineSignature}"`);
-    
+
+    Result.push(`-DABYTEK_CMAKE_SIGNATURE="${EngineSignature}"`);
     Result.push(`-DABYTEK_CMAKE_ENVIRONMENT="${EngineEnvironment}"`);
     Result.push(`-DABYTEK_CMAKE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_CMAKE_GENERATOR="${EngineCMakeGenerator}"`);
