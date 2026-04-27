@@ -91,14 +91,21 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                     let Value = Public[Key];
 
                                     let IsArray = false;
-                                    let ParsedKey = Key.replaceAll("/", ".");
-                                    if ((Key.length > 2) && !Array.isArray(Value))
+                                    let IsAlreadyArray = false;
+                                    if (Key.length > 2)
                                     {
                                         IsArray = (Key.slice(Key.length - 2, Key.length) == "[]");
+                                        IsAlreadyArray = Array.isArray(Value);
                                     }
+                                    
+                                    let ParsedKey = Key.replaceAll("/", ".");
                                     if (IsArray)
                                     {
                                         ParsedKey = ParsedKey.slice(0, ParsedKey.length - 2);
+                                    }
+
+                                    if (IsArray && !IsAlreadyArray)
+                                    {
                                         Result.PushPublic(ParsedKey, Value);
                                     }
                                     else
