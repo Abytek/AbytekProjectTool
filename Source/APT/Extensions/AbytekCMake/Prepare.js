@@ -23,6 +23,8 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
 {
     APT.Log("APT", `Start preparing project: ${Project.GetSignature()}`);
 
+    let Environment = Project.Data.Get("AbytekCMake.Environment");
+
     const AndroidProjectDirectory = path.join(
         Project.EntryDirectory,
         "Platforms",
@@ -48,7 +50,8 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
     const result = spawnSync(
         process.platform === "win32" ? "gradlew.bat" : "./gradlew",
         [
-            GradlewCommand
+            GradlewCommand,
+            `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`
         ], 
         {
             cwd: AndroidProjectDirectory,
