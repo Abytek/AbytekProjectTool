@@ -88,7 +88,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 for (let Key in Public)
                                 {
-                                    Result.SetPublic(Key, Public[Key]);
+                                    Result.SetPublic(Key.replaceAll("/", "."), Public[Key]);
                                 }
                             }
                         }
@@ -99,7 +99,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 for (let Key in Private)
                                 {
-                                    Result.SetPrivate(Key, Private[Key]);
+                                    Result.SetPrivate(Key.replaceAll("/", "."), Private[Key]);
                                 }
                             }
                         }
