@@ -37,13 +37,13 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
         "PrepareSignature",
         function()
         {
-            Context.APT.TransferSignature(
-                "AbytekCMake.Environment", 
-                "Development"
-            );
             let PlatformTags = Context.APT.TransferSignature(
                 "AbytekCMake.PlatformTags", 
                 APT.Common.GetHostPlatformTags()
+            );
+            Context.APT.TransferSignature(
+                "AbytekCMake.Environment", 
+                APT.Extensions.AbytekCMake.GetDefaultEnvironment(PlatformTags)
             );
             let Editor = Context.APT.TransferSignature(
                 "AbytekCMake.Editor", 
