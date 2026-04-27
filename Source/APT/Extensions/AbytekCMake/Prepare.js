@@ -49,13 +49,16 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
         APT.FatalError("APT", `Unknown config: ${CMakeConfig}`);
     }
 
+    let Arguments = [
+        GradlewCommand,
+        `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`,
+        `-PABYTEK_MANUAL_ANDROID_SDK_DIR="${AndroidSdkPath.replaceAll("\\", "/")}"`
+    ];
+    APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
+
     const result = spawnSync(
         process.platform === "win32" ? "gradlew.bat" : "./gradlew",
-        [
-            GradlewCommand,
-            `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`,
-            `-PABYTEK_MANUAL_ANDROID_SDK_DIR="${AndroidSdkPath.replaceAll("\\", "/")}"`
-        ], 
+        Arguments, 
         {
             cwd: AndroidProjectDirectory,
             stdio: "inherit",
