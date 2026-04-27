@@ -6,6 +6,7 @@ const fs = require("fs");
 APT.Extensions.AbytekCMake.E_Environment = {
     DEVELOPMENT: "Development", 
     COOKED: "Cooked",
+    COOKED_MAX_OPTIMIZED: "CookedMaxOptimized",
 }
 APT.Extensions.AbytekCMake.GetDefaultEnvironment = function(PlatformTags)
 {
