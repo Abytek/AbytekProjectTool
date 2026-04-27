@@ -88,7 +88,23 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 for (let Key in Public)
                                 {
-                                    Result.SetPublic(Key.replaceAll("/", "."), Public[Key]);
+                                    let Value = Public[Key];
+
+                                    let IsArray = false;
+                                    let ParsedKey = Key.replaceAll("/", ".");
+                                    if (Key.length > 2)
+                                    {
+                                        IsArray = (Key.slice(Key.length - 2, Key.length) == "[]");
+                                    }
+                                    if (IsArray)
+                                    {
+                                        ParsedKey = ParsedKey.slice(ParsedKey.length - 2);
+                                        Result.PushPublic(ParsedKey, Value);
+                                    }
+                                    else
+                                    {
+                                        Result.SetPublic(ParsedKey, Value);
+                                    }
                                 }
                             }
                         }
@@ -99,7 +115,23 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 for (let Key in Private)
                                 {
-                                    Result.SetPrivate(Key.replaceAll("/", "."), Private[Key]);
+                                    let Value = Private[Key];
+
+                                    let IsArray = false;
+                                    let ParsedKey = Key.replaceAll("/", ".");
+                                    if (Key.length > 2)
+                                    {
+                                        IsArray = (Key.slice(Key.length - 2, Key.length) == "[]");
+                                    }
+                                    if (IsArray)
+                                    {
+                                        ParsedKey = ParsedKey.slice(ParsedKey.length - 2);
+                                        Result.PushPrivate(ParsedKey, Value);
+                                    }
+                                    else
+                                    {
+                                        Result.SetPrivate(ParsedKey, Value);
+                                    }
                                 }
                             }
                         }
