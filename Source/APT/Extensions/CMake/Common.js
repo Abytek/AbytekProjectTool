@@ -8,6 +8,13 @@ APT.Extensions.CMake.E_DirectConfig = {
     REL_WITH_DEB_INFO: "RelWithDebInfo",
     MIN_SIZE_REL: "MinSizeRel",
 };
+APT.Extensions.CMake.E_Config = {
+    AUTO: "Auto",
+    DEBUG: APT.Extensions.CMake.E_DirectConfig.DEBUG,
+    RELEASE: APT.Extensions.CMake.E_DirectConfig.RELEASE,
+    REL_WITH_DEB_INFO: APT.Extensions.CMake.E_DirectConfig.REL_WITH_DEB_INFO,
+    MIN_SIZE_REL: APT.Extensions.CMake.E_DirectConfig.MIN_SIZE_REL,
+};
 
 APT.Extensions.CMake.E_Generator = {
     VISUAL_STUDIO_2026: "VisualStudio2026",
@@ -15,18 +22,6 @@ APT.Extensions.CMake.E_Generator = {
     NINJA: "Ninja",
     UNIX_MAKEFILES: "UnixMakefiles",
 };
-
-APT.Extensions.CMake.MakeConfig = function(DirectConfig, IsAuto = false) 
-{
-    return {
-        IsAuto,
-        DirectConfig
-    };
-}
-APT.Extensions.CMake.MakeAutoConfig = function()
-{
-    return APT.Extensions.CMake.MakeConfig(null, true);
-}
 
 APT.Extensions.CMake.GetDefaultDirectConfig = function()
 {
@@ -36,23 +31,19 @@ APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
 {
     if (Generator == APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026)
     {
-        return APT.Extensions.CMake.MakeAutoConfig();
+        return APT.Extensions.CMake.E_Config.AUTO;
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2022)
     {
-        return APT.Extensions.CMake.MakeAutoConfig();
+        return APT.Extensions.CMake.E_Config.AUTO;
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.NINJA)
     {
-        return APT.Extensions.CMake.MakeConfig(
-            APT.Extensions.CMake.GetDefaultDirectConfig()
-        );
+        return APT.Extensions.CMake.GetDefaultDirectConfig();
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.UNIX_MAKEFILES)
     {
-        return APT.Extensions.CMake.MakeConfig(
-            APT.Extensions.CMake.GetDefaultDirectConfig()
-        );
+        return APT.Extensions.CMake.GetDefaultDirectConfig();
     }
     APT.FatalError("APT", `Unknown generator: ${Generator}`);
 }
@@ -94,7 +85,7 @@ APT.Extensions.CMake.GetDefaultConfig = function()
 
 APT.Extensions.CMake.IsConfigCompatibleWithGenerator = function(Config, Generator)
 {
-    if (Config.IsAuto)
+    if (Config == APT.Extensions.CMake.AUTO)
     {
         if (
             (Generator == APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2022)

@@ -94,7 +94,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignature = function(
     APT.Common.Assert(Generator, "Invalid generator");
     APT.Common.Assert(Config, "Invalid config");
 
-    return [Environment, PlatformTags.sort().join("."), Generator, Config.IsAuto ? "Auto" : Config.DirectConfig].join("-");
+    return [Environment, PlatformTags.sort().join("."), Generator, Config].join("-");
 }
 
 APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
@@ -310,7 +310,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
 
     let Result = [];
     Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
-    if (!CMakeConfig.IsAuto)
+    if (CMakeConfig != APT.Extensions.CMake.E_Config.AUTO)
     {
         Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
     }
@@ -328,14 +328,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     
     Result.push(`-DABYTEK_CMAKE_EDITOR="${EngineEditor}"`);
     Result.push(`-DABYTEK_CMAKE_GENERATOR="${EngineCMakeGenerator}"`);
-    if (CMakeConfig.IsAuto)
-    {
-        Result.push(`-DABYTEK_CMAKE_CONFIG="Auto"`);
-    }
-    else
-    {
-        Result.push(`-DABYTEK_CMAKE_CONFIG="${CMakeConfig.DirectConfig}"`);
-    }
+    Result.push(`-DABYTEK_CMAKE_CONFIG="${CMakeConfig}"`);
 
     return Result;
 }
