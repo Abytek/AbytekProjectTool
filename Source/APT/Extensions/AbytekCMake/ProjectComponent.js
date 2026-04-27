@@ -20,10 +20,6 @@ APT.Extensions.AbytekCMake.F_ProjectComponent = class extends APT.Core.A_Project
             APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Editor)
         );
 
-        console.log("OK: ", PrepareEnabled);
-        console.log("OK: ", PrepareCMakeConfig);
-        exit(1);
-
         let CMakeDefinitions = this.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
 
         this.Set("AbytekCMake.Options", Options);
