@@ -338,7 +338,7 @@ APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(Proj
     Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
     if (CMakeConfig != APT.Extensions.CMake.E_Config.AUTO)
     {
-        Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig.DirectConfig}`);
+        Result.push(`-DCMAKE_BUILD_TYPE=${CMakeConfig}`);
     }
 
     Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(Project.EntryDirectory)}"`);

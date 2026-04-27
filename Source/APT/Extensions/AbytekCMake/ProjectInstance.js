@@ -68,50 +68,6 @@ APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, CMa
         const AndroidProjectDirectory = "${AndroidProjectDirectory}";
         const ImportJSFile = "${ImportJSFile}";
         let ProjectInstance = new Object();
-        // ProjectInstance.Prepare = function() {};
-    `;
-    
-    // Android requires prepare from android studio
-    // if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
-    // {
-    //     let GradlewCommand = null;
-    //     if (CMakeConfig.DirectConfig == APT.Extensions.CMake.E_DirectConfig.DEBUG)
-    //     {
-    //         GradlewCommand = "externalNativeBuildDebug";
-    //     }
-    //     else if (CMakeConfig.DirectConfig == APT.Extensions.CMake.E_DirectConfig.RELEASE)
-    //     {
-    //         GradlewCommand = "externalNativeBuildRelease";
-    //     }
-    //     else 
-    //     {
-    //         APT.FatalError("APT", `Unknown direct config: ${CMakeConfig.DirectConfig}`);
-    //     }
-
-    //     FileContent += `
-    //         ProjectInstance.Prepare = function()
-    //         {
-    //             const result = spawnSync(
-    //                 process.platform === "win32" ? "gradlew.bat" : "./gradlew",
-    //                 [
-    //                     "${GradlewCommand}"
-    //                 ], 
-    //                 {
-    //                     cwd: AndroidProjectDirectory,
-    //                     stdio: "inherit",
-    //                     shell: true,
-    //                     env: process.env,
-    //                 }
-    //             );
-    //             if (result.status != 0)
-    //             {
-    //                 throw new Error("Failed to prepare android project");
-    //             }
-    //         };
-    //     `;
-    // }
-
-    FileContent += `
         ProjectInstance.Load = function()
         {
             let Contexts = [];
