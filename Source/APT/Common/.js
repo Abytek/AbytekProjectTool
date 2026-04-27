@@ -6,6 +6,7 @@ const Ajv = require("ajv");
 const crypto = require('crypto');
 const deasync = require('deasync');
 
+AMJS.Import("./Android");
 AMJS.Import("./Assert");
 AMJS.Import("./Git");
 AMJS.Import("./ID");

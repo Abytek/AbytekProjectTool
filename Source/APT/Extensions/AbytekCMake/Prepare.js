@@ -33,6 +33,8 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
         "Application"
     ).replaceAll("\\", "/");
 
+    let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
+
     let GradlewCommand = null;
     if (CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
     {
@@ -51,7 +53,8 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
         process.platform === "win32" ? "gradlew.bat" : "./gradlew",
         [
             GradlewCommand,
-            `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`
+            `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`,
+            `-PABYTEK_MANUAL_ANDROID_SDK_DIR="${AndroidSdkPath.replaceAll("\\", "/")}"`
         ], 
         {
             cwd: AndroidProjectDirectory,
