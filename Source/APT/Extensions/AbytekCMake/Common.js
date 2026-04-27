@@ -220,7 +220,7 @@ APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, Env
     APT.Log("APT", `Generating engine path file, entry directory: ${EntryDirectory}, environment: ${Environment}, platform tags: ${PlatformTags}, engine entry directory: ${EngineEntryDirectory}`);
     const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, Environment, PlatformTags, Editor);
     APT.Extensions.AbytekCMake.EnsureBuildDirectory(EntryDirectory);
-    fs.writeFileSync(EnginePathFile, EngineEntryDirectory);
+    fs.writeFileSync(EnginePathFile, EngineEntryDirectory.replaceAll("\\", "/"));
     APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
 }
 APT.Extensions.AbytekCMake.CalculateCMakeListsFile = function(EntryDirectory)
