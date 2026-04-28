@@ -25,6 +25,7 @@ APT.Extensions.AbytekCMake.CMakeConfigure = function(Project, InstanceConfig)
         {
             Generator: InstanceConfig.CMakeGenerator,
             Config: InstanceConfig.CMakeConfig,
+            ProcessorArch: InstanceConfig.ProcessorArch,
             ExtraArguments: CMakeConfigureExtraArguments
         }
     );

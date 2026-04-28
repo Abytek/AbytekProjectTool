@@ -4,6 +4,7 @@ const os = require("os");
 
 APT.Common.E_ProcessorArch = 
 {
+    AUTO: "Auto",
     X86_32: "X86_32",
     X86_64: "X86_64",
     ARM_32: "ARM_32",

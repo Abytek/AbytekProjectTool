@@ -58,8 +58,12 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor)
             );
             let CMakeConfig = Context.APT.GetOrAdd(
-                "AbytekCMake.CMakeGenerator", 
+                "AbytekCMake.CMakeConfig", 
                 APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Editor)
+            );
+            let ProcessorArch = Context.APT.GetOrAdd(
+                "AbytekCMake.ProcessorArch", 
+                APT.Extensions.AbytekCMake.GetDefaultProcessorArchForPlatformTags(PlatformTags)
             );
 
             let InstanceConfig = Context.APT.TransferSignature(
@@ -67,7 +71,10 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 APT.Extensions.AbytekCMake.FinalizeInstanceConfig({
                     Environment,
                     Platform,
-                    Editor
+                    Editor,
+                    CMakeGenerator,
+                    CMakeConfig,
+                    ProcessorArch
                 })
             );
         }

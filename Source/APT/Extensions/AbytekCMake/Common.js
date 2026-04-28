@@ -93,6 +93,42 @@ const Ajv = require("ajv");
 }
 
 
+// ProcessorArch
+{
+    APT.Extensions.AbytekCMake.GetDefaultProcessorArchForPlatformTags = function(PlatformTags)
+    {
+        // WebAssembly
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.EMSCRIPTEN) || PlatformTags.includes(APT.Common.E_PlatformTag.WEB))
+        {
+            return APT.Common.E_ProcessorArch.WASM;
+        }
+
+        // Mobile ARM
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.IOS) ||
+            PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
+        {
+            return APT.Common.E_ProcessorArch.ARM_64; // modern default
+        }
+
+        // Desktop Linux/macOS
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.MACOS) ||
+            PlatformTags.includes(APT.Common.E_PlatformTag.LINUX) ||
+            PlatformTags.includes(APT.Common.E_PlatformTag.UNIX))
+        {
+            return APT.Common.E_ProcessorArch.X86_64; // default assumption
+        }
+
+        // Windows
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
+        {
+            return APT.Common.E_ProcessorArch.X86_64;
+        }
+
+        APT.FatalError("APT", `Cannot resolve processor arch from platform tags: ${PlatformTags}`);
+    }
+}
+
+
 // Instance Config
 {
     APT.Extensions.AbytekCMake.ValidateInstanceConfig = function(InstanceConfig)
@@ -115,9 +151,20 @@ const Ajv = require("ajv");
                 },
                 CMakeConfig: {
                     type: "string"
+                },
+                ProcessorArch: {
+                    type: "string"
                 }
             },
             additionalProperties: false,
+            required: [
+                "Environment",
+                "Platform",
+                "Editor",
+                "CMakeGenerator",
+                "CMakeConfig",
+                "ProcessorArch",
+            ]
         };
         const Validator = ajv.compile(Schema);
 
@@ -141,19 +188,7 @@ const Ajv = require("ajv");
     {
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
         APT.Common.Assert(Validation.Status, Validation);
-        APT.Common.Assert(InstanceConfig.Environment, `Missing environment`);
-        APT.Common.Assert(InstanceConfig.Platform, `Missing platform`);
-        APT.Common.Assert(InstanceConfig.Editor, `Missing editor`);
-
         let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
-        if (Result.CMakeGenerator == null)
-        {
-            Result.CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Result.Editor);
-        }
-        if (Result.CMakeConfig == null)
-        {
-            Result.CMakeConfig = APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Result.Editor);
-        }
         return Result;
     }
     APT.Extensions.AbytekCMake.FinalizeDirectInstanceConfig = function(InstanceConfig, DirectInstanceConfig)
@@ -179,6 +214,7 @@ const Ajv = require("ajv");
             InstanceConfig.Editor,
             InstanceConfig.CMakeGenerator,
             InstanceConfig.CMakeConfig,
+            InstanceConfig.ProcessorArch,
         ].join('-');
     }
 }
@@ -386,6 +422,7 @@ const Ajv = require("ajv");
         Result.push(`-DABYTEK_CMAKE_EDITOR="${InstanceConfig.Editor}"`);
         Result.push(`-DABYTEK_CMAKE_GENERATOR="${InstanceConfig.CMakeGenerator}"`);
         Result.push(`-DABYTEK_CMAKE_CONFIG="${InstanceConfig.CMakeConfig}"`);
+        Result.push(`-DABYTEK_CMAKE_PROCESSOR_ARCH="${InstanceConfig.ProcessorArch}"`);
 
         return Result;
     }

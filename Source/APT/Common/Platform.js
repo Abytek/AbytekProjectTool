@@ -4,6 +4,7 @@ const os = require("os");
 
 APT.Common.E_Platform = 
 {
+    AUTO: "Auto",
     WINDOWS: "Windows",
     MACOS: "macOS",
     IOS: "iOS",
@@ -90,7 +91,11 @@ APT.Common.GetHostPlatformTags = function()
 
 APT.Common.ParsePlatformTags = function(Platform)
 {
-    if (Platform == APT.Common.E_Platform.WINDOWS)
+    if (Platform == APT.Common.E_Platform.AUTO)
+    {
+        return [];
+    }
+    else if (Platform == APT.Common.E_Platform.WINDOWS)
     {
         return [
             APT.Common.E_PlatformTag.WINDOWS

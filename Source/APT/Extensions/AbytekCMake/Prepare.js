@@ -14,7 +14,7 @@ APT.Extensions.AbytekCMake.PrepareWindows = function(Project, DirectInstanceConf
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
     let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
-    
+
     APT.Extensions.AbytekCMake.CMakeConfigure(
         Project,
         InstanceConfig
@@ -54,6 +54,7 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, DirectInstanceConf
     let Arguments = [
         GradlewCommand,
         `-PABYTEK_CMAKE_ENVIRONMENT="${InstanceConfig.Environment}"`,
+        `-PABYTEK_CMAKE_PROCESSOR_ARCH="${InstanceConfig.ProcessorArch}"`,
     ];
     APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
 
