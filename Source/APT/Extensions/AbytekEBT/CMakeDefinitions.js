@@ -5,22 +5,25 @@ const fs = require("fs");
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName = function(InstanceConfig)
+APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFileName = function(ProjectInstance)
 {
-    return "CMakeDefinitions-" + APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig) + ".txt";
+    return "CMakeDefinitions-" + APT.Extensions.AbytekEBT.CalculateSignature(ProjectInstance) + ".txt";
 }
-APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile = function(EntryDirectory, InstanceConfig)
+APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile = function(EntryDirectory, ProjectInstance)
 {
     return path.join(
-        APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
-        APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName(InstanceConfig)
+        APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory),
+        APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFileName(ProjectInstance)
     );
 }
-APT.Extensions.AbytekCMake.ApplyCMakeDefinitions = function(CMakeDefinitions, EntryDirectory, InstanceConfig)
+APT.Extensions.AbytekEBT.ApplyCMakeDefinitions = function(Project)
 {
-    APT.Log("APT", `Start applying cmake definitions for project: ${EntryDirectory}`);
+    APT.Log("APT", `Start applying cmake definitions for project: ${Project.EntryDirectory}`);
 
-    const File = APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile(EntryDirectory, InstanceConfig);
+    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+    let CMakeDefinitions = Project.Data.Get("AbytekEBT.CMakeDefinitions");
+
+    const File = APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile(Project.EntryDirectory, ProjectInstance);
     const Directory = path.dirname(File);
     if (!fs.existsSync(Directory))
     {
@@ -36,5 +39,5 @@ APT.Extensions.AbytekCMake.ApplyCMakeDefinitions = function(CMakeDefinitions, En
         FileContent += `${CMakeDefinition[1]}\n`;
     }
     fs.writeFileSync(File, FileContent);
-    APT.Log("APT", `Applied cmake definitions for project: ${EntryDirectory}`);
+    APT.Log("APT", `Applied cmake definitions for project: ${Project.EntryDirectory}`);
 }

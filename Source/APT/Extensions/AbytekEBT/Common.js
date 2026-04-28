@@ -6,12 +6,12 @@ const Ajv = require("ajv");
 
 // Environment
 {
-    APT.Extensions.AbytekCMake.E_Environment = {
+    APT.Extensions.AbytekEBT.E_Environment = {
         DEVELOPMENT: "Development", 
         COOKED: "Cooked",
         COOKED_MAX_OPTIMIZED: "CookedMaxOptimized",
     }
-    APT.Extensions.AbytekCMake.GetDefaultEnvironmentForPlatformTags = function(PlatformTags)
+    APT.Extensions.AbytekEBT.GetDefaultEnvironmentForPlatformTags = function(PlatformTags)
     {
         if (PlatformTags == null)
         {
@@ -19,15 +19,15 @@ const Ajv = require("ajv");
         }
         if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
         {
-            return APT.Extensions.AbytekCMake.E_Environment.DEVELOPMENT;
+            return APT.Extensions.AbytekEBT.E_Environment.DEVELOPMENT;
         }
         if (PlatformTags.includes(APT.Common.E_PlatformTag.MACOS))
         {
-            return APT.Extensions.AbytekCMake.E_Environment.DEVELOPMENT;
+            return APT.Extensions.AbytekEBT.E_Environment.DEVELOPMENT;
         }
         if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
         {
-            return APT.Extensions.AbytekCMake.E_Environment.COOKED;
+            return APT.Extensions.AbytekEBT.E_Environment.COOKED;
         }
         APT.FatalError("APT", `Unknown platform tags: ${PlatformTags}`);
     }
@@ -36,7 +36,7 @@ const Ajv = require("ajv");
 
 // ProcessorArch
 {
-    APT.Extensions.AbytekCMake.GetDefaultProcessorArchsForPlatformTags = function(PlatformTags)
+    APT.Extensions.AbytekEBT.GetDefaultProcessorArchsForPlatformTags = function(PlatformTags)
     {
         // WebAssembly
         if (PlatformTags.includes(APT.Common.E_PlatformTag.EMSCRIPTEN) || PlatformTags.includes(APT.Common.E_PlatformTag.WEB))
@@ -45,10 +45,13 @@ const Ajv = require("ajv");
         }
 
         // Mobile ARM
-        if (PlatformTags.includes(APT.Common.E_PlatformTag.IOS) ||
-            PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.IOS))
         {
-            return [ APT.Common.E_ProcessorArch.ARM_32, APT.Common.E_ProcessorArch.ARM_64 ];
+            return [ APT.Common.E_ProcessorArch.ARM_64 ];
+        }
+        if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
+        {
+            return [ APT.Common.E_ProcessorArch.ARM_64 ];
         }
 
         // Desktop Linux/macOS
@@ -56,13 +59,13 @@ const Ajv = require("ajv");
             PlatformTags.includes(APT.Common.E_PlatformTag.LINUX) ||
             PlatformTags.includes(APT.Common.E_PlatformTag.UNIX))
         {
-            return [APT.Common.E_ProcessorArch.X86_32, APT.Common.E_ProcessorArch.X86_64 ];
+            return [ APT.Common.E_ProcessorArch.X86_64 ];
         }
 
         // Windows
         if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
         {
-            return [ APT.Common.E_ProcessorArch.X32_64, APT.Common.E_ProcessorArch.X86_64 ];
+            return [ APT.Common.E_ProcessorArch.X86_64 ];
         }
 
         APT.FatalError("APT", `Cannot resolve processor arch from platform tags: ${PlatformTags}`);
@@ -70,9 +73,9 @@ const Ajv = require("ajv");
 }
 
 
-// Instance Config
+// Instance Params
 {
-    APT.Extensions.AbytekCMake.ValidateInstanceConfig = function(InstanceConfig)
+    APT.Extensions.AbytekEBT.ValidateProjectInstanceParams = function(InstanceParams)
     {
         const ajv = new Ajv();
         const Schema = {
@@ -94,7 +97,10 @@ const Ajv = require("ajv");
                     type: "string"
                 },
                 ProcessorArchs: {
-                    type: "string"
+                    type: "array",
+                    items: {
+                        type: "string"
+                    }
                 }
             },
             additionalProperties: false,
@@ -113,7 +119,7 @@ const Ajv = require("ajv");
             Errors: []
         };
         
-        if (!Validator(InstanceConfig)) 
+        if (!Validator(InstanceParams)) 
         {
             Result.Status = false;
             Result.Errors.push({
@@ -123,41 +129,42 @@ const Ajv = require("ajv");
             return Result;
         }
 
-        if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.AUTO)
+        if (InstanceParams.CMakeConfig == APT.Extensions.CMake.E_Config.AUTO)
         {
             Result.Status = false;
             Result.Errors.push({
                 Message: "APT.Extensions.CMake.E_Config.AUTO is not allowed",
-                ChildErrors = []
+                ChildErrors: []
             });
             return Result;
         };
-        for (let ProcessorArch of InstanceConfig.ProcessorArchs)
+        for (let ProcessorArch of InstanceParams.ProcessorArchs)
         {
             if (ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
             {
                 Result.Status = false;
                 Result.Errors.push({
                     Message: "APT.Common.E_ProcessorArch.AUTO is not allowed",
-                    ChildErrors = []
+                    ChildErrors: []
                 });
                 return Result;
             };
         }
         return Result;
     }
-    APT.Extensions.AbytekCMake.FinalizeInstanceConfig = function(InstanceConfig)
+    APT.Extensions.AbytekEBT.FinalizeProjectInstanceParams = function(InstanceParams)
     {
-        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
+        let Validation = APT.Extensions.AbytekEBT.ValidateProjectInstanceParams(InstanceParams);
+        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
+        let Result = APT.Common.SimpleDeepCopy(InstanceParams);
         return Result;
     }
 }
 
 
-// CMake Specialization
+// CMake Instance
 {
-    APT.Extensions.AbytekCMake.ValidateCMakeSpecialization = function(CMakeSpecialization)
+    APT.Extensions.AbytekEBT.ValidateCMakeInstanceParams = function(CMakeInstanceParams)
     {
         const ajv = new Ajv();
         const Schema = {
@@ -169,7 +176,7 @@ const Ajv = require("ajv");
             },
             additionalProperties: false,
             required: [
-                "ProcessorArchs"
+                "ProcessorArch"
             ]
         };
         const Validator = ajv.compile(Schema);
@@ -179,7 +186,7 @@ const Ajv = require("ajv");
             Errors: []
         };
         
-        if (!Validator(CMakeSpecialization)) 
+        if (!Validator(CMakeInstanceParams)) 
         {
             Result.Status = false;
             Result.Errors.push({
@@ -189,42 +196,158 @@ const Ajv = require("ajv");
             return Result;
         }
 
-        if (ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
+        if (CMakeInstanceParams.ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
         {
             Result.Status = false;
             Result.Errors.push({
                 Message: "APT.Common.E_ProcessorArch.AUTO is not allowed",
-                ChildErrors = []
+                ChildErrors: []
             });
             return Result;
         };
         return Result;
     }
-    APT.Extensions.AbytekCMake.FinalizeInstanceConfig = function(InstanceConfig)
+    APT.Extensions.AbytekEBT.FinalizeCMakeInstanceParams = function(CMakeInstanceParams)
     {
-        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
+        let Validation = APT.Extensions.AbytekEBT.ValidateCMakeInstanceParams(CMakeInstanceParams);
+        let Result = APT.Common.SimpleDeepCopy(CMakeInstanceParams);
         return Result;
+    }
+    APT.Extensions.AbytekEBT.ValidateCMakeInstanceQuery = function(CMakeInstanceQuery)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                ProcessorArch: {
+                    type: "array",
+                    items: {
+                        type: "string"
+                    }
+                }
+            },
+            additionalProperties: false,
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(CMakeInstanceQuery)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+
+        for (let ProcessorArch of CMakeInstanceQuery.ProcessorArchs)
+        {
+            if (ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
+            {
+                Result.Status = false;
+                Result.Errors.push({
+                    Message: "APT.Common.E_ProcessorArch.AUTO is not allowed",
+                    ChildErrors: []
+                });
+                return Result;
+            };
+        }
+        return Result;
+    }
+    APT.Extensions.AbytekEBT.FinalizeCMakeInstanceQuery = function(CMakeInstanceQuery)
+    {
+        let Validation = APT.Extensions.AbytekEBT.ValidateCMakeInstanceQuery(CMakeInstanceQuery);
+        let Result = APT.Common.SimpleDeepCopy(CMakeInstanceQuery);
+        return Result;
+    }
+    APT.Extensions.AbytekEBT.F_CMakeInstance = class
+    {
+        constructor(Params)
+        {
+            let Validation = APT.Extensions.AbytekEBT.ValidateCMakeInstanceParams(Params);
+            APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
+
+            this.ProcessorArch = Params.ProcessorArch;
+        }
+    }
+}
+
+
+// Project Instance
+{
+    APT.Extensions.AbytekEBT.F_ProjectInstance = class
+    {
+        constructor(Params)
+        {
+            let Validation = APT.Extensions.AbytekEBT.ValidateProjectInstanceParams(Params);
+            APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
+
+            this.Environment = Params.Environment;
+            this.Platform = Params.Platform;
+            this.CMakeGenerator = Params.CMakeGenerator;
+            this.CMakeConfig = Params.CMakeConfig;
+            this.ProcessorArchs = Params.ProcessorArchs;
+
+            // Generate processor archs
+            this.CMakeInstances = [];
+            for (let ProcessorArch of this.ProcessorArchs)
+            {
+                this.CMakeInstances.push(
+                    new APT.Extensions.AbytekEBT.F_CMakeInstance(
+                        APT.Extensions.AbytekEBT.FinalizeCMakeInstanceParams({
+                            ProcessorArch
+                        })
+                    )
+                );
+            }
+        }
+
+        FindCMakeInstances(Query)
+        {
+            let FinalizedQuery = APT.Extensions.AbytekEBT.FinalizeCMakeInstanceQuery(Query);
+            let Result = [];
+            for (let CMakeInstance of this.CMakeInstances)
+            {
+                if ("ProcessorArchs" in Query)
+                {
+                    if (!Query.ProcessorArchs.includes(CMakeInstance.ProcessorArch))
+                    {
+                        continue;
+                    }
+                }
+                Result.push(CMakeInstance);
+            }
+            return Result;
+        }
     }
 }
 
 
 // Signature
 {
-    APT.Extensions.AbytekCMake.GetSignatureDataKeys = function()
+    APT.Extensions.AbytekEBT.GetSignatureDataKeys = function()
     {
         return [
-            "AbytekCMake.InstanceConfig",
+            "AbytekEBT.Environment",
+            "AbytekEBT.Platform",
+            "AbytekEBT.CMakeGenerator",
+            "AbytekEBT.CMakeConfig",
+            "AbytekEBT.ProcessorArchs",
         ];
     }
-    APT.Extensions.AbytekCMake.CalculateSignature = function(InstanceConfig)
+    APT.Extensions.AbytekEBT.CalculateSignature = function(ProjectInstance)
     {
         return [ 
-            InstanceConfig.Environment,
-            InstanceConfig.Platform,
-            InstanceConfig.CMakeGenerator,
-            InstanceConfig.CMakeConfig,
-            InstanceConfig.ProcessorArchs.sort().join("."),
+            ProjectInstance.Environment,
+            ProjectInstance.Platform,
+            ProjectInstance.CMakeGenerator,
+            ProjectInstance.CMakeConfig,
+            ProjectInstance.ProcessorArchs.sort().join("."),
         ].join('-');
     }
 }
@@ -232,13 +355,13 @@ const Ajv = require("ajv");
 
 // Build Directory
 {
-    APT.Extensions.AbytekCMake.CalculateBuildDirectory = function(EntryDirectory)
+    APT.Extensions.AbytekEBT.CalculateBuildDirectory = function(EntryDirectory)
     {
         return path.join(EntryDirectory, "Build");
     }
-    APT.Extensions.AbytekCMake.EnsureBuildDirectory = function(EntryDirectory)
+    APT.Extensions.AbytekEBT.EnsureBuildDirectory = function(EntryDirectory)
     {
-        const Path = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
+        const Path = APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory);
         fs.mkdirSync(Path, { recursive: true });
         return Path;
     }
@@ -247,17 +370,17 @@ const Ajv = require("ajv");
 
 // CMake Build Directory
 {
-    APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig = function(
+    APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig = function(
         EntryDirectory,
         InstanceConfig
     )
     {
         APT.Common.Assert(EntryDirectory, "Invalid entry directory");
-        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
+        let Validation = APT.Extensions.AbytekEBT.ValidateInstanceConfig(InstanceConfig);
         APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
         let Result = {
-            Values = new Object(),
+            Values: new Object(),
             Find(Options)
             {
                 const Key = APT.Common.NiceJSONStringify(Options);
@@ -290,8 +413,8 @@ const Ajv = require("ajv");
         };
         for (let ProcessorArch of InstanceConfig.ProcessorArchs)
         {
-            const BuildDirectory = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
-            const Signature = APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig);
+            const BuildDirectory = APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory);
+            const Signature = APT.Extensions.AbytekEBT.CalculateSignature(InstanceConfig);
 
             function ShortHash(str) 
             {
@@ -325,12 +448,12 @@ const Ajv = require("ajv");
         }
         return Result;
     }
-    APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile = function(EntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFile = function(EntryDirectory, InstanceConfig)
     {
-        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
+        let Validation = APT.Extensions.AbytekEBT.ValidateInstanceConfig(InstanceConfig);
         APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
-        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EntryDirectory,
             InstanceConfig
         );
@@ -345,28 +468,28 @@ const Ajv = require("ajv");
 
 // Engine Path File
 {
-    APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(InstanceConfig)
+    APT.Extensions.AbytekEBT.CalculateEnginePathFileName = function(ProjectInstance)
     {
-        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
-
-        return "AbytekEnginePath-" + APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig) + ".txt";
+        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateSignature(ProjectInstance) + ".txt";
     }
-    APT.Extensions.AbytekCMake.CalculateEnginePathFile = function(EntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekEBT.CalculateEnginePathFile = function(EntryDirectory, ProjectInstance)
     {
         return path.join(
-            APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
-            APT.Extensions.AbytekCMake.CalculateEnginePathFileName(InstanceConfig)
+            APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory),
+            APT.Extensions.AbytekEBT.CalculateEnginePathFileName(ProjectInstance)
         );
     }
-    APT.Extensions.AbytekCMake.GenerateEnginePathFile = function(EntryDirectory, EngineEntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekEBT.GenerateEnginePathFile = function(Project)
     {
-        APT.Log("APT", `Generating engine path file, entry directory: ${EntryDirectory}, instance config: ${InstanceConfig}`);
+        APT.Log("APT", `Generating engine path file, entry directory: ${Project.EntryDirectory}`);
 
-        const EnginePathFile = APT.Extensions.AbytekCMake.CalculateEnginePathFile(EntryDirectory, InstanceConfig);
-        APT.Extensions.AbytekCMake.EnsureBuildDirectory(EntryDirectory);
+        let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+        let EngineProject = Project.Data.Get("AbytekEBT.Engine");
+
+        const EnginePathFile = APT.Extensions.AbytekEBT.CalculateEnginePathFile(Project.EntryDirectory, ProjectInstance);
+        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Project.EntryDirectory);
         
-        fs.writeFileSync(EnginePathFile, EngineEntryDirectory.replaceAll("\\", "/"));
+        fs.writeFileSync(EnginePathFile, EngineProject.EntryDirectory.replaceAll("\\", "/"));
 
         APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
     }
@@ -375,24 +498,24 @@ const Ajv = require("ajv");
 
 // CMakeLists.txt & CMake Configure
 {
-    APT.Extensions.AbytekCMake.CalculateCMakeListsFile = function(EntryDirectory)
+    APT.Extensions.AbytekEBT.CalculateCMakeListsFile = function(EntryDirectory)
     {
         return path.join(EntryDirectory, "CMakeLists.txt");
     }
-    APT.Extensions.AbytekCMake.GenerateCMakeListsFile = function(Project)
+    APT.Extensions.AbytekEBT.GenerateCMakeListsFile = function(Project)
     {
-        APT.Extensions.AbytekCMake.EnsureBuildDirectory(Project.EntryDirectory);
+        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Project.EntryDirectory);
 
-        let ProjectName = Project.Data.Get("AbytekCMake.Name");
+        let ProjectName = Project.Data.Get("AbytekEBT.Name");
 
-        const AbytekCMakeFile = path.join(Project.EntryDirectory, "AbytekCMake.txt");
-        const AbytekCMakeFileContent = "";
-        if (fs.existsSync(AbytekCMakeFile))
+        const AbytekEBTFile = path.join(Project.EntryDirectory, "AbytekEBT.txt");
+        const AbytekEBTFileContent = "";
+        if (fs.existsSync(AbytekEBTFile))
         {
-            AbytekCMakeFileContent = fs.readFileSync(AbytekCMakeFile, "utf8");
+            AbytekEBTFileContent = fs.readFileSync(AbytekEBTFile, "utf8");
         }
 
-        const CMakeListsFile = APT.Extensions.AbytekCMake.CalculateCMakeListsFile(Project.EntryDirectory);
+        const CMakeListsFile = APT.Extensions.AbytekEBT.CalculateCMakeListsFile(Project.EntryDirectory);
         const CMakeListsFileContent = `
             cmake_minimum_required(VERSION 3.14)
 
@@ -428,30 +551,30 @@ const Ajv = require("ajv");
                 )
             endif()
 
-            ${AbytekCMakeFileContent}
+            ${AbytekEBTFileContent}
         `;
         fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
     }
-    APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments = function(
+    APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments = function(
         Project,
         InstanceConfig
     )
     {
-        let EngineProject = Project.Data.Get("AbytekCMake.Engine");
+        let EngineProject = Project.Data.Get("AbytekEBT.Engine");
 
         let EntryDirectory = Project.EntryDirectory;
         let EngineEntryDirectory = EngineProject.EntryDirectory;
 
-        const ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+        const ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EntryDirectory,
             InstanceConfig
         );
-        const EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+        const EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EngineEntryDirectory,
             InstanceConfig
         );
         
-        const Signature = APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig);
+        const Signature = APT.Extensions.AbytekEBT.CalculateSignature(InstanceConfig);
 
         let Result = [];
         Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);

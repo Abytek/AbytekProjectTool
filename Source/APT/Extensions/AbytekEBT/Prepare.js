@@ -8,24 +8,24 @@ AMJS.Import("./Common");
 AMJS.Import("./CMakeConfigure");
 
 
-APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
+APT.Extensions.AbytekEBT.PrepareWindows = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
-    let TargetsToBuild = Project.Data.Get("AbytekCMake.Prepare.TargetsToBuild");
+    let TargetsToBuild = Project.Data.Get("AbytekEBT.Prepare.TargetsToBuild");
 
-    APT.Extensions.AbytekCMake.CMakeConfigure(Project);
+    APT.Extensions.AbytekEBT.CMakeConfigure(Project);
     for (let TargetToBuild of TargetsToBuild)
     {
-        APT.Extensions.AbytekCMake.CMakeBuild(Project, TargetToBuild);
+        APT.Extensions.AbytekEBT.CMakeBuild(Project, TargetToBuild);
     }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.PrepareAndroid = function(Project)
+APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
-    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    let InstanceConfig = Project.Data.Get("AbytekEBT.InstanceConfig");
 
     const AndroidProjectDirectory = path.join(
         Project.EntryDirectory,
@@ -79,22 +79,22 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project)
     }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.Prepare = function(Project)
+APT.Extensions.AbytekEBT.Prepare = function(Project)
 {
-    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    let InstanceConfig = Project.Data.Get("AbytekEBT.InstanceConfig");
 
     let PlatformTags = APT.Common.ParsePlatformTags(InstanceConfig.Platform);
 
-    APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
-        APT.Extensions.AbytekCMake.PrepareWindows(Project);
+        APT.Extensions.AbytekEBT.PrepareWindows(Project);
         return;
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
-        APT.Extensions.AbytekCMake.PrepareAndroid(Project);
+        APT.Extensions.AbytekEBT.PrepareAndroid(Project);
         return;
     }
 
