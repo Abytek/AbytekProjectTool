@@ -340,7 +340,7 @@ const Ajv = require("ajv");
             "AbytekEBT.ProcessorArchs",
         ];
     }
-    APT.Extensions.AbytekEBT.CalculateSignature = function(ProjectInstance)
+    APT.Extensions.AbytekEBT.CalculateProjectSignature = function(ProjectInstance)
     {
         return [ 
             ProjectInstance.Environment,
@@ -349,6 +349,14 @@ const Ajv = require("ajv");
             ProjectInstance.CMakeConfig,
             ProjectInstance.ProcessorArchs.sort().join("."),
         ].join('-');
+    }
+    APT.Extensions.AbytekEBT.CalculateCMakeSignature = function(ProjectInstance, CMakeInstance)
+    {
+        return (
+            APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance)
+            + "-"
+            + CMakeInstance.ProcessorArch
+        );
     }
 }
 
@@ -372,96 +380,60 @@ const Ajv = require("ajv");
 {
     APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig = function(
         EntryDirectory,
-        InstanceConfig
+        ProjectInstance,
+        CMakeInstance
     )
     {
         APT.Common.Assert(EntryDirectory, "Invalid entry directory");
-        let Validation = APT.Extensions.AbytekEBT.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
+        APT.Common.Assert(ProjectInstance, "Invalid project instance");
+        APT.Common.Assert(CMakeInstance, "Invalid cmake instance");
+        
+        const BuildDirectory = APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory);
+        const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(ProjectInstance, CMakeInstance);
 
-        let Result = {
-            Values: new Object(),
-            Find(Options)
-            {
-                const Key = APT.Common.NiceJSONStringify(Options);
-                if (!(Key in this.Values))
-                {
-                    return null;
-                }
-                return this.Values[Key];
-            },
-            Get(Options)
-            {
-                const Key = APT.Common.NiceJSONStringify(Options);
-                APT.Common.Assert(Key in this.Values, `Not found value for: ${Key}`);
-                return this.Values[Key];
-            },
-            Add(Value, Options)
-            {
-                const Key = APT.Common.NiceJSONStringify(Options);
-                APT.Common.Assert(!(Key in this.Values), `Value was already added: ${Key}`);
-                this.Values[Key] = Value;
-            },
-            Foreach(Callback)
-            {
-                for (let Key in this.Values)
-                {
-                    const Options = JSON.parse(Key);
-                    Callback(Options, this.Values[Key]);
-                }
-            }
-        };
-        for (let ProcessorArch of InstanceConfig.ProcessorArchs)
+        function ShortHash(str) 
         {
-            const BuildDirectory = APT.Extensions.AbytekEBT.CalculateBuildDirectory(EntryDirectory);
-            const Signature = APT.Extensions.AbytekEBT.CalculateSignature(InstanceConfig);
+            let hash = 0x811c9dc5;
 
-            function ShortHash(str) 
-            {
-                let hash = 0x811c9dc5;
-
-                for (let i = 0; i < str.length; i++) {
-                    hash ^= str.charCodeAt(i);
-                    hash = Math.imul(hash, 0x01000193);
-                }
-
-                // unsigned 32-bit
-                hash >>>= 0;
-
-                // base36 + lấy 4 ký tự
-                return hash.toString(36).slice(0, 4);
+            for (let i = 0; i < str.length; i++) {
+                hash ^= str.charCodeAt(i);
+                hash = Math.imul(hash, 0x01000193);
             }
-            const SignatureHash = ShortHash(Signature);
 
-            Result.Add(
-                {
-                    Directory: path.join(BuildDirectory, SignatureHash),
-                    SignatureHashFile: path.join(
-                        BuildDirectory,
-                        `CMakeBuildDirectorySignatureHash-${Signature}-${ProcessorArch}.txt`
-                    ),
-                    Signature,
-                    SignatureHash,
-                },
-                ProcessorArch
+            // unsigned 32-bit
+            hash >>>= 0;
+
+            // base36 + lấy 4 ký tự
+            return hash.toString(36).slice(0, 4);
+        }
+        const CMakeSignatureHash = ShortHash(CMakeSignature);
+
+        return {
+            Directory: path.join(BuildDirectory, CMakeSignatureHash),
+            CMakeSignatureHashFile: path.join(
+                BuildDirectory,
+                `CMakeBuildDirectorySignatureHash-${CMakeSignature}.txt`
+            ),
+            CMakeSignature,
+            CMakeSignatureHash,
+        };
+    }
+    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles = function(Project)
+    {
+        let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+
+        for (let CMakeInstance of ProjectInstance.CMakeInstances)
+        {
+            const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+                Project.EntryDirectory,
+                ProjectInstance,
+                CMakeInstance
+            );
+            fs.writeFileSync(
+                CMakeBuildDirectoryConfig.CMakeSignatureHashFile, 
+                CMakeBuildDirectoryConfig.CMakeSignatureHash
             );
         }
-        return Result;
-    }
-    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFile = function(EntryDirectory, InstanceConfig)
-    {
-        let Validation = APT.Extensions.AbytekEBT.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
-
-        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
-            EntryDirectory,
-            InstanceConfig
-        );
-        CMakeBuildDirectoryConfig.Foreach(
-            (Options, Value) => {
-                fs.writeFileSync(Value.SignatureHashFile, Value.SignatureHash);
-            }
-        );
     }
 }
 
@@ -470,7 +442,7 @@ const Ajv = require("ajv");
 {
     APT.Extensions.AbytekEBT.CalculateEnginePathFileName = function(ProjectInstance)
     {
-        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateSignature(ProjectInstance) + ".txt";
+        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance) + ".txt";
     }
     APT.Extensions.AbytekEBT.CalculateEnginePathFile = function(EntryDirectory, ProjectInstance)
     {
@@ -529,7 +501,7 @@ const Ajv = require("ajv");
             include(Abytek/Utilities/SetGlobal)
             include(Abytek/Utilities/ReadKeyValueFile)
 
-            Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_EBT_SIGNATURE}.txt")
+            Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_EBT_PROJECT_SIGNATURE}.txt")
             Abytek_ReadKeyValueFile(\${ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE})
 
             add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
@@ -557,7 +529,8 @@ const Ajv = require("ajv");
     }
     APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments = function(
         Project,
-        InstanceConfig
+        ProjectInstance,
+        CMakeInstance
     )
     {
         let EngineProject = Project.Data.Get("AbytekEBT.Engine");
@@ -567,29 +540,34 @@ const Ajv = require("ajv");
 
         const ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EntryDirectory,
-            InstanceConfig
+            ProjectInstance,
+            CMakeInstance
         );
         const EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EngineEntryDirectory,
-            InstanceConfig
+            ProjectInstance,
+            CMakeInstance
         );
         
-        const Signature = APT.Extensions.AbytekEBT.CalculateSignature(InstanceConfig);
+        const ProjectSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
+        const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(ProjectInstance, CMakeInstance);
 
         let Result = [];
         Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
 
         Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(EntryDirectory)}"`);
-        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Path)}"`);
+        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Directory)}"`);
 
         Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineEntryDirectory)}"`);
-        Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Path)}"`);
+        Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Directory)}"`);
 
-        Result.push(`-DABYTEK_EBT_SIGNATURE="${Signature}"`);
-        Result.push(`-DABYTEK_EBT_ENVIRONMENT="${InstanceConfig.Environment}"`);
-        Result.push(`-DABYTEK_EBT_GENERATOR="${InstanceConfig.CMakeGenerator}"`);
-        Result.push(`-DABYTEK_EBT_CONFIG="${InstanceConfig.CMakeConfig}"`);
-        Result.push(`-DABYTEK_EBT_PROCESSOR_ARCHS="${InstanceConfig.ProcessorArchs.join(";")}"`);
+        Result.push(`-DABYTEK_EBT_PROJECT_SIGNATURE="${ProjectSignature}"`);
+        Result.push(`-DABYTEK_EBT_CMAKE_SIGNATURE="${CMakeSignature}"`);
+        Result.push(`-DABYTEK_EBT_ENVIRONMENT="${ProjectInstance.Environment}"`);
+        Result.push(`-DABYTEK_EBT_PLATFORM="${ProjectInstance.Platform}"`);
+        Result.push(`-DABYTEK_EBT_CMAKE_GENERATOR="${ProjectInstance.CMakeGenerator}"`);
+        Result.push(`-DABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`);
+        Result.push(`-DABYTEK_EBT_PROCESSOR_ARCH="${CMakeInstance.ProcessorArch}"`);
 
         return Result;
     }

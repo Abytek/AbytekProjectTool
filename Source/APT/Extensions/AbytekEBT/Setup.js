@@ -137,8 +137,6 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
             // Apply cmake definitions
             APT.Extensions.AbytekEBT.ApplyCMakeDefinitions(Context.APT.Project);
 
-            return;
-
             // Prepare if needed
             if (PrepareEnabled)
             {

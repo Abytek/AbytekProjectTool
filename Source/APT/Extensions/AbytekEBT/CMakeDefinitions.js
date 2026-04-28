@@ -7,7 +7,7 @@ AMJS.Import("./Common");
 
 APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFileName = function(ProjectInstance)
 {
-    return "CMakeDefinitions-" + APT.Extensions.AbytekEBT.CalculateSignature(ProjectInstance) + ".txt";
+    return "CMakeDefinitions-" + APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance) + ".txt";
 }
 APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile = function(EntryDirectory, ProjectInstance)
 {

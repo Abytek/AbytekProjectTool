@@ -12,12 +12,16 @@ APT.Extensions.AbytekEBT.PrepareWindows = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
+    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
     let TargetsToBuild = Project.Data.Get("AbytekEBT.Prepare.TargetsToBuild");
 
-    APT.Extensions.AbytekEBT.CMakeConfigure(Project);
-    for (let TargetToBuild of TargetsToBuild)
+    for (let CMakeInstance of ProjectInstance.CMakeInstances)
     {
-        APT.Extensions.AbytekEBT.CMakeBuild(Project, TargetToBuild);
+        APT.Extensions.AbytekEBT.CMakeConfigure(Project, CMakeInstance);
+        // for (let TargetToBuild of TargetsToBuild)
+        // {
+        //     APT.Extensions.AbytekEBT.CMakeBuild(Project, CMakeInstance, TargetToBuild);
+        // }
     }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
@@ -81,11 +85,11 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
 }
 APT.Extensions.AbytekEBT.Prepare = function(Project)
 {
-    let InstanceConfig = Project.Data.Get("AbytekEBT.InstanceConfig");
+    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+    
+    let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
 
-    let PlatformTags = APT.Common.ParsePlatformTags(InstanceConfig.Platform);
-
-    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Project)
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
