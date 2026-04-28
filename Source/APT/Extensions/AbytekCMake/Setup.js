@@ -80,11 +80,16 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
         function()
         {
             let GlobalContext = Context.AMJS.GetGlobalContext();
+
+            let InstanceConfig = Context.APT.Get("AbytekCMake.InstanceConfig");
             
             let Name = Context.APT.GetOrAdd("AbytekCMake.Name", "AbytekProject");
             Context.APT.Set("AbytekCMake.Options", Options);
 
-            let InstanceConfig = Context.APT.Get("AbytekCMake.InstanceConfig");
+            let PrepareEnabled = APT.Common.ForwardBool(
+                Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain)
+            );
+            let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekCMake.Prepare.TargetsToBuild", []);
 
             // Find & import
             let Engine = null;
@@ -114,9 +119,6 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 Engine = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery, EngineData);
                 Engine = Context.APT.Set("AbytekCMake.Engine", Engine);
             }
-
-            let PrepareEnabled = Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain);
-            let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekCMake.Prepare.TargetsToBuild", []);
 
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
 
