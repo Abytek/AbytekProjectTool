@@ -14,8 +14,10 @@ APT.Extensions.AbytekCMake.GetProjectInstanceJSFile = function(CMakeBuildDirecto
     );
 }
 
-APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, InstanceConfig)
+APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project)
 {
+    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    
     const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
         Project.EntryDirectory,
         InstanceConfig

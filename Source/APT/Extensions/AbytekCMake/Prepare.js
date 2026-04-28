@@ -9,7 +9,7 @@ AMJS.Import("./CMakeConfigure");
 AMJS.Import("./ProjectInstance");
 
 
-APT.Extensions.AbytekCMake.PrepareWindows = function(Project, DirectInstanceConfig)
+APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
@@ -21,7 +21,7 @@ APT.Extensions.AbytekCMake.PrepareWindows = function(Project, DirectInstanceConf
     );
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, DirectInstanceConfig)
+APT.Extensions.AbytekCMake.PrepareAndroid = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
@@ -38,11 +38,11 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, DirectInstanceConf
     let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
 
     let GradlewCommand = null;
-    if (DirectInstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+    if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
     {
         GradlewCommand = "externalNativeBuildDebug";
     }
-    else if (DirectInstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+    else if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
     {
         GradlewCommand = "externalNativeBuildRelease";
     }
@@ -79,23 +79,23 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, DirectInstanceConf
     }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.Prepare = function(Project, DirectInstanceConfig)
+APT.Extensions.AbytekCMake.Prepare = function(Project)
 {
     let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
 
     let PlatformTags = APT.Common.ParsePlatformTags(InstanceConfig.Platform);
 
     APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
-    APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile(Project, InstanceConfig);
+    APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile(Project);
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
-        APT.Extensions.AbytekCMake.PrepareWindows(Project, DirectInstanceConfig);
+        APT.Extensions.AbytekCMake.PrepareWindows(Project);
         return;
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
-        APT.Extensions.AbytekCMake.PrepareAndroid(Project, DirectInstanceConfig);
+        APT.Extensions.AbytekCMake.PrepareAndroid(Project);
         return;
     }
 

@@ -49,17 +49,13 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 "AbytekCMake.Environment", 
                 APT.Extensions.AbytekCMake.GetDefaultEnvironmentForPlatformTags(PlatformTags)
             );
-            let Editor = Context.APT.GetOrAdd(
-                "AbytekCMake.Editor", 
-                APT.Extensions.AbytekCMake.GetDefaultEditorForPlatformTags(PlatformTags)
-            );
             let CMakeGenerator = Context.APT.GetOrAdd(
                 "AbytekCMake.CMakeGenerator", 
-                APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor)
+                APT.Extensions.CMake.GetDefaultGeneratorForPlatformTags(PlatformTags)
             );
             let CMakeConfig = Context.APT.GetOrAdd(
                 "AbytekCMake.CMakeConfig", 
-                APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Editor)
+                APT.Extensions.CMake.GetDefaultConfig()
             );
             let ProcessorArch = Context.APT.GetOrAdd(
                 "AbytekCMake.ProcessorArch", 
@@ -71,7 +67,6 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                 APT.Extensions.AbytekCMake.FinalizeInstanceConfig({
                     Environment,
                     Platform,
-                    Editor,
                     CMakeGenerator,
                     CMakeConfig,
                     ProcessorArch
@@ -121,17 +116,6 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             }
 
             let PrepareEnabled = Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain);
-            let PrepareDirectInstanceConfig = Context.APT.GetOrAdd(
-                "AbytekCMake.Prepare.DirectInstanceConfig", 
-                new Object()
-            );
-            PrepareDirectInstanceConfig = Context.APT.Set(
-                "AbytekCMake.Prepare.DirectInstanceConfig", 
-                APT.Extensions.AbytekCMake.FinalizeDirectInstanceConfig(
-                    InstanceConfig,
-                    PrepareDirectInstanceConfig
-                )
-            );
 
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
 
@@ -161,7 +145,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             // Prepare if needed
             if (PrepareEnabled)
             {
-                APT.Extensions.AbytekCMake.Prepare(Context.APT.Project, PrepareDirectInstanceConfig);
+                APT.Extensions.AbytekCMake.Prepare(Context.APT.Project);
             }
         }
     );

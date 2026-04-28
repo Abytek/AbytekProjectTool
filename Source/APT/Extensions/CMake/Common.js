@@ -42,7 +42,7 @@ APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
     APT.FatalError("APT", `Unknown generator: ${Generator}`);
 }
 
-APT.Extensions.CMake.GetDefaultGenerator = function(PlatformTags)
+APT.Extensions.CMake.GetDefaultGeneratorForPlatformTags = function(PlatformTags)
 {
     if (PlatformTags == null)
     {

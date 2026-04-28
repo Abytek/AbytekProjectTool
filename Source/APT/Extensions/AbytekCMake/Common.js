@@ -34,65 +34,6 @@ const Ajv = require("ajv");
 }
 
 
-// Editor
-{
-    APT.Extensions.AbytekCMake.E_Editor = {
-        VISUAL_STUDIO_2026: "VisualStudio2026", 
-        VISUAL_STUDIO_2022: "VisualStudio2022", 
-        ANDROID_STUDIO: "AndroidStudio",   
-    }
-    APT.Extensions.AbytekCMake.GetDefaultEditorForPlatformTags = function(PlatformTags)
-    {
-        if (PlatformTags == null)
-        {
-            PlatformTags = APT.Common.GetHostPlatformTags();
-        }
-        if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
-        {
-            let InstalledVSVersions = APT.Common.GetInstalledVSVersions();
-            if (InstalledVSVersions.includes("2026"))
-            {
-                return APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2026;
-            }
-            if (InstalledVSVersions.includes("2022"))
-            {
-                return APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2022;
-            }
-        }
-        if (PlatformTags.includes(APT.Common.E_PlatformTag.MACOS))
-        {
-            return APT.Extensions.AbytekCMake.E_Editor.XCODE;
-        }
-        if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
-        {
-            return APT.Extensions.AbytekCMake.E_Editor.ANDROID_STUDIO;
-        }
-        APT.FatalError("APT", `Unknown platform tags: ${PlatformTags}`);
-    }
-    APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor = function(Editor)
-    {
-        if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2026))
-        {
-            return APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026;
-        }
-        if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.VISUAL_STUDIO_2022))
-        {
-            return APT.Extensions.CMake.E_Generator.VISUAL_STUDIO_2026;
-        }
-        if (Editor.includes(APT.Extensions.AbytekCMake.E_Editor.ANDROID_STUDIO))
-        {
-            return APT.Extensions.CMake.E_Generator.NINJA;
-        }
-        APT.FatalError("APT", `Unknown editor: ${Editor}`);
-    }
-    APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor = function(Editor)
-    {
-        let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
-        return APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
-    }
-}
-
-
 // ProcessorArch
 {
     APT.Extensions.AbytekCMake.GetDefaultProcessorArchForPlatformTags = function(PlatformTags)
@@ -160,7 +101,6 @@ const Ajv = require("ajv");
             required: [
                 "Environment",
                 "Platform",
-                "Editor",
                 "CMakeGenerator",
                 "CMakeConfig",
                 "ProcessorArch",
@@ -187,13 +127,11 @@ const Ajv = require("ajv");
     APT.Extensions.AbytekCMake.FinalizeInstanceConfig = function(InstanceConfig)
     {
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, Validation);
+        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
         let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
+        APT.Common.Assert(Result.CMakeConfig != APT.Extensions.CMake.E_Config.AUTO, "APT.Extensions.CMake.E_Config.AUTO is not allowed");
+        APT.Common.Assert(Result.ProcessorArch != APT.Common.E_ProcessorArch.AUTO, "APT.Common.E_ProcessorArch.AUTO is not allowed");
         return Result;
-    }
-    APT.Extensions.AbytekCMake.FinalizeDirectInstanceConfig = function(InstanceConfig, DirectInstanceConfig)
-    {
-        return APT.Common.MergeData(InstanceConfig, DirectInstanceConfig);
     }
 }
 
@@ -211,7 +149,6 @@ const Ajv = require("ajv");
         return [ 
             InstanceConfig.Environment,
             InstanceConfig.Platform,
-            InstanceConfig.Editor,
             InstanceConfig.CMakeGenerator,
             InstanceConfig.CMakeConfig,
             InstanceConfig.ProcessorArch,
@@ -244,7 +181,7 @@ const Ajv = require("ajv");
     {
         APT.Common.Assert(EntryDirectory, "Invalid entry directory");
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, Validation);
+        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
         const BuildDirectory = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
         const Signature = APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig);
@@ -282,7 +219,7 @@ const Ajv = require("ajv");
     APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile = function(EntryDirectory, InstanceConfig)
     {
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, Validation);
+        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
         const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
             EntryDirectory,
@@ -303,7 +240,7 @@ const Ajv = require("ajv");
     APT.Extensions.AbytekCMake.CalculateEnginePathFileName = function(InstanceConfig)
     {
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, Validation);
+        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
         return "AbytekEnginePath-" + APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig) + ".txt";
     }
@@ -419,7 +356,6 @@ const Ajv = require("ajv");
 
         Result.push(`-DABYTEK_CMAKE_SIGNATURE="${Signature}"`);
         Result.push(`-DABYTEK_CMAKE_ENVIRONMENT="${InstanceConfig.Environment}"`);
-        Result.push(`-DABYTEK_CMAKE_EDITOR="${InstanceConfig.Editor}"`);
         Result.push(`-DABYTEK_CMAKE_GENERATOR="${InstanceConfig.CMakeGenerator}"`);
         Result.push(`-DABYTEK_CMAKE_CONFIG="${InstanceConfig.CMakeConfig}"`);
         Result.push(`-DABYTEK_CMAKE_PROCESSOR_ARCH="${InstanceConfig.ProcessorArch}"`);

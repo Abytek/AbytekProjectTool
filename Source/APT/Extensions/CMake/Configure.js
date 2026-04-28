@@ -8,7 +8,11 @@ AMJS.Import("./Common");
 APT.Extensions.CMake.GetDefaultConfigureOptions = function()
 {
     let Options = new Object();
-    Options.Generator = APT.Extensions.CMake.GetDefaultGenerator();
+    Options.Generator = APT.Extensions.CMake.GetDefaultGeneratorForPlatformTags(
+        APT.Common.ParsePlatformTags(
+            APT.Common.GetHostPlatform()
+        )
+    );
     Options.Config = APT.Extensions.CMake.GetDefaultConfigForGenerator(Options.Generator);
     Options.ProcessorArch = APT.Common.E_ProcessorArch.AUTO;
     Options.ExtraArguments = [];
@@ -70,6 +74,7 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
     if (Options.Config != APT.Extensions.CMake.E_Config.AUTO)
     {
         Arguments.push(`-DCMAKE_BUILD_TYPE=${Options.Config}`);
+        Arguments.push(`-DCMAKE_CONFIGURATION_TYPES=${Options.Config}`);
     }
 
     if (Options.ProcessorArch != APT.Common.E_ProcessorArch.AUTO)
