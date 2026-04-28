@@ -121,15 +121,15 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             }
 
             let PrepareEnabled = Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain);
-            let PrepareInstanceConfig = Context.APT.GetOrAdd(
-                "AbytekCMake.Prepare.InstanceConfig", 
+            let PrepareDirectInstanceConfig = Context.APT.GetOrAdd(
+                "AbytekCMake.Prepare.DirectInstanceConfig", 
                 new Object()
             );
-            PrepareInstanceConfig = Context.APT.Set(
-                "AbytekCMake.Prepare.InstanceConfig", 
+            PrepareDirectInstanceConfig = Context.APT.Set(
+                "AbytekCMake.Prepare.DirectInstanceConfig", 
                 APT.Extensions.AbytekCMake.FinalizeDirectInstanceConfig(
                     InstanceConfig,
-                    PrepareInstanceConfig
+                    PrepareDirectInstanceConfig
                 )
             );
 
@@ -161,7 +161,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             // Prepare if needed
             if (PrepareEnabled)
             {
-                APT.Extensions.AbytekCMake.Prepare(Context.APT.Project, PrepareInstanceConfig);
+                APT.Extensions.AbytekCMake.Prepare(Context.APT.Project, PrepareDirectInstanceConfig);
             }
         }
     );
