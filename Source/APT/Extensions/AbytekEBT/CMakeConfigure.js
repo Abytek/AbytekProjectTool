@@ -2,14 +2,14 @@
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekCMake.CMakeConfigure = function(Project)
+APT.Extensions.AbytekEBT.CMakeConfigure = function(Project)
 {
-    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    let InstanceConfig = Project.Data.Get("AbytekEBT.InstanceConfig");
 
     APT.Log("APT", `Start configurating project: ${Project.EntryDirectory}`);
     APT.Log("APT", `Use instance config: ${InstanceConfig}`);
     
-    const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
+    const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
         Project.EntryDirectory,
         InstanceConfig
     );
@@ -18,7 +18,7 @@ APT.Extensions.AbytekCMake.CMakeConfigure = function(Project)
     const CMakeBuildDirectory = CMakeBuildDirectoryConfig.Path;
 
     let CMakeConfigureExtraArguments = [
-        ...APT.Extensions.AbytekCMake.CalculateCMakeConfigureExtraArguments(Project, InstanceConfig)
+        ...APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments(Project, InstanceConfig)
     ];
     
     APT.Extensions.CMake.Configure(

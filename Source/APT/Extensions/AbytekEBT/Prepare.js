@@ -6,7 +6,6 @@ const { spawnSync } = require("child_process");
 
 AMJS.Import("./Common");
 AMJS.Import("./CMakeConfigure");
-AMJS.Import("./ProjectInstance");
 
 
 APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
@@ -54,8 +53,8 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project)
 
     let Arguments = [
         GradlewCommand,
-        `-PABYTEK_CMAKE_ENVIRONMENT="${InstanceConfig.Environment}"`,
-        `-PABYTEK_CMAKE_PROCESSOR_ARCH="${InstanceConfig.ProcessorArch}"`,
+        `-PABYTEK_EBT_ENVIRONMENT="${InstanceConfig.Environment}"`,
+        `-PABYTEK_EBT_PROCESSOR_ARCHS="${InstanceConfig.ProcessorArchs}"`,
     ];
     APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
 
@@ -87,7 +86,6 @@ APT.Extensions.AbytekCMake.Prepare = function(Project)
     let PlatformTags = APT.Common.ParsePlatformTags(InstanceConfig.Platform);
 
     APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
-    APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile(Project);
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {

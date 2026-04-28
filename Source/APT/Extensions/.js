@@ -4,4 +4,4 @@ AMJS.Import("../Core");
 
 AMJS.ImportSubnamespace("ProjectLinker");
 AMJS.ImportSubnamespace("CMake");
-AMJS.ImportSubnamespace("AbytekCMake");
+AMJS.ImportSubnamespace("AbytekEBT");

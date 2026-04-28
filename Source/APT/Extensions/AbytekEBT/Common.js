@@ -36,19 +36,19 @@ const Ajv = require("ajv");
 
 // ProcessorArch
 {
-    APT.Extensions.AbytekCMake.GetDefaultProcessorArchForPlatformTags = function(PlatformTags)
+    APT.Extensions.AbytekCMake.GetDefaultProcessorArchsForPlatformTags = function(PlatformTags)
     {
         // WebAssembly
         if (PlatformTags.includes(APT.Common.E_PlatformTag.EMSCRIPTEN) || PlatformTags.includes(APT.Common.E_PlatformTag.WEB))
         {
-            return APT.Common.E_ProcessorArch.WASM;
+            return [ APT.Common.E_ProcessorArch.WASM ];
         }
 
         // Mobile ARM
         if (PlatformTags.includes(APT.Common.E_PlatformTag.IOS) ||
             PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
         {
-            return APT.Common.E_ProcessorArch.ARM_64; // modern default
+            return [ APT.Common.E_ProcessorArch.ARM_32, APT.Common.E_ProcessorArch.ARM_64 ];
         }
 
         // Desktop Linux/macOS
@@ -56,13 +56,13 @@ const Ajv = require("ajv");
             PlatformTags.includes(APT.Common.E_PlatformTag.LINUX) ||
             PlatformTags.includes(APT.Common.E_PlatformTag.UNIX))
         {
-            return APT.Common.E_ProcessorArch.X86_64; // default assumption
+            return [APT.Common.E_ProcessorArch.X86_32, APT.Common.E_ProcessorArch.X86_64 ];
         }
 
         // Windows
         if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
         {
-            return APT.Common.E_ProcessorArch.X86_64;
+            return [ APT.Common.E_ProcessorArch.X32_64, APT.Common.E_ProcessorArch.X86_64 ];
         }
 
         APT.FatalError("APT", `Cannot resolve processor arch from platform tags: ${PlatformTags}`);
@@ -93,7 +93,7 @@ const Ajv = require("ajv");
                 CMakeConfig: {
                     type: "string"
                 },
-                ProcessorArch: {
+                ProcessorArchs: {
                     type: "string"
                 }
             },
@@ -103,7 +103,7 @@ const Ajv = require("ajv");
                 "Platform",
                 "CMakeGenerator",
                 "CMakeConfig",
-                "ProcessorArch",
+                "ProcessorArchs",
             ]
         };
         const Validator = ajv.compile(Schema);
@@ -122,15 +122,88 @@ const Ajv = require("ajv");
             });
             return Result;
         }
+
+        if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.AUTO)
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "APT.Extensions.CMake.E_Config.AUTO is not allowed",
+                ChildErrors = []
+            });
+            return Result;
+        };
+        for (let ProcessorArch of InstanceConfig.ProcessorArchs)
+        {
+            if (ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
+            {
+                Result.Status = false;
+                Result.Errors.push({
+                    Message: "APT.Common.E_ProcessorArch.AUTO is not allowed",
+                    ChildErrors = []
+                });
+                return Result;
+            };
+        }
         return Result;
     }
     APT.Extensions.AbytekCMake.FinalizeInstanceConfig = function(InstanceConfig)
     {
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
-        APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
         let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
-        APT.Common.Assert(Result.CMakeConfig != APT.Extensions.CMake.E_Config.AUTO, "APT.Extensions.CMake.E_Config.AUTO is not allowed");
-        APT.Common.Assert(Result.ProcessorArch != APT.Common.E_ProcessorArch.AUTO, "APT.Common.E_ProcessorArch.AUTO is not allowed");
+        return Result;
+    }
+}
+
+
+// CMake Specialization
+{
+    APT.Extensions.AbytekCMake.ValidateCMakeSpecialization = function(CMakeSpecialization)
+    {
+        const ajv = new Ajv();
+        const Schema = {
+            type: "object",
+            properties: {
+                ProcessorArch: {
+                    type: "string"
+                }
+            },
+            additionalProperties: false,
+            required: [
+                "ProcessorArchs"
+            ]
+        };
+        const Validator = ajv.compile(Schema);
+
+        let Result = {
+            Status: true,
+            Errors: []
+        };
+        
+        if (!Validator(CMakeSpecialization)) 
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "Invalid syntax",
+                ChildErrors: Validator.errors
+            });
+            return Result;
+        }
+
+        if (ProcessorArch == APT.Common.E_ProcessorArch.AUTO)
+        {
+            Result.Status = false;
+            Result.Errors.push({
+                Message: "APT.Common.E_ProcessorArch.AUTO is not allowed",
+                ChildErrors = []
+            });
+            return Result;
+        };
+        return Result;
+    }
+    APT.Extensions.AbytekCMake.FinalizeInstanceConfig = function(InstanceConfig)
+    {
+        let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
+        let Result = APT.Common.SimpleDeepCopy(InstanceConfig);
         return Result;
     }
 }
@@ -151,7 +224,7 @@ const Ajv = require("ajv");
             InstanceConfig.Platform,
             InstanceConfig.CMakeGenerator,
             InstanceConfig.CMakeConfig,
-            InstanceConfig.ProcessorArch,
+            InstanceConfig.ProcessorArchs.sort().join("."),
         ].join('-');
     }
 }
@@ -183,38 +256,74 @@ const Ajv = require("ajv");
         let Validation = APT.Extensions.AbytekCMake.ValidateInstanceConfig(InstanceConfig);
         APT.Common.Assert(Validation.Status, APT.Common.NiceJSONStringify(Validation));
 
-        const BuildDirectory = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
-        const Signature = APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig);
-
-        function ShortHash(str) 
-        {
-            let hash = 0x811c9dc5;
-
-            for (let i = 0; i < str.length; i++) {
-                hash ^= str.charCodeAt(i);
-                hash = Math.imul(hash, 0x01000193);
+        let Result = {
+            Values = new Object(),
+            Find(Options)
+            {
+                const Key = APT.Common.NiceJSONStringify(Options);
+                if (!(Key in this.Values))
+                {
+                    return null;
+                }
+                return this.Values[Key];
+            },
+            Get(Options)
+            {
+                const Key = APT.Common.NiceJSONStringify(Options);
+                APT.Common.Assert(Key in this.Values, `Not found value for: ${Key}`);
+                return this.Values[Key];
+            },
+            Add(Value, Options)
+            {
+                const Key = APT.Common.NiceJSONStringify(Options);
+                APT.Common.Assert(!(Key in this.Values), `Value was already added: ${Key}`);
+                this.Values[Key] = Value;
+            },
+            Foreach(Callback)
+            {
+                for (let Key in this.Values)
+                {
+                    const Options = JSON.parse(Key);
+                    Callback(Options, this.Values[Key]);
+                }
             }
-
-            // unsigned 32-bit
-            hash >>>= 0;
-
-            // base36 + lấy 4 ký tự
-            return hash.toString(36).slice(0, 4);
-        }
-        const SignatureHash = ShortHash(Signature);
-
-        return {
-            Path: path.join(BuildDirectory, SignatureHash),
-            Signature,
-            SignatureHash,
         };
-    }
-    APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignatureFile = function(BuildDirectory, Signature)
-    {
-        return path.join(
-            BuildDirectory,
-            "CMakeBuildDirectorySignature-" + Signature + ".txt"
-        );
+        for (let ProcessorArch of InstanceConfig.ProcessorArchs)
+        {
+            const BuildDirectory = APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory);
+            const Signature = APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig);
+
+            function ShortHash(str) 
+            {
+                let hash = 0x811c9dc5;
+
+                for (let i = 0; i < str.length; i++) {
+                    hash ^= str.charCodeAt(i);
+                    hash = Math.imul(hash, 0x01000193);
+                }
+
+                // unsigned 32-bit
+                hash >>>= 0;
+
+                // base36 + lấy 4 ký tự
+                return hash.toString(36).slice(0, 4);
+            }
+            const SignatureHash = ShortHash(Signature);
+
+            Result.Add(
+                {
+                    Directory: path.join(BuildDirectory, SignatureHash),
+                    SignatureHashFile: path.join(
+                        BuildDirectory,
+                        `CMakeBuildDirectorySignatureHash-${Signature}-${ProcessorArch}.txt`
+                    ),
+                    Signature,
+                    SignatureHash,
+                },
+                ProcessorArch
+            );
+        }
+        return Result;
     }
     APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile = function(EntryDirectory, InstanceConfig)
     {
@@ -225,12 +334,11 @@ const Ajv = require("ajv");
             EntryDirectory,
             InstanceConfig
         );
-
-        const CMakeBuildDirectorySignatureFile = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectorySignatureFile(
-            APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
-            CMakeBuildDirectoryConfig.Signature
+        CMakeBuildDirectoryConfig.Foreach(
+            (Options, Value) => {
+                fs.writeFileSync(Value.SignatureHashFile, Value.SignatureHash);
+            }
         );
-        fs.writeFileSync(CMakeBuildDirectorySignatureFile, CMakeBuildDirectoryConfig.SignatureHash);
     }
 }
 
@@ -298,7 +406,7 @@ const Ajv = require("ajv");
             include(Abytek/Utilities/SetGlobal)
             include(Abytek/Utilities/ReadKeyValueFile)
 
-            Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_CMAKE_SIGNATURE}.txt")
+            Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_EBT_SIGNATURE}.txt")
             Abytek_ReadKeyValueFile(\${ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE})
 
             add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
@@ -354,11 +462,11 @@ const Ajv = require("ajv");
         Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineEntryDirectory)}"`);
         Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Path)}"`);
 
-        Result.push(`-DABYTEK_CMAKE_SIGNATURE="${Signature}"`);
-        Result.push(`-DABYTEK_CMAKE_ENVIRONMENT="${InstanceConfig.Environment}"`);
-        Result.push(`-DABYTEK_CMAKE_GENERATOR="${InstanceConfig.CMakeGenerator}"`);
-        Result.push(`-DABYTEK_CMAKE_CONFIG="${InstanceConfig.CMakeConfig}"`);
-        Result.push(`-DABYTEK_CMAKE_PROCESSOR_ARCH="${InstanceConfig.ProcessorArch}"`);
+        Result.push(`-DABYTEK_EBT_SIGNATURE="${Signature}"`);
+        Result.push(`-DABYTEK_EBT_ENVIRONMENT="${InstanceConfig.Environment}"`);
+        Result.push(`-DABYTEK_EBT_GENERATOR="${InstanceConfig.CMakeGenerator}"`);
+        Result.push(`-DABYTEK_EBT_CONFIG="${InstanceConfig.CMakeConfig}"`);
+        Result.push(`-DABYTEK_EBT_PROCESSOR_ARCHS="${InstanceConfig.ProcessorArchs.join(";")}"`);
 
         return Result;
     }

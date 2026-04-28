@@ -20,7 +20,7 @@ APT.Templates.CMake.ProjectPrototypes.Default(Project);
 Extended CMake template with Abytek features:
 ```javascript
 // APTProject.js
-APT.Templates.AbytekCMake.ProjectPrototypes.Default(Project);
+APT.Templates.AbytekEBT.ProjectPrototypes.Default(Project);
 ```
 
 ### Unreal Engine Template

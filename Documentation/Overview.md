@@ -65,18 +65,18 @@ How to import:
 abytekpt ./Samples/HelloAPT/HelloAPT/APTProject.js
 ```
 
-### AbytekCMake
-AbytekCMake template usage:
+### AbytekEBT
+AbytekEBT template usage:
 ```
-AbytekCMake/
+AbytekEBT/
   └── APTProject.js          # Extended CMake configuration
 ```
 Demonstrates:
-- AbytekCMake usage for importing Abytek Engine.
+- AbytekEBT usage for importing Abytek Engine.
 
 How to import:   
 ```bash
-abytekpt Samples/AbytekCMake/APTProject.js
+abytekpt Samples/AbytekEBT/APTProject.js
 ```
 
 ## Further Reading
