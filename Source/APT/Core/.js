@@ -11,4 +11,3 @@ AMJS.Import("./Console");
 AMJS.Import("./ProjectManager");
 AMJS.Import("./Project");
 AMJS.Import("./ProjectData");
-AMJS.Import("./ProjectComponent");

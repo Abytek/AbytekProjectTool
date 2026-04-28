@@ -9,7 +9,7 @@ APT.Extensions.CMake.GetDefaultBuildOptions = function()
 {
     let Options = new Object();
     Options.Target = null;
-    Options.DirectConfig = APT.Extensions.CMake.GetDefaultDirectConfig();
+    Options.Config = APT.Extensions.CMake.GetDefaultConfig();
     Options.ExtraArguments = [];
     return Options;
 }
@@ -26,9 +26,9 @@ APT.Extensions.CMake.Build = function(SourceDirectory, BuildDirectory, Options)
     {
         Options = new Object();
     }
-    if (Options.DirectConfig == null)
+    if (Options.Config == null)
     {
-        Options.DirectConfig = DefaultOptions.DirectConfig;
+        Options.Config = DefaultOptions.Config;
     }
     if (Options.Target == null)
     {
@@ -55,7 +55,7 @@ APT.Extensions.CMake.Build = function(SourceDirectory, BuildDirectory, Options)
     }
     Arguments.push(
         "--config",
-        Options.DirectConfig
+        Options.Config
     );
     for (let ExtraArgument of Options.ExtraArguments)
     {

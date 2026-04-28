@@ -14,27 +14,11 @@ APT.Extensions.AbytekCMake.GetProjectInstanceJSFile = function(CMakeBuildDirecto
     );
 }
 
-APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, CMakeConfig)
+APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile = function(Project, InstanceConfig)
 {
-    let Editor = Project.Data.Get("AbytekCMake.Editor");
-    let Environment = Project.Data.Get("AbytekCMake.Environment");
-    let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
-    
-    let EngineProject = Project.Data.Get("AbytekCMake.Engine");
-    let EngineEnvironment = EngineProject.Data.Get("AbytekCMake.Environment");
-
-    let CMakeGenerator = APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor);
-    if (CMakeConfig == null)
-    {
-        CMakeConfig = APT.Extensions.CMake.GetDefaultConfigForGenerator(CMakeGenerator);
-    }
-    
     const CMakeBuildDirectoryConfig = APT.Extensions.AbytekCMake.CalculateCMakeBuildDirectoryConfig(
         Project.EntryDirectory,
-        Environment,
-        PlatformTags,
-        CMakeGenerator,
-        CMakeConfig
+        InstanceConfig
     );
 
     const ProjectInstanceJSFile = APT.Extensions.AbytekCMake.GetProjectInstanceJSFile(CMakeBuildDirectoryConfig.Path);

@@ -2,18 +2,12 @@
 const path = require("path");
 const { execSync } = require("child_process");
 
-APT.Extensions.CMake.E_DirectConfig = {
+APT.Extensions.CMake.E_Config = {
+    AUTO: "Auto",
     DEBUG: "Debug",
     RELEASE: "Release",
     REL_WITH_DEB_INFO: "RelWithDebInfo",
     MIN_SIZE_REL: "MinSizeRel",
-};
-APT.Extensions.CMake.E_Config = {
-    AUTO: "Auto",
-    DEBUG: APT.Extensions.CMake.E_DirectConfig.DEBUG,
-    RELEASE: APT.Extensions.CMake.E_DirectConfig.RELEASE,
-    REL_WITH_DEB_INFO: APT.Extensions.CMake.E_DirectConfig.REL_WITH_DEB_INFO,
-    MIN_SIZE_REL: APT.Extensions.CMake.E_DirectConfig.MIN_SIZE_REL,
 };
 
 APT.Extensions.CMake.E_Generator = {
@@ -23,9 +17,9 @@ APT.Extensions.CMake.E_Generator = {
     UNIX_MAKEFILES: "UnixMakefiles",
 };
 
-APT.Extensions.CMake.GetDefaultDirectConfig = function()
+APT.Extensions.CMake.GetDefaultConfig = function()
 {
-    return APT.Extensions.CMake.E_DirectConfig.DEBUG;
+    return APT.Extensions.CMake.E_Config.DEBUG;
 }
 APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
 {
@@ -39,11 +33,11 @@ APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.NINJA)
     {
-        return APT.Extensions.CMake.GetDefaultDirectConfig();
+        return GetDefaultConfig();
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.UNIX_MAKEFILES)
     {
-        return APT.Extensions.CMake.GetDefaultDirectConfig();
+        return GetDefaultConfig();
     }
     APT.FatalError("APT", `Unknown generator: ${Generator}`);
 }
@@ -75,12 +69,6 @@ APT.Extensions.CMake.GetDefaultGenerator = function(PlatformTags)
         return APT.Extensions.CMake.E_Generator.NINJA;
     }
     return APT.Extensions.CMake.E_Generator.UNIX_MAKEFILES;
-}
-APT.Extensions.CMake.GetDefaultConfig = function()
-{
-    return APT.Extensions.CMake.GetDefaultConfigForGenerator(
-        APT.Extensions.CMake.GetDefaultGenerator()
-    );
 }
 
 APT.Extensions.CMake.IsConfigCompatibleWithGenerator = function(Config, Generator)

@@ -62,6 +62,11 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
         APT.Common.ToCLIArgument(CmakeGenerator),
     ];
 
+    if (Options.Config != APT.Extensions.CMake.E_Config.AUTO)
+    {
+        Arguments.push(`-DCMAKE_BUILD_TYPE=${Options.Config}`);
+    }
+
     for (let ExtraArgument of Options.ExtraArguments)
     {
         Arguments.push(ExtraArgument);

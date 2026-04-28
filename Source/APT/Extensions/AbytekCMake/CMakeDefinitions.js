@@ -5,22 +5,22 @@ const fs = require("fs");
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName = function(Environment, PlatformTags, Editor)
+APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName = function(InstanceConfig)
 {
-    return "CMakeDefinitions-" + APT.Extensions.AbytekCMake.CalculateSignature(Environment, PlatformTags, Editor) + ".txt";
+    return "CMakeDefinitions-" + APT.Extensions.AbytekCMake.CalculateSignature(InstanceConfig) + ".txt";
 }
-APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile = function(EntryDirectory, Environment, PlatformTags, Editor)
+APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile = function(EntryDirectory, InstanceConfig)
 {
     return path.join(
         APT.Extensions.AbytekCMake.CalculateBuildDirectory(EntryDirectory),
-        APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName(Environment, PlatformTags, Editor)
+        APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFileName(InstanceConfig)
     );
 }
-APT.Extensions.AbytekCMake.ApplyCMakeDefinitions = function(CMakeDefinitions, EntryDirectory, Environment, PlatformTags, Editor)
+APT.Extensions.AbytekCMake.ApplyCMakeDefinitions = function(CMakeDefinitions, EntryDirectory, InstanceConfig)
 {
     APT.Log("APT", `Start applying cmake definitions for project: ${EntryDirectory}`);
 
-    const File = APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile(EntryDirectory, Environment, PlatformTags, Editor);
+    const File = APT.Extensions.AbytekCMake.CalculateCMakeDefinitionsFile(EntryDirectory, InstanceConfig);
     const Directory = path.dirname(File);
     if (!fs.existsSync(Directory))
     {

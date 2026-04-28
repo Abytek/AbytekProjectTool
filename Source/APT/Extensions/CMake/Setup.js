@@ -1,5 +1,8 @@
 
-AMJS.Import("./ProjectComponent")
+AMJS.Import("./Common")
+AMJS.Import("./Configure")
+AMJS.Import("./Build")
+
 
 APT.Extensions.CMake.Setup = function(Context)
 {
@@ -14,10 +17,28 @@ APT.Extensions.CMake.Setup = function(Context)
         "Import",
         function()
         {
-            Context.APT.Set(
-                "CMake",
-                new APT.Extensions.CMake.F_ProjectComponent(Context)
-            );
+            let SourceDirectory = Context.APT.GetOrAdd("CMake.SourceDirectory", Context.APT.Project.EntryDirectory);
+            let BuildDirectory = Context.APT.GetOrAdd("CMake.BuildDirectory", Context.APT.Project.EntryDirectory + "/Build");
+
+            let ConfigureOptions = Context.APT.GetOrAdd("CMake.Configure.Options", APT.Extensions.CMake.GetDefaultConfigureOptions());
+            if (Context.APT.GetOrAdd("CMake.Configure.Enabled", Context.APT.Project.IsMain))
+            {
+                APT.Extensions.CMake.Configure(
+                    SourceDirectory,
+                    BuildDirectory,
+                    ConfigureOptions
+                );
+            }
+            
+            let BuildOptions = Context.APT.GetOrAdd("CMake.Build.Options", APT.Extensions.CMake.GetDefaultBuildOptions());
+            if (Context.APT.GetOrAdd("CMake.Build.Enabled", false))
+            {
+                APT.Extensions.CMake.Build(
+                    SourceDirectory,
+                    BuildDirectory,
+                    BuildOptions
+                );
+            }
         }
     );
 }

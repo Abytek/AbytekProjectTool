@@ -9,21 +9,23 @@ AMJS.Import("./CMakeConfigure");
 AMJS.Import("./ProjectInstance");
 
 
-APT.Extensions.AbytekCMake.PrepareWindows = function(Project, CMakeConfig)
+APT.Extensions.AbytekCMake.PrepareWindows = function(Project, DirectInstanceConfig)
 {
-    APT.Log("APT", `Start preparing project: ${Project.GetSignature()}`);
+    APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
+    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    
     APT.Extensions.AbytekCMake.CMakeConfigure(
         Project,
-        CMakeConfig
+        InstanceConfig
     );
-    APT.Log("APT", `Prepared project: ${Project.GetSignature()}`);
+    APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
+APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, DirectInstanceConfig)
 {
-    APT.Log("APT", `Start preparing project: ${Project.GetSignature()}`);
+    APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
-    let Environment = Project.Data.Get("AbytekCMake.Environment");
+    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
 
     const AndroidProjectDirectory = path.join(
         Project.EntryDirectory,
@@ -36,22 +38,22 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
     let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
 
     let GradlewCommand = null;
-    if (CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+    if (DirectInstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
     {
         GradlewCommand = "externalNativeBuildDebug";
     }
-    else if (CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+    else if (DirectInstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
     {
         GradlewCommand = "externalNativeBuildRelease";
     }
     else 
     {
-        APT.FatalError("APT", `Unknown config: ${CMakeConfig}`);
+        APT.FatalError("APT", `Unknown config: ${InstanceConfig.CMakeConfig}`);
     }
 
     let Arguments = [
         GradlewCommand,
-        `-PABYTEK_CMAKE_ENVIRONMENT="${Environment}"`,
+        `-PABYTEK_CMAKE_ENVIRONMENT="${InstanceConfig.Environment}"`,
     ];
     APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
 
@@ -74,23 +76,25 @@ APT.Extensions.AbytekCMake.PrepareAndroid = function(Project, CMakeConfig)
     {
         throw new Error("Failed to prepare android project");
     }
-    APT.Log("APT", `Prepared project: ${Project.GetSignature()}`);
+    APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
-APT.Extensions.AbytekCMake.Prepare = function(Project, CMakeConfig)
+APT.Extensions.AbytekCMake.Prepare = function(Project, DirectInstanceConfig)
 {
-    let PlatformTags = Project.Data.Get("AbytekCMake.PlatformTags");
+    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
 
-    APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile(Project, CMakeConfig)
-    APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile(Project, CMakeConfig);
+    let PlatformTags = APT.Common.ParsePlatformTags(InstanceConfig.Platform);
+
+    APT.Extensions.AbytekCMake.GenerateCMakeBuildDirectorySignatureFile(Project.EntryDirectory, InstanceConfig)
+    APT.Extensions.AbytekCMake.GenerateProjectInstanceJSFile(Project, InstanceConfig);
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
-        APT.Extensions.AbytekCMake.PrepareWindows(Project, CMakeConfig);
+        APT.Extensions.AbytekCMake.PrepareWindows(Project, DirectInstanceConfig);
         return;
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
-        APT.Extensions.AbytekCMake.PrepareAndroid(Project, CMakeConfig);
+        APT.Extensions.AbytekCMake.PrepareAndroid(Project, DirectInstanceConfig);
         return;
     }
 

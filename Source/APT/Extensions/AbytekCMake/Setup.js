@@ -1,6 +1,9 @@
 
-AMJS.Import("./ProjectComponent")
 AMJS.Import("./Common")
+AMJS.Import("./CMakeConfigure")
+AMJS.Import("./CMakeDefinitions")
+AMJS.Import("./Prepare")
+AMJS.Import("./ProjectInstance")
 
 
 APT.Extensions.AbytekCMake.GetDefaultSetupOptions = function()
@@ -37,17 +40,35 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
         "PrepareSignature",
         function()
         {
-            let PlatformTags = Context.APT.TransferSignature(
-                "AbytekCMake.PlatformTags", 
-                APT.Common.GetHostPlatformTags()
+            let Platform = Context.APT.GetOrAdd(
+                "AbytekCMake.Platform", 
+                APT.Common.GetHostPlatform()
             );
-            Context.APT.TransferSignature(
+            let PlatformTags = APT.Common.ParsePlatformTags(Platform);
+            let Environment = Context.APT.GetOrAdd(
                 "AbytekCMake.Environment", 
-                APT.Extensions.AbytekCMake.GetDefaultEnvironment(PlatformTags)
+                APT.Extensions.AbytekCMake.GetDefaultEnvironmentForPlatformTags(PlatformTags)
             );
-            let Editor = Context.APT.TransferSignature(
+            let Editor = Context.APT.GetOrAdd(
                 "AbytekCMake.Editor", 
-                APT.Extensions.AbytekCMake.GetDefaultEditor(PlatformTags)
+                APT.Extensions.AbytekCMake.GetDefaultEditorForPlatformTags(PlatformTags)
+            );
+            let CMakeGenerator = Context.APT.GetOrAdd(
+                "AbytekCMake.CMakeGenerator", 
+                APT.Extensions.AbytekCMake.GetDefaultCMakeGeneratorForEditor(Editor)
+            );
+            let CMakeConfig = Context.APT.GetOrAdd(
+                "AbytekCMake.CMakeGenerator", 
+                APT.Extensions.AbytekCMake.GetDefaultCMakeConfigForEditor(Editor)
+            );
+
+            let InstanceConfig = Context.APT.TransferSignature(
+                "AbytekCMake.InstanceConfig", 
+                APT.Extensions.AbytekCMake.FinalizeInstanceConfig({
+                    Environment,
+                    Platform,
+                    Editor
+                })
             );
         }
     );
@@ -57,7 +78,14 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
         function()
         {
             let GlobalContext = Context.AMJS.GetGlobalContext();
+            
+            let Name = Context.APT.GetOrAdd("AbytekCMake.Name", "AbytekProject");
+            Context.APT.Set("AbytekCMake.Options", Options);
 
+            let InstanceConfig = Context.APT.Get("AbytekCMake.InstanceConfig");
+
+            // Find & import
+            let Engine = null;
             if (Options.IsEngine)
             {
                 if (GlobalContext.AbytekCMake == null)
@@ -67,6 +95,8 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                     };
                 }
                 GlobalContext.AbytekCMake.Engines.push(Context.APT.Project);
+                
+                Engine = Context.APT.Set("AbytekCMake.Engine", Context.APT.Project);
             }
             else
             {
@@ -79,13 +109,53 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
                     );
                 }
 
-                APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery, EngineData);
+                Engine = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery, EngineData);
+                Engine = Context.APT.Set("AbytekCMake.Engine", Engine);
             }
 
-            Context.APT.Set(
-                "AbytekCMake",
-                new APT.Extensions.AbytekCMake.F_ProjectComponent(Context, Options)
+            let PrepareEnabled = Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain);
+            let PrepareInstanceConfig = Context.APT.GetOrAdd(
+                "AbytekCMake.Prepare.InstanceConfig", 
+                new Object()
             );
+            PrepareInstanceConfig = Context.APT.Set(
+                "AbytekCMake.Prepare.InstanceConfig", 
+                APT.Extensions.AbytekCMake.FinalizeDirectInstanceConfig(
+                    InstanceConfig,
+                    PrepareInstanceConfig
+                )
+            );
+
+            let CMakeDefinitions = Context.APT.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
+
+            // Generate engine path file
+            APT.Extensions.AbytekCMake.GenerateEnginePathFile(
+                Context.APT.Project.EntryDirectory,
+                Engine.EntryDirectory,
+                InstanceConfig
+            );       
+
+            // Generate CMakeLists file if needed
+            if (!Options.IsEngine)
+            {
+                APT.Extensions.AbytekCMake.GenerateCMakeListsFile(
+                    Context.APT.Project,
+                    Name
+                );
+            }
+
+            // Apply cmake definitions
+            APT.Extensions.AbytekCMake.ApplyCMakeDefinitions(
+                CMakeDefinitions,
+                Context.APT.Project.EntryDirectory,
+                InstanceConfig
+            );
+
+            // Prepare if needed
+            if (PrepareEnabled)
+            {
+                APT.Extensions.AbytekCMake.Prepare(Context.APT.Project, PrepareInstanceConfig);
+            }
         }
     );
 }

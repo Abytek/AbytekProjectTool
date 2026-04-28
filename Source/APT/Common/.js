@@ -16,6 +16,7 @@ AMJS.Import("./Forward");
 AMJS.Import("./Copy");
 AMJS.Import("./Cache");
 AMJS.Import("./Platform");
+AMJS.Import("./ProcessorArch");
 AMJS.Import("./Files");
 AMJS.Import("./VisualStudio");
 AMJS.Import("./CLI");
