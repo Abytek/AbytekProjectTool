@@ -13,12 +13,13 @@ APT.Extensions.AbytekCMake.PrepareWindows = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
-    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+    let TargetsToBuild = Project.Data.Get("AbytekCMake.Prepare.TargetsToBuild");
 
-    APT.Extensions.AbytekCMake.CMakeConfigure(
-        Project,
-        InstanceConfig
-    );
+    APT.Extensions.AbytekCMake.CMakeConfigure(Project);
+    for (let TargetToBuild of TargetsToBuild)
+    {
+        APT.Extensions.AbytekCMake.CMakeBuild(Project, TargetToBuild);
+    }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
 APT.Extensions.AbytekCMake.PrepareAndroid = function(Project)

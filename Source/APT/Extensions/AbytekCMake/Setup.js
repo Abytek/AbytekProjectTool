@@ -116,6 +116,7 @@ APT.Extensions.AbytekCMake.Setup = function(Context, Options)
             }
 
             let PrepareEnabled = Context.APT.GetOrAdd("AbytekCMake.Prepare.Enabled", Context.APT.Project.IsMain);
+            let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekCMake.Prepare.TargetsToBuild", []);
 
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekCMake.CMakeDefinitions", []);
 

@@ -2,8 +2,10 @@
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekCMake.CMakeConfigure = function(Project, InstanceConfig)
+APT.Extensions.AbytekCMake.CMakeConfigure = function(Project)
 {
+    let InstanceConfig = Project.Data.Get("AbytekCMake.InstanceConfig");
+
     APT.Log("APT", `Start configurating project: ${Project.EntryDirectory}`);
     APT.Log("APT", `Use instance config: ${InstanceConfig}`);
     
