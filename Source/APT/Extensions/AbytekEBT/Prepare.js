@@ -18,10 +18,10 @@ APT.Extensions.AbytekEBT.PrepareWindows = function(Project)
     for (let CMakeInstance of ProjectInstance.CMakeInstances)
     {
         APT.Extensions.AbytekEBT.CMakeConfigure(Project, CMakeInstance);
-        // for (let TargetToBuild of TargetsToBuild)
-        // {
-        //     APT.Extensions.AbytekEBT.CMakeBuild(Project, CMakeInstance, TargetToBuild);
-        // }
+        for (let TargetToBuild of TargetsToBuild)
+        {
+            APT.Extensions.AbytekEBT.CMakeBuild(Project, CMakeInstance, TargetToBuild);
+        }
     }
     APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
 }
