@@ -13,7 +13,7 @@ APT.Extensions.AbytekEBT.CMakeBuild = function(Project, CMakeInstance, TargetToB
     );
     APT.Log("APT", `Use CMake build directory config: ${APT.Common.NiceJSONStringify(CMakeBuildDirectoryConfig)}`);
 
-    const CMakeBuildDirectory = CMakeBuildDirectoryConfig.Path;
+    const CMakeBuildDirectory = CMakeBuildDirectoryConfig.Directory;
 
     APT.Extensions.CMake.Build(
         Project.EntryDirectory,
