@@ -166,7 +166,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Start importing main project: ${this.Command_ImportMainProject.MainProjectEntryDirectory}`);
         APT.Log("APT", `Main project defines: ${this.MainProjectDefines.GetSignature()}`);
         APT.Log("APT", `Defines: ${this.Defines.GetSignature()}`);
-        this.MainProject = this.ImportProject(
+        this.MainProject = this.Import(
             [
                 process.cwd()
             ],
@@ -178,7 +178,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Imported main project`);
     }
 
-    ImportProject(BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
+    Import(BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
     {
         APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
@@ -464,13 +464,13 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                                 return Value;
                             }
                         }
-                        Context.APT.ImportProject = function(RelativeEntryDirectory2, Data2, Required2 = true)
+                        Context.APT.Import = function(RelativeEntryDirectory2, Data2, Required2 = true)
                         {
                             if (Data2 == null)
                             {
                                 Data2 = new APT.Core.F_ProjectData(Project.Data);
                             }
-                            return ProjectManager.ImportProject([ AbsoluteProjectEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
+                            return ProjectManager.Import([ AbsoluteProjectEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
