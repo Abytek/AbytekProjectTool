@@ -49,7 +49,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                     // positional
                     .positional('MainScopeEntryDirectory', {
                         type: 'string',
-                        describe: 'path to the main project'
+                        describe: 'path to the main scope'
                     })
 
                     .option('MainScopeDefines', {
@@ -163,8 +163,8 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         {
             return;
         }
-        APT.Log("APT", `Start importing main project: ${this.Command_ImportMainScope.MainScopeEntryDirectory}`);
-        APT.Log("APT", `Main project defines: ${this.MainScopeDefines.GetSignature()}`);
+        APT.Log("APT", `Start importing main scope: ${this.Command_ImportMainScope.MainScopeEntryDirectory}`);
+        APT.Log("APT", `Main scope defines: ${this.MainScopeDefines.GetSignature()}`);
         APT.Log("APT", `Defines: ${this.Defines.GetSignature()}`);
         this.MainScope = this.Import(
             null,
@@ -176,12 +176,12 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
             true,
             true
         );
-        APT.Log("APT", `Imported main project`);
+        APT.Log("APT", `Imported main scope`);
     }
 
     Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ScopeCreationArgs)
     {
-        APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
+        APT.Log("APT", `Import scope: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
 
         if (Data == null)
@@ -200,16 +200,16 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
             return false;
         }
 
-        APT.Log("APT", `Found project entry directory ${AbsoluteScopeEntryDirectory}`);
+        APT.Log("APT", `Found scope entry directory ${AbsoluteScopeEntryDirectory}`);
 
-        // Create new project instance
+        // Create new scope instance
         let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, Data, ...ScopeCreationArgs);
 
         let ScopeManager = this;
 
         if (Scope.HasEntryFile)
         {
-            // Import project module and set up context
+            // Import scope module and set up context
             let ScopeContext = AMJS.ModuleSystem.Import(
                 BaseDirectories,
                 Scope.EntryFile,
@@ -496,7 +496,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Scope signature: ${Signature}`);
         if (this.Scopes.has(Signature))
         {
-            APT.Log("APT", `Found project, already imported: ${Signature}`);
+            APT.Log("APT", `Found scope, already imported: ${Signature}`);
             return this.Scopes.get(Signature);
         }
         this.Scopes.set(Signature, Scope);
@@ -507,7 +507,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         Scope.ExecuteEvent("Import");
         Scope.PostImport();
 
-        APT.Log("APT", `Imported project at: ${AbsoluteScopeEntryDirectory}`);
+        APT.Log("APT", `Imported scope at: ${AbsoluteScopeEntryDirectory}`);
         return Scope;
     }
 }

@@ -140,7 +140,7 @@ APT.Extensions.ScopeLinker.Find = function(Query, ...ScopeImportArgs)
 APT.Extensions.ScopeLinker.Ensure = function(Query, ...ScopeImportArgs)
 {
     let EntryDirectory = APT.Extensions.ScopeLinker.EnsureDirectory(Query);
-    APT.Common.Assert(EntryDirectory, `Not found project link for: ${APT.Common.NiceJSONStringify(Query)}`);
+    APT.Common.Assert(EntryDirectory, `Not found scope link for: ${APT.Common.NiceJSONStringify(Query)}`);
     return APT.Core.System.GetChild("ScopeManager").Import(
         null,
         [], 

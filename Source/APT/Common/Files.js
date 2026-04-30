@@ -70,8 +70,8 @@ APT.Common.SmartWriteFile = function(File, Content)
 }
 
 /**
- * Gets the project links directory path
- * @returns {string} Absolute path to project links directory
+ * Gets the scope links directory path
+ * @returns {string} Absolute path to scope links directory
  */
 APT.Common.GetScopeLinksDirectory = function()
 {
