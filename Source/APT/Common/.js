@@ -20,3 +20,4 @@ AMJS.Import("./ProcessorArch");
 AMJS.Import("./Files");
 AMJS.Import("./VisualStudio");
 AMJS.Import("./CLI");
+AMJS.Import("./Event");

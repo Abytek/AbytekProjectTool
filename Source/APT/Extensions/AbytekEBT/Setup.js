@@ -141,6 +141,10 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
 
             //
             APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Context.APT.Project)
+            
+            // Broadcast events
+            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
+            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);
 
             // Prepare if needed
             if (PrepareEnabled)
