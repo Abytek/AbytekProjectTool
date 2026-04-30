@@ -7,8 +7,9 @@ AMJS.Import("./ProjectData");
 
 APT.Core.F_Project = class
 {
-    constructor(EntryDirectory, Data, IsMain = false)
+    constructor(Parent, EntryDirectory, Data, IsMain = false)
     {
+        this.Parent = Parent;
         this.EntryDirectory = EntryDirectory;
         this.EntryFile = path.join(EntryDirectory, "APT.js");
         this.Context = null;

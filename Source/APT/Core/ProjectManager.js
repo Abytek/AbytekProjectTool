@@ -167,6 +167,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Main project defines: ${this.MainProjectDefines.GetSignature()}`);
         APT.Log("APT", `Defines: ${this.Defines.GetSignature()}`);
         this.MainProject = this.Import(
+            null,
             [
                 process.cwd()
             ],
@@ -178,7 +179,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Imported main project`);
     }
 
-    Import(BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
+    Import(ParentProject, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
     {
         APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
@@ -202,7 +203,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Found project entry directory ${AbsoluteProjectEntryDirectory}`);
 
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(AbsoluteProjectEntryDirectory, Data, ...ProjectCreationArgs);
+        let Project = new AMJS.Namespace.F_Project(ParentProject, AbsoluteProjectEntryDirectory, Data, ...ProjectCreationArgs);
 
         let ProjectManager = this;
 
@@ -471,7 +472,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 Data2 = new APT.Core.F_ProjectData(Project.Data);
                             }
-                            return ProjectManager.Import([ AbsoluteProjectEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
+                            return ProjectManager.Import(Project, [ AbsoluteProjectEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
