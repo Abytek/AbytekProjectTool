@@ -5,7 +5,7 @@ AMJS.Import("./CMakeDefinitions")
 AMJS.Import("./Prepare")
 
 
-APT.Extensions.AbytekEBT.GetDefaultSetupOptions = function()
+APT.Extensions.AbytekEBT.GetDefaultSetupProjectOptions = function()
 {
     let Options = new Object();
     Options.IsEngine = false;
@@ -21,7 +21,7 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 {
     APT.Extensions.ScopeLinker.Setup(Context);
 
-    let DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupOptions();
+    let DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupProjectOptions();
     if (Options == null)
     {
         Options = new Object();
@@ -80,6 +80,8 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
         { 
             let GlobalContext = Context.AMJS.GetGlobalContext();
 
+            Context.APT.Set("AbytekEBT.IsProject", true);
+
             let ProjectInstanceParams = Context.APT.Get("AbytekEBT.ProjectInstanceParams");
             let ProjectInstance = Context.APT.Set(
                 "AbytekEBT.ProjectInstance",
@@ -87,7 +89,7 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             );
             let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
             
-            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "AbytekScope");
+            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Project");
             Context.APT.Set("AbytekEBT.Options", Options);
 
             Context.APT.Set("AbytekEBT.Applications", []);
