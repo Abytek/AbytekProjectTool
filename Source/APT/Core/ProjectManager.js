@@ -221,6 +221,7 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         };
                         Project.Context = Context;
                         Context.APT.Project = Project;
+                        Project.Context = Context;
                         {
                             Context.APT.HasPublic = function(Key, IsSignature = false)
                             {
