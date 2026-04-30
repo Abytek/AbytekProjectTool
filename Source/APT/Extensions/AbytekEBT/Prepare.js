@@ -54,7 +54,7 @@ APT.Extensions.AbytekEBT.PrepareWindows = function(Scope)
 
     let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
     let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
-    let TargetsToBuild = Scope.Data.Get("AbytekEBT.Prepare.TargetsToBuild");
+    let PrepareApplicationFilter = Scope.Get("AbytekEBT.Prepare.ApplicationFilter");
 
     for (let CMakeInstance of ProjectInstance.CMakeInstances)
     {
@@ -64,9 +64,9 @@ APT.Extensions.AbytekEBT.PrepareWindows = function(Scope)
         }
         if (APT.Extensions.AbytekEBT.PrepareModeShouldCMakeBuild(PrepareMode))
         {
-            for (let TargetToBuild of TargetsToBuild)
+            for (let PrepareApplicationName of PrepareApplicationFilter)
             {
-                APT.Extensions.AbytekEBT.CMakeBuild(Scope, CMakeInstance, TargetToBuild);
+                APT.Extensions.AbytekEBT.CMakeBuild(Scope, CMakeInstance, `${PrepareApplicationName}.CookedExecutable`);
             }
         }
     }
@@ -78,6 +78,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
 
     let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
     let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
+    let PrepareApplicationFilter = Scope.Get("AbytekEBT.Prepare.ApplicationFilter");
 
     let ShouldCMakeBuild = APT.Extensions.AbytekEBT.PrepareModeShouldCMakeBuild(PrepareMode);
     let ShouldBuildApplication = APT.Extensions.AbytekEBT.PrepareModeShouldBuildApplication(PrepareMode);
@@ -87,78 +88,81 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
         || ShouldBuildApplication
     )
     {
-        const AndroidScopeDirectory = path.join(
-            Scope.EntryDirectory,
-            "Platforms",
-            "Android",
-            "Projects",
-            "Application"
-        ).replaceAll("\\", "/");
-
-        let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
-
-        let GradlewCommand = null;
-        if (ShouldBuildApplication)
+        for (let PrepareApplicationName of PrepareApplicationFilter)
         {
-            if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+            const AndroidScopeDirectory = path.join(
+                Scope.EntryDirectory,
+                "Platforms",
+                "Android",
+                "Projects",
+                PrepareApplicationName
+            ).replaceAll("\\", "/");
+
+            let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
+
+            let GradlewCommand = null;
+            if (ShouldBuildApplication)
             {
-                GradlewCommand = "assembleDebug";
+                if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+                {
+                    GradlewCommand = "assembleDebug";
+                }
+                else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+                {
+                    GradlewCommand = "assembleRelease";
+                }
+                else 
+                {
+                    APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
+                }
             }
-            else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+            else if (ShouldCMakeBuild)
             {
-                GradlewCommand = "assembleRelease";
+                if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+                {
+                    GradlewCommand = "externalNativeBuildDebug";
+                }
+                else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+                {
+                    GradlewCommand = "externalNativeBuildRelease";
+                }
+                else 
+                {
+                    APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
+                }
             }
             else 
             {
-                APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
+                throw new Error(`Unknown prepare mode: ${PrepareMode}`);
             }
-        }
-        else if (ShouldCMakeBuild)
-        {
-            if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
-            {
-                GradlewCommand = "externalNativeBuildDebug";
-            }
-            else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
-            {
-                GradlewCommand = "externalNativeBuildRelease";
-            }
-            else 
-            {
-                APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
-            }
-        }
-        else 
-        {
-            throw new Error(`Unknown prepare mode: ${PrepareMode}`);
-        }
 
-        let Arguments = [
-            GradlewCommand,
-            `-PABYTEK_EBT_ENVIRONMENT="${ProjectInstance.Environment}"`,
-            `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
-            `-PABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`,
-        ];
-        APT.Log("APT", `Start gradlew at "${AndroidScopeDirectory}" with arguments: ${Arguments}`);
+            let Arguments = [
+                GradlewCommand,
+                `-PABYTEK_EBT_ENVIRONMENT="${ProjectInstance.Environment}"`,
+                `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
+                `-PABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`,
+            ];
+            APT.Log("APT", `Start gradlew at "${AndroidScopeDirectory}" with arguments: ${Arguments}`);
 
-        const Env = {
-            ...process.env,
-            ANDROID_SDK_ROOT: AndroidSdkPath,
-        };
+            const Env = {
+                ...process.env,
+                ANDROID_SDK_ROOT: AndroidSdkPath,
+            };
 
-        const result = spawnSync(
-            process.platform === "win32" ? "gradlew.bat" : "./gradlew",
-            Arguments, 
+            const result = spawnSync(
+                process.platform === "win32" ? "gradlew.bat" : "./gradlew",
+                Arguments, 
+                {
+                    cwd: AndroidScopeDirectory,
+                    stdio: "inherit",
+                    shell: true,
+                    env: Env,
+                }
+            );
+            if (result.status != 0)
             {
-                cwd: AndroidScopeDirectory,
-                stdio: "inherit",
-                shell: true,
-                env: Env,
+                throw new Error("Failed to prepare android project");
             }
-        );
-        if (result.status != 0)
-        {
-            throw new Error("Failed to prepare android project");
         }
     }
     APT.Log("APT", `Prepared project: ${Scope.EntryDirectory}`);

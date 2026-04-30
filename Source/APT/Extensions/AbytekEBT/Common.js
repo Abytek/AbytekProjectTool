@@ -582,3 +582,48 @@ const Ajv = require("ajv");
         return Result;
     }
 }
+
+
+// Application
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory = function(CMakeBuildDirectory)
+{
+    return path.join(CMakeBuildDirectory, "AbytekEBT", "ApplicationDescriptors");
+}
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFile = function(Directory, Name)
+{
+    return path.join(Directory, Name + ".json");
+}
+APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
+{
+    const Applications = Scope.Get("AbytekEBT.Applications");
+    const ProjectInstancce = Scope.Get("AbytekEBT.ProjectInstance");
+    for (const CMakeInstance of ProjectInstancce.CMakeInstances)
+    {
+        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+            Scope.EntryDirectory,
+            CMakeInstance
+        );
+
+        const ApplicationDescriptorsDirectory = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory(CMakeBuildDirectoryConfig.Directory);
+        if (fs.existsSync(ApplicationDescriptorsDirectory))
+        {
+            fs.rmdirSync(ApplicationDescriptorsDirectory, { recursive: true, force: true });
+        }
+        fs.mkdirSync(ApplicationDescriptorsDirectory, { recursive: true });
+
+        for (const Application of Applications)
+        {
+            const ApplicationName = Application.Get("AbytekEBT.Name");
+            const ApplicationDescriptorFile = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFile(
+                ApplicationDescriptorsDirectory,
+                ApplicationName
+            );
+
+            let ApplicationDescriptor = {
+                Name: ApplicationName
+            };
+            const ApplicationDescriptorJSON = APT.Common.NiceJSONStringify(ApplicationDescriptor);
+            fs.writeFileSync(ApplicationDescriptorFile, ApplicationDescriptorJSON);
+        }
+    }
+}

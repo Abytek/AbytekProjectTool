@@ -90,11 +90,13 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "AbytekScope");
             Context.APT.Set("AbytekEBT.Options", Options);
 
+            Context.APT.Set("AbytekEBT.Applications", []);
+
             let PrepareEnabled = APT.Common.ForwardBool(
                 Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Scope.IsMain)
             );
             let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
-            let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekEBT.Prepare.TargetsToBuild", []);
+            let PrepareApplicationFilter = Context.APT.GetOrAdd("AbytekEBT.Prepare.ApplicationFilter", []);
 
             // Find & import
             let Engine = null;
@@ -128,7 +130,11 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);
 
             // Generate engine path file
-            APT.Extensions.AbytekEBT.GenerateEnginePathFile(Context.APT.Scope);       
+            APT.Extensions.AbytekEBT.GenerateEnginePathFile(Context.APT.Scope);     
+            
+            // Broadcast events
+            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
+            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
 
             // Generate CMakeLists file if needed
             if (!Options.IsEngine)
@@ -141,10 +147,9 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 
             //
             APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Context.APT.Scope)
-            
-            // Broadcast events
-            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
-            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);
+
+            // Generate application descriptors
+            APT.Extensions.AbytekEBT.GenerateApplicationDescriptors(Context.APT.Scope);
 
             // Prepare if needed
             if (PrepareEnabled)
