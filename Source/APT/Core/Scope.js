@@ -3,9 +3,9 @@ const path = require("path");
 const fs = require("fs");
 
 AMJS.Import("./Logger");
-AMJS.Import("./ProjectData");
+AMJS.Import("./ScopeData");
 
-APT.Core.F_Project = class
+APT.Core.F_Scope = class
 {
     constructor(Parent, EntryDirectory, Data, IsMain = false)
     {
@@ -15,7 +15,7 @@ APT.Core.F_Project = class
         this.Context = null;
         this.HasEntryFile = fs.existsSync(this.EntryFile);
         this.Data = Data;
-        this.SignatureData = new APT.Core.F_ProjectData();
+        this.SignatureData = new APT.Core.F_ScopeData();
         this.IsMain = IsMain;
 
         this.Events = {

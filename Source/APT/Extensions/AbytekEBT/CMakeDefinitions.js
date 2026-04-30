@@ -7,7 +7,7 @@ AMJS.Import("./Common");
 
 APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFileName = function(ProjectInstance)
 {
-    return "CMakeDefinitions-" + APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance) + ".txt";
+    return "CMakeDefinitions-" + APT.Extensions.AbytekEBT.CalculateScopeSignature(ProjectInstance) + ".txt";
 }
 APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile = function(EntryDirectory, ProjectInstance)
 {
@@ -16,14 +16,14 @@ APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile = function(EntryDirectory
         APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFileName(ProjectInstance)
     );
 }
-APT.Extensions.AbytekEBT.ApplyCMakeDefinitions = function(Project)
+APT.Extensions.AbytekEBT.ApplyCMakeDefinitions = function(Scope)
 {
-    APT.Log("APT", `Start applying cmake definitions for project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Start applying cmake definitions for project: ${Scope.EntryDirectory}`);
 
-    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
-    let CMakeDefinitions = Project.Data.Get("AbytekEBT.CMakeDefinitions");
+    let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+    let CMakeDefinitions = Scope.Data.Get("AbytekEBT.CMakeDefinitions");
 
-    const File = APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile(Project.EntryDirectory, ProjectInstance);
+    const File = APT.Extensions.AbytekEBT.CalculateCMakeDefinitionsFile(Scope.EntryDirectory, ProjectInstance);
     const Directory = path.dirname(File);
     if (!fs.existsSync(Directory))
     {
@@ -39,5 +39,5 @@ APT.Extensions.AbytekEBT.ApplyCMakeDefinitions = function(Project)
         FileContent += `${CMakeDefinition[1]}\n`;
     }
     fs.writeFileSync(File, FileContent);
-    APT.Log("APT", `Applied cmake definitions for project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Applied cmake definitions for project: ${Scope.EntryDirectory}`);
 }

@@ -48,36 +48,36 @@ APT.Extensions.AbytekEBT.PrepareModeShouldBuildApplication = function(PrepareMod
     );
 }
 
-APT.Extensions.AbytekEBT.PrepareWindows = function(Project)
+APT.Extensions.AbytekEBT.PrepareWindows = function(Scope)
 {
-    APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Start preparing project: ${Scope.EntryDirectory}`);
 
-    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
-    let PrepareMode = Project.Data.Get("AbytekEBT.Prepare.Mode");
-    let TargetsToBuild = Project.Data.Get("AbytekEBT.Prepare.TargetsToBuild");
+    let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+    let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
+    let TargetsToBuild = Scope.Data.Get("AbytekEBT.Prepare.TargetsToBuild");
 
     for (let CMakeInstance of ProjectInstance.CMakeInstances)
     {
         if (APT.Extensions.AbytekEBT.PrepareModeShouldCMakeConfigure(PrepareMode))
         {
-            APT.Extensions.AbytekEBT.CMakeConfigure(Project, CMakeInstance);
+            APT.Extensions.AbytekEBT.CMakeConfigure(Scope, CMakeInstance);
         }
         if (APT.Extensions.AbytekEBT.PrepareModeShouldCMakeBuild(PrepareMode))
         {
             for (let TargetToBuild of TargetsToBuild)
             {
-                APT.Extensions.AbytekEBT.CMakeBuild(Project, CMakeInstance, TargetToBuild);
+                APT.Extensions.AbytekEBT.CMakeBuild(Scope, CMakeInstance, TargetToBuild);
             }
         }
     }
-    APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Prepared project: ${Scope.EntryDirectory}`);
 }
-APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
+APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
 {
-    APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Start preparing project: ${Scope.EntryDirectory}`);
 
-    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
-    let PrepareMode = Project.Data.Get("AbytekEBT.Prepare.Mode");
+    let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+    let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
 
     let ShouldCMakeBuild = APT.Extensions.AbytekEBT.PrepareModeShouldCMakeBuild(PrepareMode);
     let ShouldBuildApplication = APT.Extensions.AbytekEBT.PrepareModeShouldBuildApplication(PrepareMode);
@@ -87,11 +87,11 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
         || ShouldBuildApplication
     )
     {
-        const AndroidProjectDirectory = path.join(
-            Project.EntryDirectory,
+        const AndroidScopeDirectory = path.join(
+            Scope.EntryDirectory,
             "Platforms",
             "Android",
-            "Projects",
+            "Scopes",
             "Application"
         ).replaceAll("\\", "/");
 
@@ -150,7 +150,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
             process.platform === "win32" ? "gradlew.bat" : "./gradlew",
             Arguments, 
             {
-                cwd: AndroidProjectDirectory,
+                cwd: AndroidScopeDirectory,
                 stdio: "inherit",
                 shell: true,
                 env: Env,
@@ -161,21 +161,21 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
             throw new Error("Failed to prepare android project");
         }
     }
-    APT.Log("APT", `Prepared project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Prepared project: ${Scope.EntryDirectory}`);
 }
-APT.Extensions.AbytekEBT.Prepare = function(Project)
+APT.Extensions.AbytekEBT.Prepare = function(Scope)
 {
-    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+    let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
     
     let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {
-        APT.Extensions.AbytekEBT.PrepareWindows(Project);
+        APT.Extensions.AbytekEBT.PrepareWindows(Scope);
         return;
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
-        APT.Extensions.AbytekEBT.PrepareAndroid(Project);
+        APT.Extensions.AbytekEBT.PrepareAndroid(Scope);
         return;
     }
 

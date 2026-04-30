@@ -19,7 +19,7 @@ APT.Extensions.AbytekEBT.GetDefaultSetupOptions = function()
 
 APT.Extensions.AbytekEBT.Setup = function(Context, Options)
 {
-    APT.Extensions.ProjectLinker.Setup(Context);
+    APT.Extensions.ScopeLinker.Setup(Context);
 
     let DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupOptions();
     if (Options == null)
@@ -87,11 +87,11 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
             );
             let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
             
-            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "AbytekProject");
+            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "AbytekScope");
             Context.APT.Set("AbytekEBT.Options", Options);
 
             let PrepareEnabled = APT.Common.ForwardBool(
-                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Project.IsMain)
+                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Scope.IsMain)
             );
             let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
             let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekEBT.Prepare.TargetsToBuild", []);
@@ -106,13 +106,13 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
                         Engines: []
                     };
                 }
-                GlobalContext.AbytekEBT.Engines.push(Context.APT.Project);
+                GlobalContext.AbytekEBT.Engines.push(Context.APT.Scope);
                 
-                Engine = Context.APT.Set("AbytekEBT.Engine", Context.APT.Project);
+                Engine = Context.APT.Set("AbytekEBT.Engine", Context.APT.Scope);
             }
             else
             {
-                let EngineData = new APT.Core.F_ProjectData();
+                let EngineData = new APT.Core.F_ScopeData();
                 for (let DataKey of APT.Extensions.AbytekEBT.GetSignatureDataKeys())
                 {
                     EngineData.Set(
@@ -121,26 +121,26 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
                     );
                 }
 
-                Engine = APT.Extensions.ProjectLinker.Ensure(Options.EngineLinkQuery, EngineData);
+                Engine = APT.Extensions.ScopeLinker.Ensure(Options.EngineLinkQuery, EngineData);
                 Engine = Context.APT.Set("AbytekEBT.Engine", Engine);
             }
 
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);
 
             // Generate engine path file
-            APT.Extensions.AbytekEBT.GenerateEnginePathFile(Context.APT.Project);       
+            APT.Extensions.AbytekEBT.GenerateEnginePathFile(Context.APT.Scope);       
 
             // Generate CMakeLists file if needed
             if (!Options.IsEngine)
             {
-                APT.Extensions.AbytekEBT.GenerateCMakeListsFile(Context.APT.Project);
+                APT.Extensions.AbytekEBT.GenerateCMakeListsFile(Context.APT.Scope);
             }
 
             // Apply cmake definitions
-            APT.Extensions.AbytekEBT.ApplyCMakeDefinitions(Context.APT.Project);
+            APT.Extensions.AbytekEBT.ApplyCMakeDefinitions(Context.APT.Scope);
 
             //
-            APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Context.APT.Project)
+            APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Context.APT.Scope)
             
             // Broadcast events
             let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
@@ -149,7 +149,7 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
             // Prepare if needed
             if (PrepareEnabled)
             {
-                APT.Extensions.AbytekEBT.Prepare(Context.APT.Project);
+                APT.Extensions.AbytekEBT.Prepare(Context.APT.Scope);
             }
         }
     );

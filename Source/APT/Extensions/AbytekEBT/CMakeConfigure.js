@@ -2,13 +2,13 @@
 AMJS.Import("./Common");
 
 
-APT.Extensions.AbytekEBT.CMakeConfigure = function(Project, CMakeInstance)
+APT.Extensions.AbytekEBT.CMakeConfigure = function(Scope, CMakeInstance)
 {
-    APT.Log("APT", `Start configurating project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Start configurating project: ${Scope.EntryDirectory}`);
     APT.Log("APT", `Use cmake instance: ${CMakeInstance}`);
     
     const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
-        Project.EntryDirectory,
+        Scope.EntryDirectory,
         CMakeInstance
     );
     APT.Log("APT", `Use CMake build directory config: ${APT.Common.NiceJSONStringify(CMakeBuildDirectoryConfig)}`);
@@ -17,13 +17,13 @@ APT.Extensions.AbytekEBT.CMakeConfigure = function(Project, CMakeInstance)
 
     let CMakeConfigureExtraArguments = [
         ...APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments(
-            Project, 
+            Scope, 
             CMakeInstance
         )
     ];
     
     APT.Extensions.CMake.Configure(
-        Project.EntryDirectory,
+        Scope.EntryDirectory,
         CMakeBuildDirectory,
         {
             Generator: CMakeInstance.CMakeGenerator,
@@ -32,5 +32,5 @@ APT.Extensions.AbytekEBT.CMakeConfigure = function(Project, CMakeInstance)
             ExtraArguments: CMakeConfigureExtraArguments
         }
     );
-    APT.Log("APT", `Configurated project: ${Project.EntryDirectory}`);
+    APT.Log("APT", `Configurated project: ${Scope.EntryDirectory}`);
 }

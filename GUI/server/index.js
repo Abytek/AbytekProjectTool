@@ -22,7 +22,7 @@ const System = new APT.Core.F_System();
 APT.Core.System = System;
 
 // Configure system defaults before starting
-System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureProjects = false;
+System.CommandManager.CLIInput.get("GlobalDefault").ShouldConfigureScopes = false;
 
 // Start the system
 System.AutomaticExit = false;
@@ -31,7 +31,7 @@ System.Start();
 // Helper function to get environment config directory
 const getEnvironmentConfigDir = (projectDirectoryPath) => {
     const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(absoluteDirectoryPath);
+    const projectPreset = APT.Core.System.ScopeManager.GenerateScopePreset(absoluteDirectoryPath);
     console.log(projectPreset);
     return path.join(absoluteDirectoryPath, projectPreset.EnvironmentConfigDirectory);
 };
@@ -56,11 +56,11 @@ app.get('/api/project/:projectPath', (req, res) => {
     try {
         const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTScope.js');
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            console.log(`[API] Project directory not found: ${absoluteDirectoryPath}`);
-            return res.status(404).json({ error: 'Project directory not found' });
+            console.log(`[API] Scope directory not found: ${absoluteDirectoryPath}`);
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
         // Get project name from directory
@@ -100,7 +100,7 @@ app.get('/api/project/:projectPath', (req, res) => {
 
         try {
             // Use APT system to generate project link for git details
-            const projectLink = APT.Core.System.ProjectManager.GenerateProjectLink(absoluteDirectoryPath);
+            const projectLink = APT.Core.System.ScopeManager.GenerateScopeLink(absoluteDirectoryPath);
             console.log(`[API] Generated project link:`, APT.Common.NiceJSONStringify(projectLink));
             
             // Extract git details if available
@@ -112,10 +112,10 @@ app.get('/api/project/:projectPath', (req, res) => {
                 };
             }
 
-            // Try to get additional metadata from project preset if APTProject.js exists
+            // Try to get additional metadata from project preset if APTScope.js exists
             if (fs.existsSync(projectFilePath)) {
                 try {
-                    const projectPreset = APT.Core.System.ProjectManager.GenerateProjectPreset(projectFilePath);
+                    const projectPreset = APT.Core.System.ScopeManager.GenerateScopePreset(projectFilePath);
                     console.log(`[API] Generated project preset:`, APT.Common.NiceJSONStringify(projectPreset));
                     
                     // Extract template information
@@ -224,7 +224,7 @@ app.get('/api/project-links', (req, res) => {
     console.log(`[API] GET /api/project-links`);
     try {
         // Use the proper method to load project links
-        const projectLinks = APT.Core.System.ProjectManager.LoadProjectLinks();
+        const projectLinks = APT.Core.System.ScopeManager.LoadScopeLinks();
         
         // Transform the links into our API format, filtering out invalid entries
         const formattedLinks = projectLinks
@@ -238,7 +238,7 @@ app.get('/api/project-links', (req, res) => {
             }));
 
         console.log(`[API] Found ${formattedLinks.length} project links`);
-        console.log(`[API] Project links response data:`, APT.Common.NiceJSONStringify(formattedLinks));
+        console.log(`[API] Scope links response data:`, APT.Common.NiceJSONStringify(formattedLinks));
         res.json(formattedLinks);
     } catch (error) {
         console.error(`[API] Error in /api/project-links:`, error);
@@ -261,7 +261,7 @@ app.get('/api/resolve-project-link', (req, res) => {
         }
         console.log('[API] Searching for project link with dependency:', dependency);
         
-        const projectLink = APT.Core.System.ProjectManager.SearchProjectLink(dependency);
+        const projectLink = APT.Core.System.ScopeManager.SearchScopeLink(dependency);
         
         if (projectLink && projectLink.EntryDirectory && typeof projectLink.EntryDirectory === 'string') {
             console.log(`[API] Found project link:`, projectLink);
@@ -297,10 +297,10 @@ app.get('/api/project/:projectPath/configs', (req, res) => {
     try {
         const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTScope.js');
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            return res.status(404).json({ error: 'Project directory not found' });
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
         // Read config directory
@@ -330,11 +330,11 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
     try {
         const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTScope.js');
         const { name } = req.params;
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            return res.status(404).json({ error: 'Project directory not found' });
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
         // Read the config file
@@ -353,7 +353,7 @@ app.get('/api/project/:projectPath/configs/:name', (req, res) => {
             const defaultConfig = {
                 Dependencies: {},
                 GlobalDefault: {},
-                ProjectDefault: {}
+                ScopeDefault: {}
             };
             console.log(`[API] Config '${name}' response (default):`, APT.Common.NiceJSONStringify(defaultConfig));
             res.json(defaultConfig);
@@ -374,12 +374,12 @@ app.post('/api/project/:projectPath/configs/:name', (req, res) => {
     try {
         const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTScope.js');
         const { name } = req.params;
         const { config } = req.body;
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            return res.status(404).json({ error: 'Project directory not found' });
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
         if (!config) {
@@ -414,11 +414,11 @@ app.delete('/api/project/:projectPath/configs/:name', (req, res) => {
     try {
         const projectDirectoryPath = decodeURIComponent(req.params.projectPath);
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
-        const projectFilePath = path.join(absoluteDirectoryPath, 'APTProject.js');
+        const projectFilePath = path.join(absoluteDirectoryPath, 'APTScope.js');
         const { name } = req.params;
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            return res.status(404).json({ error: 'Project directory not found' });
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
         // Delete the config file
@@ -443,10 +443,10 @@ app.get('/api/project/:projectPath/actions', (req, res) => {
         const absoluteDirectoryPath = path.resolve(projectDirectoryPath);
         
         if (!fs.existsSync(absoluteDirectoryPath)) {
-            return res.status(404).json({ error: 'Project directory not found' });
+            return res.status(404).json({ error: 'Scope directory not found' });
         }
 
-        const actions = APT.Core.System.ProjectManager.SearchActions(absoluteDirectoryPath);
+        const actions = APT.Core.System.ScopeManager.SearchActions(absoluteDirectoryPath);
         console.log(`[API] Actions response:`, APT.Common.NiceJSONStringify(actions));
         res.json(actions);
     } catch (error) {

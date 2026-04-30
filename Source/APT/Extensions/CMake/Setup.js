@@ -17,11 +17,11 @@ APT.Extensions.CMake.Setup = function(Context)
         "Import",
         function()
         {
-            let SourceDirectory = Context.APT.GetOrAdd("CMake.SourceDirectory", Context.APT.Project.EntryDirectory);
-            let BuildDirectory = Context.APT.GetOrAdd("CMake.BuildDirectory", Context.APT.Project.EntryDirectory + "/Build");
+            let SourceDirectory = Context.APT.GetOrAdd("CMake.SourceDirectory", Context.APT.Scope.EntryDirectory);
+            let BuildDirectory = Context.APT.GetOrAdd("CMake.BuildDirectory", Context.APT.Scope.EntryDirectory + "/Build");
 
             let ConfigureOptions = Context.APT.GetOrAdd("CMake.Configure.Options", APT.Extensions.CMake.GetDefaultConfigureOptions());
-            if (Context.APT.GetOrAdd("CMake.Configure.Enabled", Context.APT.Project.IsMain))
+            if (Context.APT.GetOrAdd("CMake.Configure.Enabled", Context.APT.Scope.IsMain))
             {
                 APT.Extensions.CMake.Configure(
                     SourceDirectory,

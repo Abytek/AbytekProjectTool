@@ -286,7 +286,7 @@ const Ajv = require("ajv");
 }
 
 
-// Project Instance
+// Scope Instance
 {
     APT.Extensions.AbytekEBT.F_ProjectInstance = class
     {
@@ -349,7 +349,7 @@ const Ajv = require("ajv");
             "AbytekEBT.ProcessorArchs",
         ];
     }
-    APT.Extensions.AbytekEBT.CalculateProjectSignature = function(ProjectInstance)
+    APT.Extensions.AbytekEBT.CalculateScopeSignature = function(ProjectInstance)
     {
         return [ 
             ProjectInstance.Environment,
@@ -427,14 +427,14 @@ const Ajv = require("ajv");
             CMakeSignatureHash,
         };
     }
-    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles = function(Project)
+    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles = function(Scope)
     {
-        let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
+        let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
 
         for (let CMakeInstance of ProjectInstance.CMakeInstances)
         {
             const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
-                Project.EntryDirectory,
+                Scope.EntryDirectory,
                 CMakeInstance
             );
             fs.writeFileSync(
@@ -450,7 +450,7 @@ const Ajv = require("ajv");
 {
     APT.Extensions.AbytekEBT.CalculateEnginePathFileName = function(ProjectInstance)
     {
-        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance) + ".txt";
+        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateScopeSignature(ProjectInstance) + ".txt";
     }
     APT.Extensions.AbytekEBT.CalculateEnginePathFile = function(EntryDirectory, ProjectInstance)
     {
@@ -459,17 +459,17 @@ const Ajv = require("ajv");
             APT.Extensions.AbytekEBT.CalculateEnginePathFileName(ProjectInstance)
         );
     }
-    APT.Extensions.AbytekEBT.GenerateEnginePathFile = function(Project)
+    APT.Extensions.AbytekEBT.GenerateEnginePathFile = function(Scope)
     {
-        APT.Log("APT", `Generating engine path file, entry directory: ${Project.EntryDirectory}`);
+        APT.Log("APT", `Generating engine path file, entry directory: ${Scope.EntryDirectory}`);
 
-        let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
-        let EngineProject = Project.Data.Get("AbytekEBT.Engine");
+        let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+        let EngineScope = Scope.Data.Get("AbytekEBT.Engine");
 
-        const EnginePathFile = APT.Extensions.AbytekEBT.CalculateEnginePathFile(Project.EntryDirectory, ProjectInstance);
-        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Project.EntryDirectory);
+        const EnginePathFile = APT.Extensions.AbytekEBT.CalculateEnginePathFile(Scope.EntryDirectory, ProjectInstance);
+        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
         
-        fs.writeFileSync(EnginePathFile, EngineProject.EntryDirectory.replaceAll("\\", "/"));
+        fs.writeFileSync(EnginePathFile, EngineScope.EntryDirectory.replaceAll("\\", "/"));
 
         APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
     }
@@ -482,27 +482,27 @@ const Ajv = require("ajv");
     {
         return path.join(EntryDirectory, "CMakeLists.txt");
     }
-    APT.Extensions.AbytekEBT.GenerateCMakeListsFile = function(Project)
+    APT.Extensions.AbytekEBT.GenerateCMakeListsFile = function(Scope)
     {
-        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Project.EntryDirectory);
+        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
 
-        let ProjectName = Project.Data.Get("AbytekEBT.Name");
+        let ScopeName = Scope.Data.Get("AbytekEBT.Name");
 
-        const AbytekEBTFile = path.join(Project.EntryDirectory, "AbytekEBT.txt");
+        const AbytekEBTFile = path.join(Scope.EntryDirectory, "AbytekEBT.txt");
         const AbytekEBTFileContent = "";
         if (fs.existsSync(AbytekEBTFile))
         {
             AbytekEBTFileContent = fs.readFileSync(AbytekEBTFile, "utf8");
         }
 
-        const CMakeListsFile = APT.Extensions.AbytekEBT.CalculateCMakeListsFile(Project.EntryDirectory);
+        const CMakeListsFile = APT.Extensions.AbytekEBT.CalculateCMakeListsFile(Scope.EntryDirectory);
         const CMakeListsFileContent = `
             cmake_minimum_required(VERSION 3.14)
 
             if(APPLE)
-                project("${ProjectName}" LANGUAGES C CXX OBJC OBJCXX)
+                project("${ScopeName}" LANGUAGES C CXX OBJC OBJCXX)
             else()
-                project("${ProjectName}" LANGUAGES C CXX)
+                project("${ScopeName}" LANGUAGES C CXX)
             endif()
 
             set(CMAKE_MODULE_PATH "\${CMAKE_MODULE_PATH};\${ABYTEK_ENGINE_DIR}/CMake")
@@ -526,7 +526,7 @@ const Ajv = require("ajv");
 
             if(EXISTS "\${CMAKE_CURRENT_LIST_DIR}/Modules")
                 Abytek_SetupModules_MultiplePhases(
-                    "${ProjectName}" 
+                    "${ScopeName}" 
                     "\${CMAKE_CURRENT_LIST_DIR}/Modules"
                 )
             endif()
@@ -536,17 +536,17 @@ const Ajv = require("ajv");
         fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
     }
     APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments = function(
-        Project,
+        Scope,
         CMakeInstance
     )
     {
-        let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
-        let EngineProject = Project.Data.Get("AbytekEBT.Engine");
+        let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+        let EngineScope = Scope.Data.Get("AbytekEBT.Engine");
 
-        let EntryDirectory = Project.EntryDirectory;
-        let EngineEntryDirectory = EngineProject.EntryDirectory;
+        let EntryDirectory = Scope.EntryDirectory;
+        let EngineEntryDirectory = EngineScope.EntryDirectory;
 
-        const ProjectCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+        const ScopeCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
             EntryDirectory,
             CMakeInstance
         );
@@ -555,7 +555,7 @@ const Ajv = require("ajv");
             CMakeInstance
         );
         
-        const ProjectSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
+        const ScopeSignature = APT.Extensions.AbytekEBT.CalculateScopeSignature(ProjectInstance);
         const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(CMakeInstance);
         
         let Result = [];
@@ -569,7 +569,7 @@ const Ajv = require("ajv");
         Result.push(`-DABYTEK_EBT_CMAKE_GENERATOR="${CMakeInstance.CMakeGenerator}"`);
         Result.push(`-DABYTEK_EBT_CMAKE_CONFIG="${CMakeInstance.CMakeConfig}"`);
         Result.push(`-DABYTEK_EBT_PROCESSOR_ARCHS="${APT.Extensions.CMake.CalculateCMakeValue_Array(ProjectInstance.ProcessorArchs)}"`);
-        Result.push(`-DABYTEK_EBT_PROJECT_SIGNATURE="${ProjectSignature}"`);
+        Result.push(`-DABYTEK_EBT_PROJECT_SIGNATURE="${ScopeSignature}"`);
 
         // For cmake instances to generate
         Result.push(`-DABYTEK_EBT_PROCESSOR_ARCH="${CMakeInstance.ProcessorArch}"`);
@@ -577,7 +577,7 @@ const Ajv = require("ajv");
 
         //
         Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Directory)}"`);
-        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Directory)}"`);
+        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ScopeCMakeBuildDirectoryConfig.Directory)}"`);
 
         return Result;
     }

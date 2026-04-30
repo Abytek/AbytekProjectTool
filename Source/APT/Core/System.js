@@ -1,7 +1,7 @@
 
 AMJS.Import("./Logger");
 AMJS.Import("./Console");
-AMJS.Import("./ProjectManager");
+AMJS.Import("./ScopeManager");
 
 APT.Core.F_System = class
 {
@@ -12,7 +12,7 @@ APT.Core.F_System = class
         this.Childs = [];
 
         this.AddChild(new APT.Core.F_Console(this));
-        this.AddChild(new APT.Core.F_ProjectManager(this));
+        this.AddChild(new APT.Core.F_ScopeManager(this));
 
         // // Apply LoggerDefault
         // if (this.CommandManager.CLIInput.has('GlobalDefault'))

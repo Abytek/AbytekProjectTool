@@ -1,5 +1,5 @@
 
-APT.Extensions.ProjectLinker.Setup = function(Context)
+APT.Extensions.ScopeLinker.Setup = function(Context)
 {
     Context.APT.On(
         "PrepareSignature",
@@ -12,8 +12,8 @@ APT.Extensions.ProjectLinker.Setup = function(Context)
         "Import",
         function()
         {
-            APT.Extensions.ProjectLinker.LinkDirectory(
-                Context.APT.Project.EntryDirectory
+            APT.Extensions.ScopeLinker.LinkDirectory(
+                Context.APT.Scope.EntryDirectory
             );
         }
     );

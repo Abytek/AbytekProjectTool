@@ -1,5 +1,5 @@
 
-AMJS.Import("../ProjectLinker");
+AMJS.Import("../ScopeLinker");
 AMJS.Import("../CMake");
 
 AMJS.Import("./Prepare");

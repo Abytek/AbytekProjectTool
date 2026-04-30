@@ -6,27 +6,27 @@ const Ajv = require("ajv");
 const { execSync } = require('child_process');
 
 AMJS.Import("./SystemChild");
-AMJS.Import("./Project");
-AMJS.Import("./ProjectData");
+AMJS.Import("./Scope");
+AMJS.Import("./ScopeData");
 
 
-APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
+APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
 {
     constructor(System)
     {
-        super(System, "ProjectManager");
-        this.Projects = new Map();
+        super(System, "ScopeManager");
+        this.Scopes = new Map();
         
-        this.Command_ImportMainProject = {
+        this.Command_ImportMainScope = {
             Enabled: false,
-            MainProjectEntryDirectory: null
+            MainScopeEntryDirectory: null
         };
     }
 
     GetStageDefinitions()
     {
         return {
-            ImportMainProject: {
+            ImportMainScope: {
                 Dependencies: [
                     "GatherConsoleCommands",
                     "BuildConsoleCommands"
@@ -37,24 +37,24 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
 
     OnStage_GatherConsoleCommands()
     {
-        let ProjectManager = this;
+        let ScopeManager = this;
 
         let Console = this.System.GetChild("Console");
         Console.Argv = Console.Argv
             .command(
-                '$0 <MainProjectEntryDirectory>',
+                '$0 <MainScopeEntryDirectory>',
                 'run tool',
                 (y) =>
                     y
                     // positional
-                    .positional('MainProjectEntryDirectory', {
+                    .positional('MainScopeEntryDirectory', {
                         type: 'string',
                         describe: 'path to the main project'
                     })
 
-                    .option('MainProjectDefines', {
+                    .option('MainScopeDefines', {
                         type: 'object',
-                        describe: 'MainProjectDefines: --MainProjectDefines.KEY VALUE'
+                        describe: 'MainScopeDefines: --MainScopeDefines.KEY VALUE'
                     })
                     .option('Defines', {
                         type: 'object',
@@ -62,13 +62,13 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                     }),
 
                 (Argv) => {
-                    let Command_ImportMainProject = ProjectManager.Command_ImportMainProject;
-                    Command_ImportMainProject.Enabled = true;
-                    Command_ImportMainProject.MainProjectEntryDirectory = Argv.MainProjectEntryDirectory;
+                    let Command_ImportMainScope = ScopeManager.Command_ImportMainScope;
+                    Command_ImportMainScope.Enabled = true;
+                    Command_ImportMainScope.MainScopeEntryDirectory = Argv.MainScopeEntryDirectory;
 
                     let DefinesToData = function(Defines)
                     {
-                        let Result = new APT.Core.F_ProjectData();
+                        let Result = new APT.Core.F_ScopeData();
                         if (Defines == null)
                         {
                             return Result;
@@ -152,67 +152,67 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         return Result;
                     }
 
-                    ProjectManager.MainProjectDefines = DefinesToData(Argv.MainProjectDefines);
-                    ProjectManager.Defines = DefinesToData(Argv.Defines);
+                    ScopeManager.MainScopeDefines = DefinesToData(Argv.MainScopeDefines);
+                    ScopeManager.Defines = DefinesToData(Argv.Defines);
                 }
             );
     }
-    OnStage_ImportMainProject()
+    OnStage_ImportMainScope()
     {
-        if (!this.Command_ImportMainProject.Enabled)
+        if (!this.Command_ImportMainScope.Enabled)
         {
             return;
         }
-        APT.Log("APT", `Start importing main project: ${this.Command_ImportMainProject.MainProjectEntryDirectory}`);
-        APT.Log("APT", `Main project defines: ${this.MainProjectDefines.GetSignature()}`);
+        APT.Log("APT", `Start importing main project: ${this.Command_ImportMainScope.MainScopeEntryDirectory}`);
+        APT.Log("APT", `Main project defines: ${this.MainScopeDefines.GetSignature()}`);
         APT.Log("APT", `Defines: ${this.Defines.GetSignature()}`);
-        this.MainProject = this.Import(
+        this.MainScope = this.Import(
             null,
             [
                 process.cwd()
             ],
-            this.Command_ImportMainProject.MainProjectEntryDirectory,
-            this.MainProjectDefines,
+            this.Command_ImportMainScope.MainScopeEntryDirectory,
+            this.MainScopeDefines,
             true,
             true
         );
         APT.Log("APT", `Imported main project`);
     }
 
-    Import(ParentProject, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ProjectCreationArgs)
+    Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ScopeCreationArgs)
     {
         APT.Log("APT", `Import project: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
 
         if (Data == null)
         {
-            Data = new APT.Core.F_ProjectData();
+            Data = new APT.Core.F_ScopeData();
         }
         APT.Log("APT", `\t- Data: [${Data.GetSignature()}]`);
 
-        let AbsoluteProjectEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
-        if (!AbsoluteProjectEntryDirectory)
+        let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
+        if (!AbsoluteScopeEntryDirectory)
         {
             if (Required)
             {
-                throw new Error(`Project entry directory "${RelativeEntryDirectory}" not found`);
+                throw new Error(`Scope entry directory "${RelativeEntryDirectory}" not found`);
             }
             return false;
         }
 
-        APT.Log("APT", `Found project entry directory ${AbsoluteProjectEntryDirectory}`);
+        APT.Log("APT", `Found project entry directory ${AbsoluteScopeEntryDirectory}`);
 
         // Create new project instance
-        let Project = new AMJS.Namespace.F_Project(ParentProject, AbsoluteProjectEntryDirectory, Data, ...ProjectCreationArgs);
+        let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, Data, ...ScopeCreationArgs);
 
-        let ProjectManager = this;
+        let ScopeManager = this;
 
-        if (Project.HasEntryFile)
+        if (Scope.HasEntryFile)
         {
             // Import project module and set up context
-            let ProjectContext = AMJS.ModuleSystem.Import(
+            let ScopeContext = AMJS.ModuleSystem.Import(
                 BaseDirectories,
-                Project.EntryFile,
+                Scope.EntryFile,
                 Required,
                 {
                     ModifyContext(Context)
@@ -220,85 +220,85 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         Context.APT = {
                             ...Context.APT
                         };
-                        Project.Context = Context;
-                        Context.APT.Project = Project;
-                        Project.Context = Context;
+                        Scope.Context = Context;
+                        Context.APT.Scope = Scope;
+                        Scope.Context = Context;
                         {
                             Context.APT.HasPublic = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.HasPublic(Key);
+                                    return Scope.SignatureData.HasPublic(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.HasPublic(Key);
+                                    return Scope.Data.HasPublic(Key);
                                 }
                             }
                             Context.APT.AddPublic = function(Key, Value, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.AddPublic(Key, Value);
+                                    return Scope.SignatureData.AddPublic(Key, Value);
                                 }
                                 else
                                 {
-                                    return Project.Data.AddPublic(Key, Value);
+                                    return Scope.Data.AddPublic(Key, Value);
                                 }
                             }
                             Context.APT.GetPublic = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetPublic(Key);
+                                    return Scope.SignatureData.GetPublic(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.GetPublic(Key);
+                                    return Scope.Data.GetPublic(Key);
                                 }
                             }
                             Context.APT.FindPublic = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.FindPublic(Key);
+                                    return Scope.SignatureData.FindPublic(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.FindPublic(Key);
+                                    return Scope.Data.FindPublic(Key);
                                 }
                             }
                             Context.APT.GetOrAddPublic = function(Key, DefaultValue, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetOrAddPublic(Key, DefaultValue);
+                                    return Scope.SignatureData.GetOrAddPublic(Key, DefaultValue);
                                 }
                                 else
                                 {
-                                    return Project.Data.GetOrAddPublic(Key, DefaultValue);
+                                    return Scope.Data.GetOrAddPublic(Key, DefaultValue);
                                 }
                             }
                             Context.APT.SetPublic = function(Key, Value, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.SetPublic(Key, Value);
+                                    return Scope.SignatureData.SetPublic(Key, Value);
                                 }
                                 else
                                 {
-                                    return Project.Data.SetPublic(Key, Value);
+                                    return Scope.Data.SetPublic(Key, Value);
                                 }
                             }
                             Context.APT.PushPublic = function(Key, Element, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.PushPublic(Key, Element);
+                                    return Scope.SignatureData.PushPublic(Key, Element);
                                 }
                                 else
                                 {
-                                    return Project.Data.PushPublic(Key, Element);
+                                    return Scope.Data.PushPublic(Key, Element);
                                 }
                             }
 
@@ -306,77 +306,77 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.HasPrivate(Key);
+                                    return Scope.SignatureData.HasPrivate(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.HasPrivate(Key);
+                                    return Scope.Data.HasPrivate(Key);
                                 }
                             }
                             Context.APT.AddPrivate = function(Key, Value, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.AddPrivate(Key, Value);
+                                    return Scope.SignatureData.AddPrivate(Key, Value);
                                 }
                                 else
                                 {
-                                    return Project.Data.AddPrivate(Key, Value);
+                                    return Scope.Data.AddPrivate(Key, Value);
                                 }
                             }
                             Context.APT.GetPrivate = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetPrivate(Key);
+                                    return Scope.SignatureData.GetPrivate(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.GetPrivate(Key);
+                                    return Scope.Data.GetPrivate(Key);
                                 }
                             }
                             Context.APT.FindPrivate = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.FindPrivate(Key);
+                                    return Scope.SignatureData.FindPrivate(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.FindPrivate(Key);
+                                    return Scope.Data.FindPrivate(Key);
                                 }
                             }
                             Context.APT.GetOrAddPrivate = function(Key, DefaultValue, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetOrAddPrivate(Key, DefaultValue);
+                                    return Scope.SignatureData.GetOrAddPrivate(Key, DefaultValue);
                                 }
                                 else
                                 {
-                                    return Project.Data.GetOrAddPrivate(Key, DefaultValue);
+                                    return Scope.Data.GetOrAddPrivate(Key, DefaultValue);
                                 }
                             }
                             Context.APT.SetPrivate = function(Key, Value, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.SetPrivate(Key, Value);
+                                    return Scope.SignatureData.SetPrivate(Key, Value);
                                 }
                                 else
                                 {
-                                    return Project.Data.SetPrivate(Key, Value);
+                                    return Scope.Data.SetPrivate(Key, Value);
                                 }
                             }
                             Context.APT.PushPrivate = function(Key, Element, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.PushPrivate(Key, Element);
+                                    return Scope.SignatureData.PushPrivate(Key, Element);
                                 }
                                 else
                                 {
-                                    return Project.Data.PushPrivate(Key, Element);
+                                    return Scope.Data.PushPrivate(Key, Element);
                                 }
                             }
 
@@ -384,66 +384,66 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.Has(Key);
+                                    return Scope.SignatureData.Has(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.Has(Key);
+                                    return Scope.Data.Has(Key);
                                 }
                             }
                             Context.APT.Get = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.Get(Key);
+                                    return Scope.SignatureData.Get(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.Get(Key);
+                                    return Scope.Data.Get(Key);
                                 }
                             }
                             Context.APT.Find = function(Key, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.Find(Key);
+                                    return Scope.SignatureData.Find(Key);
                                 }
                                 else
                                 {
-                                    return Project.Data.Find(Key);
+                                    return Scope.Data.Find(Key);
                                 }
                             }
                             Context.APT.GetOrAdd = function(Key, DefaultValue, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetOrAdd(Key, DefaultValue);
+                                    return Scope.SignatureData.GetOrAdd(Key, DefaultValue);
                                 }
                                 else
                                 {
-                                    return Project.Data.GetOrAdd(Key, DefaultValue);
+                                    return Scope.Data.GetOrAdd(Key, DefaultValue);
                                 }
                             }
                             Context.APT.Set = function(Key, Value, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.Set(Key, Value);
+                                    return Scope.SignatureData.Set(Key, Value);
                                 }
                                 else
                                 {
-                                    return Project.Data.Set(Key, Value);
+                                    return Scope.Data.Set(Key, Value);
                                 }
                             }
                             Context.APT.Push = function(Key, Element, IsSignature = false)
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.Push(Key, Element);
+                                    return Scope.SignatureData.Push(Key, Element);
                                 }
                                 else
                                 {
-                                    return Project.Data.Push(Key, Element);
+                                    return Scope.Data.Push(Key, Element);
                                 }
                             }
 
@@ -451,18 +451,18 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                             {
                                 if (IsSignature)
                                 {
-                                    return Project.SignatureData.GetSignature();
+                                    return Scope.SignatureData.GetSignature();
                                 }
                                 else
                                 {
-                                    return Project.Data.GetSignature();
+                                    return Scope.Data.GetSignature();
                                 }
                             }
 
                             Context.APT.TransferSignature = function(Key, DefaultValue)
                             {
-                                let Value = Project.Data.GetOrAdd(Key, DefaultValue);
-                                Project.SignatureData.Set(Key, Value);
+                                let Value = Scope.Data.GetOrAdd(Key, DefaultValue);
+                                Scope.SignatureData.Set(Key, Value);
                                 return Value;
                             }
                         }
@@ -470,44 +470,44 @@ APT.Core.F_ProjectManager = class extends APT.Core.A_SystemChild
                         {
                             if (Data2 == null)
                             {
-                                Data2 = new APT.Core.F_ProjectData(Project.Data);
+                                Data2 = new APT.Core.F_ScopeData(Scope.Data);
                             }
-                            return ProjectManager.Import(Project, [ AbsoluteProjectEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
+                            return ScopeManager.Import(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
-                            APT.Common.Assert(EventName in Project.Events, `Not found event: ${EventName}`);
-                            Project.Events[EventName].push(Callback);   
+                            APT.Common.Assert(EventName in Scope.Events, `Not found event: ${EventName}`);
+                            Scope.Events[EventName].push(Callback);   
                         }
                     },
                     IsAnonymous: true
                 }
             );
 
-            if (!ProjectContext)
+            if (!ScopeContext)
             {
-                this.Projects.delete(ProjectKey);
+                this.Scopes.delete(ScopeKey);
                 return false;
             }
         }     
         
-        Project.ExecuteEvent("PrepareSignature");
-        let Signature = Project.GetSignature();
-        APT.Log("APT", `Project signature: ${Signature}`);
-        if (this.Projects.has(Signature))
+        Scope.ExecuteEvent("PrepareSignature");
+        let Signature = Scope.GetSignature();
+        APT.Log("APT", `Scope signature: ${Signature}`);
+        if (this.Scopes.has(Signature))
         {
             APT.Log("APT", `Found project, already imported: ${Signature}`);
-            return this.Projects.get(Signature);
+            return this.Scopes.get(Signature);
         }
-        this.Projects.set(Signature, Project);
+        this.Scopes.set(Signature, Scope);
 
-        APT.Log("APT", `Project was not imported => Import ${AbsoluteProjectEntryDirectory}`);
+        APT.Log("APT", `Scope was not imported => Import ${AbsoluteScopeEntryDirectory}`);
 
-        Project.PreImport();
-        Project.ExecuteEvent("Import");
-        Project.PostImport();
+        Scope.PreImport();
+        Scope.ExecuteEvent("Import");
+        Scope.PostImport();
 
-        APT.Log("APT", `Imported project at: ${AbsoluteProjectEntryDirectory}`);
-        return Project;
+        APT.Log("APT", `Imported project at: ${AbsoluteScopeEntryDirectory}`);
+        return Scope;
     }
 }

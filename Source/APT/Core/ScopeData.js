@@ -1,5 +1,5 @@
 
-APT.Core.F_ProjectData = class
+APT.Core.F_ScopeData = class
 {
     constructor(Source)
     {
@@ -155,12 +155,12 @@ APT.Core.F_ProjectData = class
         return this.PushPrivate(Key, Element);
     }
 
-    GetSignature(ProjectEntryDirectory = "")
+    GetSignature(ScopeEntryDirectory = "")
     {
         return APT.Common.NiceJSONStringify({
             Public: this.Public,
             Private: this.Private,
-            ProjectEntryDirectory
+            ScopeEntryDirectory
         });
     }
 }

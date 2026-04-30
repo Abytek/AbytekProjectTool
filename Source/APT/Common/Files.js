@@ -23,7 +23,7 @@ APT.Common.EnsureDataDirectory = function()
     return Path;
 }
 
-APT.Common.GetProjectImportedDirectory = function(EntryDirectory)
+APT.Common.GetScopeImportedDirectory = function(EntryDirectory)
 {
     const Result = path.join(APT.Common.GetDataDirectory(), "Imported");
     if (EntryDirectory == null)
@@ -73,9 +73,9 @@ APT.Common.SmartWriteFile = function(File, Content)
  * Gets the project links directory path
  * @returns {string} Absolute path to project links directory
  */
-APT.Common.GetProjectLinksDirectory = function()
+APT.Common.GetScopeLinksDirectory = function()
 {
-    return path.join(APT.Common.GetDataDirectory(), "ProjectLinks");
+    return path.join(APT.Common.GetDataDirectory(), "ScopeLinks");
 }
 
 APT.Common.TryAcquireFileBasedLock = function(Path) 
