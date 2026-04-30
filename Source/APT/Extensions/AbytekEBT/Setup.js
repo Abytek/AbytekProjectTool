@@ -17,7 +17,7 @@ APT.Extensions.AbytekEBT.GetDefaultSetupOptions = function()
     return Options;
 }
 
-APT.Extensions.AbytekEBT.Setup = function(Context, Options)
+APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 {
     APT.Extensions.ScopeLinker.Setup(Context);
 
