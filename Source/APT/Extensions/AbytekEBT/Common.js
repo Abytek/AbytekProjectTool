@@ -349,7 +349,7 @@ const Ajv = require("ajv");
             "AbytekEBT.ProcessorArchs",
         ];
     }
-    APT.Extensions.AbytekEBT.CalculateScopeSignature = function(ProjectInstance)
+    APT.Extensions.AbytekEBT.CalculateProjectSignature = function(ProjectInstance)
     {
         return [ 
             ProjectInstance.Environment,
@@ -450,7 +450,7 @@ const Ajv = require("ajv");
 {
     APT.Extensions.AbytekEBT.CalculateEnginePathFileName = function(ProjectInstance)
     {
-        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateScopeSignature(ProjectInstance) + ".txt";
+        return "AbytekEnginePath-" + APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance) + ".txt";
     }
     APT.Extensions.AbytekEBT.CalculateEnginePathFile = function(EntryDirectory, ProjectInstance)
     {
@@ -508,6 +508,7 @@ const Ajv = require("ajv");
             set(CMAKE_MODULE_PATH "\${CMAKE_MODULE_PATH};\${ABYTEK_ENGINE_DIR}/CMake")
             include(Abytek/Utilities/SetGlobal)
             include(Abytek/Utilities/ReadKeyValueFile)
+            include(Abytek/Utilities/TryFinalizeProject)
 
             Abytek_SetGlobal(ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE "\${ABYTEK_PROJECT_DIR}/Build/CMakeDefinitions-\${ABYTEK_EBT_PROJECT_SIGNATURE}.txt")
             Abytek_ReadKeyValueFile(\${ABYTEK_PROJECT_CMAKE_DEFINITIONS_FILE})
@@ -530,6 +531,8 @@ const Ajv = require("ajv");
                     "\${CMAKE_CURRENT_LIST_DIR}/Modules"
                 )
             endif()
+
+            Abytek_TryFinalizeProject()
 
             ${AbytekEBTFileContent}
         `;
@@ -555,7 +558,7 @@ const Ajv = require("ajv");
             CMakeInstance
         );
         
-        const ScopeSignature = APT.Extensions.AbytekEBT.CalculateScopeSignature(ProjectInstance);
+        const ScopeSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
         const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(CMakeInstance);
         
         let Result = [];
@@ -585,45 +588,99 @@ const Ajv = require("ajv");
 
 
 // Application
-APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory = function(CMakeBuildDirectory)
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory = function(BuildDirectory, ProjectSignature)
 {
-    return path.join(CMakeBuildDirectory, "AbytekEBT", "ApplicationDescriptors");
+    return path.join(BuildDirectory, "ApplicationDescriptors-" + ProjectSignature);
 }
-APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFile = function(Directory, Name)
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectoryJSON = function(ApplicationDescriptorsDirectory)
+{
+    return path.join(ApplicationDescriptorsDirectory, "JSON");
+}
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectoryCMake = function(ApplicationDescriptorsDirectory)
+{
+    return path.join(ApplicationDescriptorsDirectory, "CMake");
+}
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFileJSON = function(Directory, Name)
 {
     return path.join(Directory, Name + ".json");
+}
+APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFileCMake = function(Directory, Name)
+{
+    return path.join(Directory, Name + ".cmake");
 }
 APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
 {
     const Applications = Scope.Get("AbytekEBT.Applications");
     const ProjectInstancce = Scope.Get("AbytekEBT.ProjectInstance");
-    for (const CMakeInstance of ProjectInstancce.CMakeInstances)
+
+    const BuildDirectory = APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
+    const ProjectSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstancce);
+    const ApplicationDescriptorsDirectory = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory(
+        BuildDirectory,
+        ProjectSignature
+    );
+    if (fs.existsSync(ApplicationDescriptorsDirectory))
     {
-        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
-            Scope.EntryDirectory,
-            CMakeInstance
+        fs.rmdirSync(ApplicationDescriptorsDirectory, { recursive: true, force: true });
+    }
+
+    const ApplicationDescriptorsDirectoryJSON = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectoryJSON(
+        ApplicationDescriptorsDirectory
+    );
+    const ApplicationDescriptorsDirectoryCMake = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectoryCMake(
+        ApplicationDescriptorsDirectory
+    );
+    fs.mkdirSync(ApplicationDescriptorsDirectoryJSON, { recursive: true });
+    fs.mkdirSync(ApplicationDescriptorsDirectoryCMake, { recursive: true });
+
+    for (const Application of Applications)
+    {
+        const ApplicationName = Application.Get("AbytekEBT.Name");
+        const CookPipeline = Application.Get("AbytekEBT.CookPipeline");
+        const IncludeHeaders = Application.Get("AbytekEBT.IncludeHeaders");
+        const ApplicationClasses = Application.Get("AbytekEBT.ApplicationClasses");
+
+        const ApplicationDescriptorFileJSON = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFileJSON(
+            ApplicationDescriptorsDirectoryJSON,
+            ApplicationName
+        );
+        const ApplicationDescriptorFileCMake = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFileCMake(
+            ApplicationDescriptorsDirectoryCMake,
+            ApplicationName
         );
 
-        const ApplicationDescriptorsDirectory = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectory(CMakeBuildDirectoryConfig.Directory);
-        if (fs.existsSync(ApplicationDescriptorsDirectory))
-        {
-            fs.rmdirSync(ApplicationDescriptorsDirectory, { recursive: true, force: true });
-        }
-        fs.mkdirSync(ApplicationDescriptorsDirectory, { recursive: true });
+        let ApplicationDescriptor = {
+            Name: ApplicationName,
+            CookPipeline,
+            IncludeHeaders,
+            ApplicationClasses
+        };
+        const ApplicationDescriptorJSON = APT.Common.NiceJSONStringify(ApplicationDescriptor);
+        fs.writeFileSync(ApplicationDescriptorFileJSON, ApplicationDescriptorJSON);
 
-        for (const Application of Applications)
+        let ApplicationDescriptorCMake = ``;
+        ApplicationDescriptorCMake += `
+            set(ApplicationName ${ApplicationName})
+            set(CookPipeline ${CookPipeline})
+            set(IncludeHeaders "")
+            set(ApplicationClasses "")
+        `;
+        for (const IncludeHeader of IncludeHeaders)
         {
-            const ApplicationName = Application.Get("AbytekEBT.Name");
-            const ApplicationDescriptorFile = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFile(
-                ApplicationDescriptorsDirectory,
-                ApplicationName
-            );
-
-            let ApplicationDescriptor = {
-                Name: ApplicationName
-            };
-            const ApplicationDescriptorJSON = APT.Common.NiceJSONStringify(ApplicationDescriptor);
-            fs.writeFileSync(ApplicationDescriptorFile, ApplicationDescriptorJSON);
+            ApplicationDescriptorCMake += `
+                list(APPEND IncludeHeaders "${IncludeHeader.replaceAll("\\", "/")}")
+            `;
         }
+        for (const ApplicationClass of ApplicationClasses)
+        {
+            ApplicationDescriptorCMake += `
+                list(APPEND ApplicationClasses "${ApplicationClass.replaceAll("\\", "/")}")
+            `;
+        }
+        fs.writeFileSync(ApplicationDescriptorFileCMake, ApplicationDescriptorCMake);
     }
 }
+
+
+//
+APT.Extensions.AbytekEBT.DEFAULT_COOK_PIPELINE = "SAF";

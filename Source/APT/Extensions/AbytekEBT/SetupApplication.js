@@ -10,7 +10,7 @@ APT.Extensions.AbytekEBT.GetDefaultSetupApplicationOptions = function()
 
 APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
 {
-    let DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupApplicationOptions();
+    const DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupApplicationOptions();
     if (Options == null)
     {
         Options = new Object();
@@ -40,16 +40,19 @@ APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
         "Import",
         function()
         { 
-            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Appplication");
+            const Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Appplication");
             Context.APT.Set("AbytekEBT.Options", Options);
 
-            let Project = Context.APT.GetOrAdd("AbytekEBT.Project", AutoSearchedProject);
+            const Project = Context.APT.GetOrAdd("AbytekEBT.Project", AutoSearchedProject);
             APT.Common.Assert(Project, `Not found project for application at scope: ${Context.APT.Scope.EntryDirectory}`);
-
             Project.Push(
                 "AbytekEBT.Applications",
                 Context.APT.Scope
             );
+
+            const CookPipeline = Context.APT.GetOrAdd("AbytekEBT.CookPipeline", APT.Extensions.AbytekEBT.DEFAULT_COOK_PIPELINE);
+            const IncludeHeaders = Context.APT.GetOrAdd("AbytekEBT.IncludeHeaders", []);
+            const ApplicationClasses = Context.APT.GetOrAdd("AbytekEBT.ApplicationClasses", []);
         }
     );
 }
