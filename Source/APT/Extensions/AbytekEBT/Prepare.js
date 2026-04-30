@@ -22,7 +22,7 @@ APT.Extensions.AbytekEBT.GetDefaultPrepareMode = function(PlatformTags)
     }
     if (PlatformTags.includes(APT.Common.E_PlatformTag.ANDROID))
     {
-        return APT.Extensions.AbytekEBT.E_PrepareMode.CMAKE_BUILD;
+        return APT.Extensions.AbytekEBT.E_PrepareMode.CMAKE_CONFIGURE;
     }
     throw new Error(`Unknown platform tags: ${PlatformTags}`);
 }
@@ -80,11 +80,13 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
     let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
     let PrepareApplicationFilter = Scope.Get("AbytekEBT.Prepare.ApplicationFilter");
 
+    let ShouldCMakeConfigure = APT.Extensions.AbytekEBT.PrepareModeShouldCMakeConfigure(PrepareMode);
     let ShouldCMakeBuild = APT.Extensions.AbytekEBT.PrepareModeShouldCMakeBuild(PrepareMode);
     let ShouldBuildApplication = APT.Extensions.AbytekEBT.PrepareModeShouldBuildApplication(PrepareMode);
 
     if (
-        ShouldCMakeBuild
+        ShouldCMakeConfigure
+        || ShouldCMakeBuild
         || ShouldBuildApplication
     )
     {
@@ -125,6 +127,21 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
                 else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
                 {
                     GradlewCommand = "externalNativeBuildRelease";
+                }
+                else 
+                {
+                    APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
+                }
+            }
+            else if (ShouldCMakeConfigure)
+            {
+                if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+                {
+                    GradlewCommand = ":app:configureCMakeDebug";
+                }
+                else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+                {
+                    GradlewCommand = ":app:configureCMakeRelease";
                 }
                 else 
                 {
