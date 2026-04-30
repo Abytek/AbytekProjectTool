@@ -98,3 +98,17 @@ APT.Extensions.CMake.ParseConfig = function(Config, Generator, PlatformTags)
     }
     return APT.Extensions.CMake.GetDefaultConfig(PlatformTags);
 }
+
+APT.Extensions.CMake.CalculateCMakeValue_Array = function(Array)
+{
+    let Value = "";
+    for (let Element of Array)
+    {
+        if (Value != "")
+        {
+            Value += ";";
+        }
+        Value += Element.toString();
+    }
+    return Value;
+}

@@ -6,6 +6,7 @@ const { spawnSync } = require("child_process");
 
 AMJS.Import("./Common");
 AMJS.Import("./CMakeConfigure");
+AMJS.Import("./CMakeBuild");
 
 
 APT.Extensions.AbytekEBT.PrepareWindows = function(Project)
@@ -88,8 +89,6 @@ APT.Extensions.AbytekEBT.Prepare = function(Project)
     let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
     
     let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
-
-    APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Project)
 
     if (PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS))
     {

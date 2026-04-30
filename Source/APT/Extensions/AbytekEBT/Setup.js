@@ -137,6 +137,9 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
             // Apply cmake definitions
             APT.Extensions.AbytekEBT.ApplyCMakeDefinitions(Context.APT.Project);
 
+            //
+            APT.Extensions.AbytekEBT.GenerateCMakeBuildDirectorySignatureFiles(Context.APT.Project)
+
             // Prepare if needed
             if (PrepareEnabled)
             {

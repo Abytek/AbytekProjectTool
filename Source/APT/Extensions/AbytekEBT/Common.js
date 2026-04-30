@@ -557,23 +557,27 @@ const Ajv = require("ajv");
         
         const ProjectSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
         const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(CMakeInstance);
-
+        
         let Result = [];
         Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
 
-        Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(EntryDirectory)}"`);
-        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Directory)}"`);
-
+        // The most important
         Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineEntryDirectory)}"`);
-        Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Directory)}"`);
-
-        Result.push(`-DABYTEK_EBT_PROJECT_SIGNATURE="${ProjectSignature}"`);
-        Result.push(`-DABYTEK_EBT_CMAKE_SIGNATURE="${CMakeSignature}"`);
+        Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(EntryDirectory)}"`);
         Result.push(`-DABYTEK_EBT_ENVIRONMENT="${CMakeInstance.Environment}"`);
         Result.push(`-DABYTEK_EBT_PLATFORM="${CMakeInstance.Platform}"`);
         Result.push(`-DABYTEK_EBT_CMAKE_GENERATOR="${CMakeInstance.CMakeGenerator}"`);
         Result.push(`-DABYTEK_EBT_CMAKE_CONFIG="${CMakeInstance.CMakeConfig}"`);
+        Result.push(`-DABYTEK_EBT_PROCESSOR_ARCHS="${APT.Extensions.CMake.CalculateCMakeValue_Array(ProjectInstance.ProcessorArchs)}"`);
+        Result.push(`-DABYTEK_EBT_PROJECT_SIGNATURE="${ProjectSignature}"`);
+
+        // For cmake instances to generate
         Result.push(`-DABYTEK_EBT_PROCESSOR_ARCH="${CMakeInstance.ProcessorArch}"`);
+        Result.push(`-DABYTEK_EBT_CMAKE_SIGNATURE="${CMakeSignature}"`);
+
+        //
+        Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Directory)}"`);
+        Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ProjectCMakeBuildDirectoryConfig.Directory)}"`);
 
         return Result;
     }
