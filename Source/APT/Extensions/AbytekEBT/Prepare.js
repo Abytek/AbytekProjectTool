@@ -30,7 +30,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
 {
     APT.Log("APT", `Start preparing project: ${Project.EntryDirectory}`);
 
-    let InstanceConfig = Project.Data.Get("AbytekEBT.InstanceConfig");
+    let ProjectInstance = Project.Data.Get("AbytekEBT.ProjectInstance");
 
     const AndroidProjectDirectory = path.join(
         Project.EntryDirectory,
@@ -43,23 +43,23 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Project)
     let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
 
     let GradlewCommand = null;
-    if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
+    if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.DEBUG)
     {
         GradlewCommand = "externalNativeBuildDebug";
     }
-    else if (InstanceConfig.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
+    else if (ProjectInstance.CMakeConfig == APT.Extensions.CMake.E_Config.RELEASE)
     {
         GradlewCommand = "externalNativeBuildRelease";
     }
     else 
     {
-        APT.FatalError("APT", `Unknown config: ${InstanceConfig.CMakeConfig}`);
+        APT.FatalError("APT", `Unknown config: ${ProjectInstance.CMakeConfig}`);
     }
 
     let Arguments = [
         GradlewCommand,
-        `-PABYTEK_EBT_ENVIRONMENT="${InstanceConfig.Environment}"`,
-        `-PABYTEK_EBT_PROCESSOR_ARCHS="${InstanceConfig.ProcessorArchs}"`,
+        `-PABYTEK_EBT_ENVIRONMENT="${ProjectInstance.Environment}"`,
+        `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
     ];
     APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
 
