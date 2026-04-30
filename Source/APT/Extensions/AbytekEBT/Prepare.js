@@ -139,7 +139,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
             `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
             `-PABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`,
         ];
-        APT.Log("APT", `Start gradlew with arguments: ${Arguments}`);
+        APT.Log("APT", `Start gradlew at "${AndroidScopeDirectory}" with arguments: ${Arguments}`);
 
         const Env = {
             ...process.env,
