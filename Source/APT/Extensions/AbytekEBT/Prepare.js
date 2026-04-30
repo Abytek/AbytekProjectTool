@@ -91,7 +91,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
             Scope.EntryDirectory,
             "Platforms",
             "Android",
-            "Scopes",
+            "Projects",
             "Application"
         ).replaceAll("\\", "/");
 
