@@ -85,6 +85,7 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
                 "AbytekEBT.ProjectInstance",
                 new APT.Extensions.AbytekEBT.F_ProjectInstance(ProjectInstanceParams)
             );
+            let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
             
             let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "AbytekProject");
             Context.APT.Set("AbytekEBT.Options", Options);
@@ -92,6 +93,7 @@ APT.Extensions.AbytekEBT.Setup = function(Context, Options)
             let PrepareEnabled = APT.Common.ForwardBool(
                 Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Project.IsMain)
             );
+            let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
             let PrepareTargetsToBuild = Context.APT.GetOrAdd("AbytekEBT.Prepare.TargetsToBuild", []);
 
             // Find & import
