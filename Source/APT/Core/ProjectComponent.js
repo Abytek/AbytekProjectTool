@@ -92,9 +92,9 @@ APT.Core.A_ProjectComponent = class
         return this.Context.APT.TransferSignature(Key, DefaultValue);
     }
 
-    ImportProject(RelativeEntryDirectory2, Data2, Required2 = true)
+    Import(RelativeEntryDirectory2, Data2, Required2 = true)
     {
-        return this.Context.APT.ImportProject(RelativeEntryDirectory2, Data2, Required2);
+        return this.Context.APT.Import(RelativeEntryDirectory2, Data2, Required2);
     }
     On(EventName, Callback)
     {

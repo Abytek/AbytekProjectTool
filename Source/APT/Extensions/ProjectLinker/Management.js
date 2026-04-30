@@ -131,7 +131,7 @@ APT.Extensions.ProjectLinker.Find = function(Query, ...ProjectImportArgs)
     {
         return null;
     }
-    return APT.Core.System.GetChild("ProjectManager").ImportProject(
+    return APT.Core.System.GetChild("ProjectManager").Import(
         [], 
         EntryDirectory, 
         ...ProjectImportArgs
@@ -141,7 +141,7 @@ APT.Extensions.ProjectLinker.Ensure = function(Query, ...ProjectImportArgs)
 {
     let EntryDirectory = APT.Extensions.ProjectLinker.EnsureDirectory(Query);
     APT.Common.Assert(EntryDirectory, `Not found project link for: ${APT.Common.NiceJSONStringify(Query)}`);
-    return APT.Core.System.GetChild("ProjectManager").ImportProject(
+    return APT.Core.System.GetChild("ProjectManager").Import(
         [], 
         EntryDirectory, 
         ...ProjectImportArgs
