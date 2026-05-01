@@ -180,7 +180,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Imported main scope`);
     }
 
-    // ImportRecursive(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ScopeCreationArgs)
+    // ImportRecursive(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
     // {
     //     APT.Log("APT", `Import recursive: ${RelativeEntryDirectory}`);
 
@@ -203,7 +203,14 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
     //     const SubDirs = GetSubDirs(AbsoluteScopeEntryDirectory);
     //     for (let SubDir of SubDirs)
     //     {
-    //         let Scope = this.Import(ParentScope, [], SubDir, Data, );
+    //         let Scope = this.Import(ParentScope, [], SubDir, Data, SignatureData, true, ...ScopeCreationArgs);
+    //         this.ImportRecursive(
+    //             Scope,
+    //             [ Scope.EntryDirectory ],
+    //             ".",
+    //             null,
+
+    //         );
     //     }
 
     //     APT.Log("APT", `Imported recursive: ${RelativeEntryDirectory}`);
@@ -213,16 +220,26 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Import scope: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
 
+        let ParentData = null;
+        let ParentSignatureData = null;
+        if (ParentScope)
+        {
+            ParentData = ParentScope.Data;
+            ParentSignatureData = ParentScope.SignatureData;
+        }
+
         if (Data == null)
         {
             Data = new APT.Core.F_ScopeData();
         }
+        Data.Inherit(ParentData);
         APT.Log("APT", `\t- Data: [${Data.GetSignature()}]`);
 
         if (SignatureData == null)
         {
             SignatureData = new APT.Core.F_ScopeData();
         }
+        SignatureData.Inherit(ParentSignatureData);
         APT.Log("APT", `\t- Signature data: [${SignatureData.GetSignature()}]`);
 
         let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
@@ -513,14 +530,6 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                         }
                         Context.APT.Import = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
-                            if (Data2 == null)
-                            {
-                                Data2 = new APT.Core.F_ScopeData(Scope.Data);
-                            }
-                            if (SignatureData2 == null)
-                            {
-                                SignatureData2 = new APT.Core.F_ScopeData(Scope.SignatureData);
-                            }
                             return ScopeManager.Import(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
                         }
                         Context.APT.On = function(EventName, Callback)

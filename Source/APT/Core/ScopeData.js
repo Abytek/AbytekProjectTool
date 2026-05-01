@@ -6,13 +6,18 @@ APT.Core.F_ScopeData = class
         this.Public = new Object();
         this.Private = new Object();
 
+        this.Inherit(Source);
+    }
+
+    Inherit(Source)
+    {
         if (Source)
         {
             for (let Key in Source.Public)
             {
                 let SourceValue = Source.Get(Key);
                 const Value = APT.Common.SimpleDeepCopy(SourceValue);
-                this.AddPublic(Key, Value);
+                this.GetOrAddPublic(Key, Value);
             }
         }
     }
