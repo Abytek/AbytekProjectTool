@@ -376,15 +376,15 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                         }
                         Context.APT.ImportRecursive = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
-                            Scope.ImportRecursive(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
+                            return Scope.ImportRecursive(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
                         }
                         Context.APT.Import = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
-                            Scope.Import(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
+                            return Scope.Import(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
-                            Scope.On(EventName, Callback);   
+                            return Scope.On(EventName, Callback);   
                         }
                     },
                     IsAnonymous: true

@@ -163,7 +163,7 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             }
 
             // Apply cmake definitions
-            for (const Application of Context.APT.GetOrAdd("AbytekEBT.Applications"))
+            for (const Application of Context.APT.Get("AbytekEBT.Applications"))
             {
                 for (const CMakeDefinition of Application.Get("AbytekEBT.CMakeDefinitions"))
                 {
@@ -173,8 +173,9 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
                     );
                 }
             }
-            for (const Package of Context.APT.GetOrAdd("AbytekEBT.Packages"))
+            for (const Package of Context.APT.Get("AbytekEBT.Packages"))
             {
+                console.log(Context.APT.Get("AbytekEBT.Packages"));
                 for (const CMakeDefinition of Package.Get("AbytekEBT.CMakeDefinitions"))
                 {
                     Context.APT.Push(
