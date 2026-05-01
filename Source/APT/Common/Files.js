@@ -117,3 +117,10 @@ APT.Common.ReleaseFileBasedLock = function(Handle)
     fs.closeSync(Handle.FileDescriptor);
     fs.unlinkSync(Handle.Path);
 }
+
+APT.Common.GetSubDirectories = function(dir) 
+{
+    return fs.readdirSync(dir)
+        .map(name => path.join(dir, name))
+        .filter(p => fs.statSync(p).isDirectory());
+}

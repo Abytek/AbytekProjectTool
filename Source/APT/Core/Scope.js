@@ -276,17 +276,34 @@ APT.Core.F_Scope = class
         }
     }
 
+    TransferSignaturePrivate(Key, DefaultValue)
+    {
+        let Value = this.Data.GetOrAddPrivate(Key, DefaultValue);
+        this.SignatureData.SetPrivate(Key, Value);
+        return Value;
+    }
+    TransferSignaturePublic(Key, DefaultValue)
+    {
+        let Value = this.Data.GetOrAddPublic(Key, DefaultValue);
+        this.SignatureData.SetPublic(Key, Value);
+        return Value;
+    }
     TransferSignature(Key, DefaultValue)
     {
-        return this.Context.APT.TransferSignature(Key, DefaultValue);
+        return this.TransferSignaturePublic(Key, DefaultValue);
     }
 
-    Import(RelativeEntryDirectory2, Data2, Required2 = true)
+    Import(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
     {
-        return this.Context.APT.Import(RelativeEntryDirectory2, Data2, Required2);
+        return APT.Core.System.GetChild("ScopeManager").Import(this, [ this.EntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
+    }
+    ImportRecursive(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
+    {
+        return APT.Core.System.GetChild("ScopeManager").ImportRecursive(this, [ this.EntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
     }
     On(EventName, Callback)
     {
-        return this.Context.APT.On(EventName, Callback);
+        APT.Common.Assert(EventName in this.Events, `Not found event: ${EventName}`);
+        this.Events[EventName].push(Callback);   
     }
 }

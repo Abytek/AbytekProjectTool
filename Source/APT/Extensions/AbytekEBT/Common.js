@@ -684,3 +684,21 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
 
 //
 APT.Extensions.AbytekEBT.DEFAULT_COOK_PIPELINE = "SAF";
+
+
+//
+APT.Extensions.AbytekEBT.ImportModules = function(ParentScope, ModulesDirectory)
+{
+    if (!fs.existsSync(ModulesDirectory))
+    {
+        return;
+    }
+
+    const SubDirs = APT.Common.GetSubDirectories(ModulesDirectory);
+    for (let SubDir of SubDirs)
+    {
+        let Scope = ParentScope.Import(SubDir);
+        APT.Extensions.AbytekEBT.ImportModules(Scope, path.join(Scope.EntryDirectory, "Modules", "Private"));
+        APT.Extensions.AbytekEBT.ImportModules(Scope, path.join(Scope.EntryDirectory, "Modules", "Public"));
+    }
+}

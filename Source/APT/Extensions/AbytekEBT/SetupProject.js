@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.Import("./Common")
 AMJS.Import("./CMakeConfigure")
 AMJS.Import("./CMakeDefinitions")
@@ -134,6 +136,9 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             // Generate engine path file
             APT.Extensions.AbytekEBT.GenerateEnginePathFile(Context.APT.Scope);     
             
+            // Import modules
+            APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));     
+
             // Broadcast events
             let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
             APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  

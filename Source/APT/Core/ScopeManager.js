@@ -195,12 +195,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         }
         APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
 
-        function GetSubDirs(dir) {
-            return fs.readdirSync(dir)
-                .map(name => path.join(dir, name))
-                .filter(p => fs.statSync(p).isDirectory());
-        }
-        const SubDirs = GetSubDirs(AbsoluteScopeEntryDirectory);
+        const SubDirs = APT.Common.GetSubDirectories(AbsoluteScopeEntryDirectory);
         for (let SubDir of SubDirs)
         {
             let Scope = this.Import(ParentScope, [], SubDir, Data, SignatureData, ...ScopeCreationArgs);
@@ -280,268 +275,116 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                         {
                             Context.APT.HasPublic = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.HasPublic(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.HasPublic(Key);
-                                }
+                                return Scope.HasPublic(Key, IsSignature);
                             }
                             Context.APT.AddPublic = function(Key, Value, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.AddPublic(Key, Value);
-                                }
-                                else
-                                {
-                                    return Scope.Data.AddPublic(Key, Value);
-                                }
+                                return Scope.AddPublic(Key, Value, IsSignature);
                             }
                             Context.APT.GetPublic = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetPublic(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetPublic(Key);
-                                }
+                                return Scope.GetPublic(Key, IsSignature);
                             }
                             Context.APT.FindPublic = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.FindPublic(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.FindPublic(Key);
-                                }
+                                return Scope.FindPublic(Key, IsSignature);
                             }
                             Context.APT.GetOrAddPublic = function(Key, DefaultValue, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetOrAddPublic(Key, DefaultValue);
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetOrAddPublic(Key, DefaultValue);
-                                }
+                                return Scope.GetOrAddPublic(Key, DefaultValue, IsSignature);
                             }
                             Context.APT.SetPublic = function(Key, Value, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.SetPublic(Key, Value);
-                                }
-                                else
-                                {
-                                    return Scope.Data.SetPublic(Key, Value);
-                                }
+                                return Scope.SetPublic(Key, Value, IsSignature);
                             }
                             Context.APT.PushPublic = function(Key, Element, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.PushPublic(Key, Element);
-                                }
-                                else
-                                {
-                                    return Scope.Data.PushPublic(Key, Element);
-                                }
+                                return Scope.PushPublic(Key, Element, IsSignature);
                             }
 
                             Context.APT.HasPrivate = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.HasPrivate(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.HasPrivate(Key);
-                                }
+                                return Scope.HasPrivate(Key, IsSignature);
                             }
                             Context.APT.AddPrivate = function(Key, Value, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.AddPrivate(Key, Value);
-                                }
-                                else
-                                {
-                                    return Scope.Data.AddPrivate(Key, Value);
-                                }
+                                return Scope.AddPrivate(Key, Value, IsSignature);
                             }
                             Context.APT.GetPrivate = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetPrivate(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetPrivate(Key);
-                                }
+                                return Scope.GetPrivate(Key, IsSignature);
                             }
                             Context.APT.FindPrivate = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.FindPrivate(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.FindPrivate(Key);
-                                }
+                                return Scope.FindPrivate(Key, IsSignature);
                             }
                             Context.APT.GetOrAddPrivate = function(Key, DefaultValue, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetOrAddPrivate(Key, DefaultValue);
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetOrAddPrivate(Key, DefaultValue);
-                                }
+                                return Scope.GetOrAddPrivate(Key, DefaultValue, IsSignature);
                             }
                             Context.APT.SetPrivate = function(Key, Value, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.SetPrivate(Key, Value);
-                                }
-                                else
-                                {
-                                    return Scope.Data.SetPrivate(Key, Value);
-                                }
+                                return Scope.SetPrivate(Key, Value, IsSignature);
                             }
                             Context.APT.PushPrivate = function(Key, Element, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.PushPrivate(Key, Element);
-                                }
-                                else
-                                {
-                                    return Scope.Data.PushPrivate(Key, Element);
-                                }
+                                return Scope.PushPrivate(Key, Element, IsSignature);
                             }
 
                             Context.APT.Has = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.Has(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.Has(Key);
-                                }
+                                return Scope.Has(Key, IsSignature);
                             }
                             Context.APT.Get = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.Get(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.Get(Key);
-                                }
+                                return Scope.Get(Key, IsSignature);
                             }
                             Context.APT.Find = function(Key, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.Find(Key);
-                                }
-                                else
-                                {
-                                    return Scope.Data.Find(Key);
-                                }
+                                return Scope.Find(Key, IsSignature);
                             }
                             Context.APT.GetOrAdd = function(Key, DefaultValue, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetOrAdd(Key, DefaultValue);
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetOrAdd(Key, DefaultValue);
-                                }
+                                return Scope.GetOrAdd(Key, DefaultValue, IsSignature);
                             }
                             Context.APT.Set = function(Key, Value, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.Set(Key, Value);
-                                }
-                                else
-                                {
-                                    return Scope.Data.Set(Key, Value);
-                                }
+                                return Scope.Set(Key, Value, IsSignature);
                             }
                             Context.APT.Push = function(Key, Element, IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.Push(Key, Element);
-                                }
-                                else
-                                {
-                                    return Scope.Data.Push(Key, Element);
-                                }
+                                return Scope.Push(Key, Element, IsSignature);
                             }
 
                             Context.APT.GetSignature = function(IsSignature = false)
                             {
-                                if (IsSignature)
-                                {
-                                    return Scope.SignatureData.GetSignature();
-                                }
-                                else
-                                {
-                                    return Scope.Data.GetSignature();
-                                }
+                                return Scope.GetSignature(IsSignature);
                             }
 
                             Context.APT.TransferSignaturePrivate = function(Key, DefaultValue)
                             {
-                                let Value = Scope.Data.GetOrAddPrivate(Key, DefaultValue);
-                                Scope.SignatureData.SetPrivate(Key, Value);
-                                return Value;
+                                return Scope.TransferSignaturePrivate(Key, DefaultValue);
                             }
                             Context.APT.TransferSignaturePublic = function(Key, DefaultValue)
                             {
-                                let Value = Scope.Data.GetOrAddPublic(Key, DefaultValue);
-                                Scope.SignatureData.SetPublic(Key, Value);
-                                return Value;
+                                return Scope.TransferSignaturePublic(Key, DefaultValue);
                             }
                             Context.APT.TransferSignature = function(Key, DefaultValue)
                             {
-                                return Context.APT.TransferSignaturePublic(Key, DefaultValue);
+                                return Scope.TransferSignature(Key, DefaultValue);
                             }
                         }
                         Context.APT.ImportRecursive = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
-                            return ScopeManager.ImportRecursive(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
+                            Scope.ImportRecursive(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
                         }
                         Context.APT.Import = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
-                            return ScopeManager.Import(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
+                            Scope.Import(RelativeEntryDirectory2, Data2, SignatureData2, Required2);   
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
-                            APT.Common.Assert(EventName in Scope.Events, `Not found event: ${EventName}`);
-                            Scope.Events[EventName].push(Callback);   
+                            Scope.On(EventName, Callback);   
                         }
                     },
                     IsAnonymous: true
