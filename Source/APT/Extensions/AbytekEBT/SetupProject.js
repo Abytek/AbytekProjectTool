@@ -156,10 +156,13 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
             APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
 
+            //
+            APT.Extensions.AbytekEBT.GenerateAddPackagesCMakeFiles(Context.APT.Scope);
+
             // Generate CMakeLists file if needed
             if (!Options.IsEngine)
             {
-                APT.Extensions.AbytekEBT.GenerateCMakeListsFile(Context.APT.Scope);
+                APT.Extensions.AbytekEBT.GenerateProjectCMakeListsFile(Context.APT.Scope);
             }
 
             // Apply cmake definitions
@@ -175,7 +178,6 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             }
             for (const Package of Context.APT.Get("AbytekEBT.Packages"))
             {
-                console.log(Context.APT.Get("AbytekEBT.Packages"));
                 for (const CMakeDefinition of Package.Get("AbytekEBT.CMakeDefinitions"))
                 {
                     Context.APT.Push(

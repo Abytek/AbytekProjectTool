@@ -62,6 +62,13 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
                         
             // Import modules
             APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));
+
+            // Broadcast events
+            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
+            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
+
+            // Generate CMakeLists file
+            APT.Extensions.AbytekEBT.GeneratePackageCMakeListsFile(Context.APT.Scope);
         }
     );
 }

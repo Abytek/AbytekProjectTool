@@ -482,7 +482,39 @@ const Ajv = require("ajv");
     {
         return path.join(EntryDirectory, "CMakeLists.txt");
     }
-    APT.Extensions.AbytekEBT.GenerateCMakeListsFile = function(Scope)
+    APT.Extensions.AbytekEBT.CalculateAddPackagesCMakeFile = function(EntryDirectory, CMakeInstance)
+    {
+        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+            EntryDirectory,
+            CMakeInstance
+        );
+        return path.join(CMakeBuildDirectoryConfig.Directory, "AbytekEBT", "AddPackages.cmake");
+    }
+    APT.Extensions.AbytekEBT.GenerateAddPackagesCMakeFiles = function(Scope)
+    {
+        const ProjectInstance = Scope.Get("AbytekEBT.ProjectInstance");
+        const CMakeInstances = ProjectInstance.CMakeInstances;
+
+        let PackageAddSubdirectoriesCMake = "";
+        for (const Package of Scope.Get("AbytekEBT.Packages"))
+        {
+            const PackageName = Package.Get("AbytekEBT.Name");
+            PackageAddSubdirectoriesCMake += `
+                add_subdirectory("${Package.EntryDirectory.replaceAll("\\", "/")}" "\${CMAKE_CURRENT_BINARY_DIR}/${PackageName}")
+            `;
+        }
+
+        for (const CMakeInstance of CMakeInstances)
+        {
+            const AddPackagesCMakeFile = APT.Extensions.AbytekEBT.CalculateAddPackagesCMakeFile(
+                Scope.EntryDirectory,
+                CMakeInstance
+            );
+            fs.mkdirSync(path.dirname(AddPackagesCMakeFile), { recursive: true });
+            fs.writeFileSync(AddPackagesCMakeFile, PackageAddSubdirectoriesCMake);
+        }
+    }
+    APT.Extensions.AbytekEBT.GenerateProjectCMakeListsFile = function(Scope)
     {
         APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
 
@@ -515,6 +547,8 @@ const Ajv = require("ajv");
 
             add_subdirectory("\${ABYTEK_ENGINE_DIR}" "\${ABYTEK_ENGINE_BUILD_DIR}")
 
+            include("\${ABYTEK_PROJECT_BUILD_DIR}/AbytekEBT/AddPackages.cmake")
+
             set(FETCHCONTENT_BASE_DIR "\${CMAKE_CURRENT_BINARY_DIR}/Dependencies")
 
             include(Abytek/Utilities/SetupModules)
@@ -534,6 +568,48 @@ const Ajv = require("ajv");
 
             Abytek_TryFinalizeProject()
 
+            ${AbytekEBTFileContent}
+        `;
+        fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
+    }
+    APT.Extensions.AbytekEBT.GeneratePackageCMakeListsFile = function(Scope)
+    {
+        APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
+
+        let ScopeName = Scope.Data.Get("AbytekEBT.Name");
+
+        const AbytekEBTFile = path.join(Scope.EntryDirectory, "AbytekEBT.txt");
+        const AbytekEBTFileContent = "";
+        if (fs.existsSync(AbytekEBTFile))
+        {
+            AbytekEBTFileContent = fs.readFileSync(AbytekEBTFile, "utf8");
+        }
+
+        const CMakeListsFile = APT.Extensions.AbytekEBT.CalculateCMakeListsFile(Scope.EntryDirectory);
+        const CMakeListsFileContent = `
+            cmake_minimum_required(VERSION 3.14)
+
+            if(APPLE)
+                project("${ScopeName}" LANGUAGES C CXX OBJC OBJCXX)
+            else()
+                project("${ScopeName}" LANGUAGES C CXX)
+            endif()
+            
+            include(Abytek/Utilities/SetupModules)
+
+            include(Abytek/SetupIDE)
+            include(Abytek/SetupCompiler)
+            include(Abytek/SetupDependencies)
+
+            Abytek_SetGlobal(CMAKE_MODULE_PATH "${"${CMAKE_MODULE_PATH}"};${"${CMAKE_CURRENT_LIST_DIR}"}/CMake")
+
+            if(EXISTS "\${CMAKE_CURRENT_LIST_DIR}/Modules")
+                Abytek_SetupModules_MultiplePhases(
+                    "${ScopeName}" 
+                    "\${CMAKE_CURRENT_LIST_DIR}/Modules"
+                )
+            endif()
+            
             ${AbytekEBTFileContent}
         `;
         fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
