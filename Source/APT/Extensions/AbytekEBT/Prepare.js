@@ -76,6 +76,8 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
 {
     APT.Log("APT", `Start preparing project: ${Scope.EntryDirectory}`);
 
+    let Engine = Scope.Get("AbytekEBT.Engine");
+
     let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
     let PrepareMode = Scope.Data.Get("AbytekEBT.Prepare.Mode");
     let PrepareApplicationFilter = Scope.Get("AbytekEBT.Prepare.ApplicationFilter");
@@ -92,13 +94,44 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
     {
         for (let PrepareApplicationName of PrepareApplicationFilter)
         {
-            const AndroidScopeDirectory = path.join(
+            const AndroidProjectDirectory = path.join(
                 Scope.EntryDirectory,
                 "Platforms",
                 "Android",
                 "Projects",
                 PrepareApplicationName
             ).replaceAll("\\", "/");
+            
+            // Ensure android project
+            const AndroidProjectTemplateDirectory = path.join(
+                Engine.EntryDirectory,
+                "Platforms",
+                "Android",
+                "Templates",
+                "Application"
+            ).replaceAll("\\", "/");
+            if (!fs.existsSync(AndroidProjectDirectory))
+            {
+                fs.cpSync(AndroidProjectTemplateDirectory, AndroidProjectDirectory, { recursive: true });
+            }
+
+            // Generate app-specific configs
+            {
+                const ApplicationLibTxtFile = path.join(AndroidProjectDirectory, "app", "application-lib.txt");
+                const ApplicationPackageTxtFile = path.join(AndroidProjectDirectory, "app", "application-package.txt");
+
+                function ProcessApplicationPackage(str) 
+                {
+                    return str
+                        .split('.')
+                        .map(s => s.charAt(0).toLowerCase() + s.slice(1))
+                        .join('.');
+                }
+                const ApplicationLib = PrepareApplicationName + ".CookedExecutable";
+                const ApplicationPackage = "com." + ProcessApplicationPackage(PrepareApplicationName);
+                fs.writeFileSync(ApplicationLibTxtFile, ApplicationLib);
+                fs.writeFileSync(ApplicationPackageTxtFile, ApplicationPackage);
+            }
 
             let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();
 
@@ -159,7 +192,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
                 `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
                 `-PABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`,
             ];
-            APT.Log("APT", `Start gradlew at "${AndroidScopeDirectory}" with arguments: ${Arguments}`);
+            APT.Log("APT", `Start gradlew at "${AndroidProjectDirectory}" with arguments: ${Arguments}`);
 
             const Env = {
                 ...process.env,
@@ -170,7 +203,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
                 process.platform === "win32" ? "gradlew.bat" : "./gradlew",
                 Arguments, 
                 {
-                    cwd: AndroidScopeDirectory,
+                    cwd: AndroidProjectDirectory,
                     stdio: "inherit",
                     shell: true,
                     env: Env,
