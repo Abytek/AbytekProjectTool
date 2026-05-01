@@ -482,33 +482,31 @@ const Ajv = require("ajv");
     {
         return path.join(EntryDirectory, "CMakeLists.txt");
     }
-    APT.Extensions.AbytekEBT.CalculateAddPackagesCMakeFile = function(EntryDirectory, CMakeInstance)
-    {
-        const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
-            EntryDirectory,
-            CMakeInstance
-        );
-        return path.join(CMakeBuildDirectoryConfig.Directory, "AbytekEBT", "AddPackages.cmake");
-    }
     APT.Extensions.AbytekEBT.GenerateAddPackagesCMakeFiles = function(Scope)
     {
         const ProjectInstance = Scope.Get("AbytekEBT.ProjectInstance");
         const CMakeInstances = ProjectInstance.CMakeInstances;
 
-        let PackageAddSubdirectoriesCMake = "";
-        for (const Package of Scope.Get("AbytekEBT.Packages"))
-        {
-            const PackageName = Package.Get("AbytekEBT.Name");
-            PackageAddSubdirectoriesCMake += `
-                add_subdirectory("${Package.EntryDirectory.replaceAll("\\", "/")}" "\${CMAKE_CURRENT_BINARY_DIR}/${PackageName}")
-            `;
-        }
-
         for (const CMakeInstance of CMakeInstances)
         {
-            const AddPackagesCMakeFile = APT.Extensions.AbytekEBT.CalculateAddPackagesCMakeFile(
+            const CMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
                 Scope.EntryDirectory,
                 CMakeInstance
+            );
+
+            let PackageAddSubdirectoriesCMake = "";
+            for (const Package of Scope.Get("AbytekEBT.Packages"))
+            {
+                const PackageName = Package.Get("AbytekEBT.Name");
+                PackageAddSubdirectoriesCMake += `
+                    add_subdirectory("${Package.EntryDirectory.replaceAll("\\", "/")}" "${Package.EntryDirectory.replaceAll("\\", "/")}/Build/${CMakeBuildDirectoryConfig.CMakeSignatureHash}")
+                `;
+            }
+
+            const AddPackagesCMakeFile = path.join(
+                CMakeBuildDirectoryConfig.Directory,
+                "AbytekEBT", 
+                "AddPackages.cmake"
             );
             fs.mkdirSync(path.dirname(AddPackagesCMakeFile), { recursive: true });
             fs.writeFileSync(AddPackagesCMakeFile, PackageAddSubdirectoriesCMake);
