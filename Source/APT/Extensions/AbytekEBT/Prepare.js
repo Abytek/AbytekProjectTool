@@ -94,8 +94,21 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
     {
         for (let PrepareApplicationName of PrepareApplicationFilter)
         {
+            let PrepareApplication = null;
+            for (const Application of Scope.Get("AbytekEBT.Applications"))
+            {
+                if (Application.Get("AbytekEBT.Name") == PrepareApplicationName)
+                {
+                    PrepareApplication = Application;
+                    break;
+                }
+            }
+            APT.Common.Assert(PrepareApplication, `Not found application with name: ${PrepareApplicationName}`);
+
+            const ApplicationOwner = PrepareApplication.Get("AbytekEBT.Owner");
+
             const AndroidProjectDirectory = path.join(
-                Scope.EntryDirectory,
+                ApplicationOwner.EntryDirectory,
                 "Platforms",
                 "Android",
                 "Projects",
@@ -188,6 +201,7 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
 
             let Arguments = [
                 GradlewCommand,
+                `-PABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(Scope.EntryDirectory)}"`,
                 `-PABYTEK_EBT_ENVIRONMENT="${ProjectInstance.Environment}"`,
                 `-PABYTEK_EBT_PROCESSOR_ARCHS="${ProjectInstance.ProcessorArchs.join(";")}"`,
                 `-PABYTEK_EBT_CMAKE_CONFIG="${ProjectInstance.CMakeConfig}"`,

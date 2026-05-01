@@ -24,6 +24,22 @@ APT.Extensions.AbytekEBT.SearchProjectForApplication = function(ApplicationScope
     }
     return Result;
 }
+APT.Extensions.AbytekEBT.SearchPackageForApplication = function(ApplicationScope)
+{
+    let Result = null;
+    {
+        let Parent = ApplicationScope.Parent;
+        while (Parent)
+        {
+            if (Parent.Has("AbytekEBT.IsPackage"))
+            {
+                Result = Parent;
+            }
+            Parent = Parent.Parent;
+        }
+    }
+    return Result;
+}
 APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
 {
     const DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupApplicationOptions();
@@ -55,6 +71,25 @@ APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
                 "AbytekEBT.Applications",
                 Context.APT.Scope
             );
+
+            const Package = Context.APT.Set(
+                "AbytekEBT.Package", 
+                APT.Extensions.AbytekEBT.SearchPackageForApplication(Context.APT.Scope)
+            );
+            if (Package)
+            {
+                Context.APT.Set(
+                    "AbytekEBT.Owner", 
+                    Package
+                );
+            }
+            else
+            {
+                Context.APT.Set(
+                    "AbytekEBT.Owner", 
+                    Project
+                );
+            }
             
             let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);
 

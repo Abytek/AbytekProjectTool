@@ -47,6 +47,8 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
         "Import",
         function()
         { 
+            Context.APT.Set("AbytekEBT.IsPackage", true);
+
             const Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Package");
             Context.APT.Set("AbytekEBT.Options", Options);
 
