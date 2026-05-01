@@ -55,6 +55,8 @@ APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
                 "AbytekEBT.Applications",
                 Context.APT.Scope
             );
+            
+            let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);
 
             const CookPipeline = Context.APT.GetOrAdd("AbytekEBT.CookPipeline", APT.Extensions.AbytekEBT.DEFAULT_COOK_PIPELINE);
             const IncludeHeaders = Context.APT.GetOrAdd("AbytekEBT.IncludeHeaders", []);

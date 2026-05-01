@@ -9,3 +9,4 @@ AMJS.Import("./CMakeDefinitions");
 
 AMJS.Import("./SetupProject");
 AMJS.Import("./SetupApplication");
+AMJS.Import("./SetupPackage");

@@ -94,6 +94,7 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Project");
             Context.APT.Set("AbytekEBT.Options", Options);
 
+            Context.APT.Set("AbytekEBT.Packages", []);
             Context.APT.Set("AbytekEBT.Applications", []);
 
             let PrepareEnabled = APT.Common.ForwardBool(
@@ -162,6 +163,26 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             }
 
             // Apply cmake definitions
+            for (const Application of Context.APT.GetOrAdd("AbytekEBT.Applications"))
+            {
+                for (const CMakeDefinition of Application.Get("AbytekEBT.CMakeDefinitions"))
+                {
+                    Context.APT.Push(
+                        "AbytekEBT.CMakeDefinitions",
+                        CMakeDefinition
+                    );
+                }
+            }
+            for (const Package of Context.APT.GetOrAdd("AbytekEBT.Packages"))
+            {
+                for (const CMakeDefinition of Package.Get("AbytekEBT.CMakeDefinitions"))
+                {
+                    Context.APT.Push(
+                        "AbytekEBT.CMakeDefinitions",
+                        CMakeDefinition
+                    );
+                }
+            }
             APT.Extensions.AbytekEBT.ApplyCMakeDefinitions(Context.APT.Scope);
 
             //
