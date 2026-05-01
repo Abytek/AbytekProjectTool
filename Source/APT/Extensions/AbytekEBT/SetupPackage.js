@@ -28,6 +28,8 @@ APT.Extensions.AbytekEBT.SearchProjectForPackage = function(PackageScope)
 }
 APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
 {
+    APT.Extensions.ScopeLinker.Setup(Context);
+
     const DefaultOptions = APT.Extensions.AbytekEBT.GetDefaultSetupPackageOptions();
     if (Options == null)
     {
