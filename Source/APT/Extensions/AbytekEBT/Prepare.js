@@ -142,8 +142,8 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
                 }
                 const ApplicationLib = PrepareApplicationName + ".CookedExecutable";
                 const ApplicationPackage = "com." + ProcessApplicationPackage(PrepareApplicationName);
-                fs.writeFileSync(ApplicationLibTxtFile, ApplicationLib);
-                fs.writeFileSync(ApplicationPackageTxtFile, ApplicationPackage);
+                APT.Common.SmartWriteFile(ApplicationLibTxtFile, ApplicationLib);
+                APT.Common.SmartWriteFile(ApplicationPackageTxtFile, ApplicationPackage);
             }
 
             let AndroidSdkPath = APT.Common.GetDefaultAndroidSdkPath();

@@ -18,7 +18,7 @@ APT.Extensions.ScopeLinker.AllocateScopeDirectory = function()
     const NextScopeIndexFile = path.join(DataDirectory, ".NextScopeIndex");
     if (!fs.existsSync(NextScopeIndexFile))
     {
-        fs.writeFileSync(NextScopeIndexFile, "0");
+        APT.Common.SmartWriteFile(NextScopeIndexFile, "0");
     }
 
     let ScopeIndex = fs.readFileSync(NextScopeIndexFile, "utf8");
@@ -31,7 +31,7 @@ APT.Extensions.ScopeLinker.AllocateScopeDirectory = function()
     const ScopeDirectory = path.join(DataDirectory, "D", ScopeIndex.toString());
     fs.mkdirSync(ScopeDirectory, { recursive: true });
 
-    fs.writeFileSync(NextScopeIndexFile, (ScopeIndex + 1).toString());
+    APT.Common.SmartWriteFile(NextScopeIndexFile, (ScopeIndex + 1).toString());
 
     APT.Extensions.ScopeLinker.UnlockLinkDirectory(LockHandle);
     return ScopeDirectory;
@@ -53,7 +53,7 @@ APT.Extensions.ScopeLinker.LinkDirectory = function(EntryDirectory)
     const NextLinkIndexFile = path.join(DataDirectory, ".NextLinkIndex");
     if (!fs.existsSync(NextLinkIndexFile))
     {
-        fs.writeFileSync(NextLinkIndexFile, "0");
+        APT.Common.SmartWriteFile(NextLinkIndexFile, "0");
     }
 
     let LinkIndex = fs.readFileSync(NextLinkIndexFile, "utf8");
@@ -64,9 +64,9 @@ APT.Extensions.ScopeLinker.LinkDirectory = function(EntryDirectory)
     }
 
     const LinkFile = path.join(LinkDirectory, LinkIndex.toString() + ".txt");
-    fs.writeFileSync(LinkFile, EntryDirectory);
+    APT.Common.SmartWriteFile(LinkFile, EntryDirectory);
 
-    fs.writeFileSync(NextLinkIndexFile, (LinkIndex + 1).toString());
+    APT.Common.SmartWriteFile(NextLinkIndexFile, (LinkIndex + 1).toString());
 
     APT.Extensions.ScopeLinker.UnlockLinkDirectory(LockHandle);
 }

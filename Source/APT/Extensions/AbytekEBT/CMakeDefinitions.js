@@ -38,6 +38,6 @@ APT.Extensions.AbytekEBT.ApplyCMakeDefinitions = function(Scope)
         FileContent += `${CMakeDefinition[0]}\n`;
         FileContent += `${CMakeDefinition[1]}\n`;
     }
-    fs.writeFileSync(File, FileContent);
+    APT.Common.SmartWriteFile(File, FileContent);
     APT.Log("APT", `Applied cmake definitions for project: ${Scope.EntryDirectory}`);
 }

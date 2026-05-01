@@ -437,7 +437,7 @@ const Ajv = require("ajv");
                 Scope.EntryDirectory,
                 CMakeInstance
             );
-            fs.writeFileSync(
+            APT.Common.SmartWriteFile(
                 CMakeBuildDirectoryConfig.CMakeSignatureHashFile, 
                 CMakeBuildDirectoryConfig.CMakeSignatureHash
             );
@@ -469,7 +469,7 @@ const Ajv = require("ajv");
         const EnginePathFile = APT.Extensions.AbytekEBT.CalculateEnginePathFile(Scope.EntryDirectory, ProjectInstance);
         APT.Extensions.AbytekEBT.EnsureBuildDirectory(Scope.EntryDirectory);
         
-        fs.writeFileSync(EnginePathFile, EngineScope.EntryDirectory.replaceAll("\\", "/"));
+        APT.Common.SmartWriteFile(EnginePathFile, EngineScope.EntryDirectory.replaceAll("\\", "/"));
 
         APT.Log("APT", `Generated engine path file at: ${EnginePathFile}`);
     }
@@ -509,7 +509,7 @@ const Ajv = require("ajv");
                 "AddPackages.cmake"
             );
             fs.mkdirSync(path.dirname(AddPackagesCMakeFile), { recursive: true });
-            fs.writeFileSync(AddPackagesCMakeFile, PackageAddSubdirectoriesCMake);
+            APT.Common.SmartWriteFile(AddPackagesCMakeFile, PackageAddSubdirectoriesCMake);
         }
     }
     APT.Extensions.AbytekEBT.GenerateProjectCMakeListsFile = function(Scope)
@@ -568,7 +568,7 @@ const Ajv = require("ajv");
 
             ${AbytekEBTFileContent}
         `;
-        fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
+        APT.Common.SmartWriteFile(CMakeListsFile, CMakeListsFileContent);
     }
     APT.Extensions.AbytekEBT.GeneratePackageCMakeListsFile = function(Scope)
     {
@@ -610,7 +610,7 @@ const Ajv = require("ajv");
             
             ${AbytekEBTFileContent}
         `;
-        fs.writeFileSync(CMakeListsFile, CMakeListsFileContent);
+        APT.Common.SmartWriteFile(CMakeListsFile, CMakeListsFileContent);
     }
     APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraArguments = function(
         Scope,
@@ -730,7 +730,7 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
             ApplicationClasses
         };
         const ApplicationDescriptorJSON = APT.Common.NiceJSONStringify(ApplicationDescriptor);
-        fs.writeFileSync(ApplicationDescriptorFileJSON, ApplicationDescriptorJSON);
+        APT.Common.SmartWriteFile(ApplicationDescriptorFileJSON, ApplicationDescriptorJSON);
 
         let ApplicationDescriptorCMake = ``;
         ApplicationDescriptorCMake += `
@@ -751,7 +751,7 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
                 list(APPEND ApplicationClasses "${ApplicationClass.replaceAll("\\", "/")}")
             `;
         }
-        fs.writeFileSync(ApplicationDescriptorFileCMake, ApplicationDescriptorCMake);
+        APT.Common.SmartWriteFile(ApplicationDescriptorFileCMake, ApplicationDescriptorCMake);
     }
 }
 
