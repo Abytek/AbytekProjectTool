@@ -1,4 +1,6 @@
 
+const path = require("path");
+
 AMJS.Import("./Common")
 
 
@@ -55,8 +57,11 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
                 "AbytekEBT.Packages",
                 Context.APT.Scope
             );
-            
-            let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);
+
+            let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);     
+                        
+            // Import modules
+            APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));
         }
     );
 }
