@@ -180,41 +180,43 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         APT.Log("APT", `Imported main scope`);
     }
 
-    // ImportRecursive(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
-    // {
-    //     APT.Log("APT", `Import recursive: ${RelativeEntryDirectory}`);
+    ImportRecursive(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
+    {
+        APT.Log("APT", `Import recursive: ${RelativeEntryDirectory}`);
 
-    //     let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
-    //     if (!AbsoluteScopeEntryDirectory)
-    //     {
-    //         if (Required)
-    //         {
-    //             throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
-    //         }
-    //         return false;
-    //     }
-    //     APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
+        let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
+        if (!AbsoluteScopeEntryDirectory)
+        {
+            if (Required)
+            {
+                throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
+            }
+            return;
+        }
+        APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
 
-    //     function GetSubDirs(dir) {
-    //         return fs.readdirSync(dir)
-    //             .map(name => path.join(dir, name))
-    //             .filter(p => fs.statSync(p).isDirectory());
-    //     }
-    //     const SubDirs = GetSubDirs(AbsoluteScopeEntryDirectory);
-    //     for (let SubDir of SubDirs)
-    //     {
-    //         let Scope = this.Import(ParentScope, [], SubDir, Data, SignatureData, true, ...ScopeCreationArgs);
-    //         this.ImportRecursive(
-    //             Scope,
-    //             [ Scope.EntryDirectory ],
-    //             ".",
-    //             null,
+        function GetSubDirs(dir) {
+            return fs.readdirSync(dir)
+                .map(name => path.join(dir, name))
+                .filter(p => fs.statSync(p).isDirectory());
+        }
+        const SubDirs = GetSubDirs(AbsoluteScopeEntryDirectory);
+        for (let SubDir of SubDirs)
+        {
+            let Scope = this.Import(ParentScope, [], SubDir, Data, SignatureData, ...ScopeCreationArgs);
+            this.ImportRecursive(
+                Scope,
+                [ Scope.EntryDirectory ],
+                ".",
+                null,
+                null,
+                true,
+                ...ScopeCreationArgs
+            );
+        }
 
-    //         );
-    //     }
-
-    //     APT.Log("APT", `Imported recursive: ${RelativeEntryDirectory}`);
-    // }
+        APT.Log("APT", `Imported recursive: ${RelativeEntryDirectory}`);
+    }
     Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
     {
         APT.Log("APT", `Import scope: ${RelativeEntryDirectory}`);
@@ -249,7 +251,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
             {
                 throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
             }
-            return false;
+            return null;
         }
 
         APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
@@ -527,6 +529,10 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                             {
                                 return Context.APT.TransferSignaturePublic(Key, DefaultValue);
                             }
+                        }
+                        Context.APT.ImportRecursive = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
+                        {
+                            return ScopeManager.ImportRecursive(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
                         }
                         Context.APT.Import = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
