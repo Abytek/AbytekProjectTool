@@ -8,9 +8,9 @@ APT.Core.F_ScopeData = class
 
         if (Source)
         {
-            for (Key in Source.Public)
+            for (let Key in Source.Public)
             {
-                let SourceValue = Source.Get();
+                let SourceValue = Source.Get(Key);
                 const Value = APT.Common.SimpleDeepCopy(SourceValue);
                 this.AddPublic(Key, Value);
             }

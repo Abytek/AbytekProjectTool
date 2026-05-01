@@ -7,7 +7,7 @@ AMJS.Import("./ScopeData");
 
 APT.Core.F_Scope = class
 {
-    constructor(Parent, EntryDirectory, Data, IsMain = false)
+    constructor(Parent, EntryDirectory, Data, SignatureData, IsMain = false)
     {
         this.Parent = Parent;
         this.EntryDirectory = EntryDirectory;
@@ -15,7 +15,7 @@ APT.Core.F_Scope = class
         this.Context = null;
         this.HasEntryFile = fs.existsSync(this.EntryFile);
         this.Data = Data;
-        this.SignatureData = new APT.Core.F_ScopeData();
+        this.SignatureData = SignatureData;
         this.IsMain = IsMain;
 
         this.Events = {

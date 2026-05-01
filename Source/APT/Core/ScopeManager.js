@@ -173,13 +173,42 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
             ],
             this.Command_ImportMainScope.MainScopeEntryDirectory,
             this.MainScopeDefines,
+            null,
             true,
             true
         );
         APT.Log("APT", `Imported main scope`);
     }
 
-    Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ScopeCreationArgs)
+    // ImportRecursive(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, Required = true, ...ScopeCreationArgs)
+    // {
+    //     APT.Log("APT", `Import recursive: ${RelativeEntryDirectory}`);
+
+    //     let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
+    //     if (!AbsoluteScopeEntryDirectory)
+    //     {
+    //         if (Required)
+    //         {
+    //             throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
+    //         }
+    //         return false;
+    //     }
+    //     APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
+
+    //     function GetSubDirs(dir) {
+    //         return fs.readdirSync(dir)
+    //             .map(name => path.join(dir, name))
+    //             .filter(p => fs.statSync(p).isDirectory());
+    //     }
+    //     const SubDirs = GetSubDirs(AbsoluteScopeEntryDirectory);
+    //     for (let SubDir of SubDirs)
+    //     {
+    //         let Scope = this.Import(ParentScope, [], SubDir, Data, );
+    //     }
+
+    //     APT.Log("APT", `Imported recursive: ${RelativeEntryDirectory}`);
+    // }
+    Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
     {
         APT.Log("APT", `Import scope: ${RelativeEntryDirectory}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
@@ -190,20 +219,26 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         }
         APT.Log("APT", `\t- Data: [${Data.GetSignature()}]`);
 
+        if (SignatureData == null)
+        {
+            SignatureData = new APT.Core.F_ScopeData();
+        }
+        APT.Log("APT", `\t- Signature data: [${SignatureData.GetSignature()}]`);
+
         let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
         if (!AbsoluteScopeEntryDirectory)
         {
             if (Required)
             {
-                throw new Error(`Scope entry directory "${RelativeEntryDirectory}" not found`);
+                throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
             }
             return false;
         }
 
-        APT.Log("APT", `Found scope entry directory ${AbsoluteScopeEntryDirectory}`);
+        APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
 
         // Create new scope instance
-        let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, Data, ...ScopeCreationArgs);
+        let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, Data, SignatureData, ...ScopeCreationArgs);
 
         let ScopeManager = this;
 
@@ -459,20 +494,34 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
                                 }
                             }
 
-                            Context.APT.TransferSignature = function(Key, DefaultValue)
+                            Context.APT.TransferSignaturePrivate = function(Key, DefaultValue)
                             {
-                                let Value = Scope.Data.GetOrAdd(Key, DefaultValue);
-                                Scope.SignatureData.Set(Key, Value);
+                                let Value = Scope.Data.GetOrAddPrivate(Key, DefaultValue);
+                                Scope.SignatureData.SetPrivate(Key, Value);
                                 return Value;
                             }
+                            Context.APT.TransferSignaturePublic = function(Key, DefaultValue)
+                            {
+                                let Value = Scope.Data.GetOrAddPublic(Key, DefaultValue);
+                                Scope.SignatureData.SetPublic(Key, Value);
+                                return Value;
+                            }
+                            Context.APT.TransferSignature = function(Key, DefaultValue)
+                            {
+                                return Context.APT.TransferSignaturePublic(Key, DefaultValue);
+                            }
                         }
-                        Context.APT.Import = function(RelativeEntryDirectory2, Data2, Required2 = true)
+                        Context.APT.Import = function(RelativeEntryDirectory2, Data2, SignatureData2, Required2 = true)
                         {
                             if (Data2 == null)
                             {
                                 Data2 = new APT.Core.F_ScopeData(Scope.Data);
                             }
-                            return ScopeManager.Import(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, Required2);
+                            if (SignatureData2 == null)
+                            {
+                                SignatureData2 = new APT.Core.F_ScopeData(Scope.SignatureData);
+                            }
+                            return ScopeManager.Import(Scope, [ AbsoluteScopeEntryDirectory ], RelativeEntryDirectory2, Data2, SignatureData2, Required2);
                         }
                         Context.APT.On = function(EventName, Callback)
                         {
@@ -501,7 +550,7 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         }
         this.Scopes.set(Signature, Scope);
 
-        APT.Log("APT", `Scope was not imported => Import ${AbsoluteScopeEntryDirectory}`);
+        APT.Log("APT", `Scope was not imported => Import: ${AbsoluteScopeEntryDirectory}`);
 
         Scope.PreImport();
         Scope.ExecuteEvent("Import");
