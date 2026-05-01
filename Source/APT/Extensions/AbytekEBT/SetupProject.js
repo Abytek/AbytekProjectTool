@@ -139,6 +139,18 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             // Import modules
             APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));     
 
+            //
+            if (!Options.IsEngine)
+            {
+                for (let Application of Engine.Get("AbytekEBT.Applications"))
+                {
+                    Context.APT.Push(
+                        "AbytekEBT.Applications",
+                        Application
+                    );
+                }
+            }
+
             // Broadcast events
             let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
             APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
