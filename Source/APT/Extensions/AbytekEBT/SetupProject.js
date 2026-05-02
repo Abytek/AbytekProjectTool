@@ -151,6 +151,10 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
                 }
             }
 
+            // Broadcast events
+            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
+            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
+
             //
             let ApplicationNames = [];
             for (const Application of Context.APT.Get("AbytekEBT.Applications"))
@@ -162,10 +166,6 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 
             // 
             let PrepareApplicationFilter = Context.APT.GetOrAdd("AbytekEBT.Prepare.ApplicationFilter", ApplicationNames);
-
-            // Broadcast events
-            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
-            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
 
             //
             APT.Extensions.AbytekEBT.GenerateAddPackagesCMakeFiles(Context.APT.Scope);

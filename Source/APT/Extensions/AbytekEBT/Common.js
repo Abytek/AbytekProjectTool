@@ -798,7 +798,18 @@ APT.Extensions.AbytekEBT.EnsureTempProject = function(Package)
                 function()
                 {
                     APT.Set("AbytekEBT.Name", "${PackageName}.TempProject");
-                    APT.Import("${Package.EntryDirectory.replaceAll("\\", "/")}");
+                    const Package = APT.Import("${Package.EntryDirectory.replaceAll("\\", "/")}");
+                    Package.Set(
+                        "AbytekEBT.Project", 
+                        APT.Scope
+                    );
+                    APT.Push(
+                        "AbytekEBT.Events.BeforePrepare",
+                        function()
+                        {
+                            Package.Get("AbytekEBT.FinalizeImportPackage")();
+                        }
+                    );
                 }
             );
             APT.Extensions.AbytekEBT.SetupProject(this);

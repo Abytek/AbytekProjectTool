@@ -264,7 +264,7 @@ APT.Core.F_Scope = class
         }
     }
 
-    GetSignature(IsSignature = false)
+    GetSignature(IsSignature = true)
     {
         if (IsSignature)
         {

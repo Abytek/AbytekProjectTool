@@ -94,6 +94,8 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
     {
         for (let PrepareApplicationName of PrepareApplicationFilter)
         {
+            APT.Log("APT", `Start preparing application: ${PrepareApplicationName}`);
+
             let PrepareApplication = null;
             for (const Application of Scope.Get("AbytekEBT.Applications"))
             {
@@ -227,6 +229,8 @@ APT.Extensions.AbytekEBT.PrepareAndroid = function(Scope)
             {
                 throw new Error("Failed to prepare android project");
             }
+
+            APT.Log("APT", `Prepared application: ${PrepareApplicationName}`);
         }
     }
     APT.Log("APT", `Prepared project: ${Scope.EntryDirectory}`);

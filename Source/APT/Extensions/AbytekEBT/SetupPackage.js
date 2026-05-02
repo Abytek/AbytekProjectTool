@@ -52,31 +52,44 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
             const Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Package");
             Context.APT.Set("AbytekEBT.Options", Options);
 
+            Context.APT.Scope.Set(
+                "AbytekEBT.FinalizeImportPackage",
+                function()
+                {
+                    let Project = Context.APT.Get("AbytekEBT.Project");
+
+                    Project.Push(
+                        "AbytekEBT.Packages",
+                        Context.APT.Scope
+                    );
+
+                    let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);     
+                                
+                    // Import modules
+                    APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));
+
+                    // Broadcast events
+                    let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
+                    APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
+
+                    // Generate CMakeLists file
+                    APT.Extensions.AbytekEBT.GeneratePackageCMakeListsFile(Context.APT.Scope);
+                }
+            );
+
             let Project = APT.Extensions.AbytekEBT.SearchProjectForPackage(Context.APT.Scope);
-            if (!Project)
+            if (Project)
             {
-                Project = APT.Extensions.AbytekEBT.EnsureTempProject(Context.APT.Scope);
+                Context.APT.Set(
+                    "AbytekEBT.Project", 
+                    Project
+                );
+                Context.APT.Get("AbytekEBT.FinalizeImportPackage")();
             }
-            Context.APT.Set(
-                "AbytekEBT.Project", 
-                Project
-            );
-            Project.Push(
-                "AbytekEBT.Packages",
-                Context.APT.Scope
-            );
-
-            let CMakeDefinitions = Context.APT.GetOrAdd("AbytekEBT.CMakeDefinitions", []);     
-                        
-            // Import modules
-            APT.Extensions.AbytekEBT.ImportModules(Context.APT.Scope, path.join(Context.APT.Scope.EntryDirectory, "Modules"));
-
-            // Broadcast events
-            let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);
-            APT.Common.BroadcastSimpleEvent(BeforePrepareEvent);  
-
-            // Generate CMakeLists file
-            APT.Extensions.AbytekEBT.GeneratePackageCMakeListsFile(Context.APT.Scope);
+            else
+            {
+                APT.Extensions.AbytekEBT.EnsureTempProject(Context.APT.Scope);
+            }
         }
     );
 }
