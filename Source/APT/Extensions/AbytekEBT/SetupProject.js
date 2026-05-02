@@ -84,6 +84,8 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 
             Context.APT.Set("AbytekEBT.IsProject", true);
 
+            const IsMainOrTemp = Context.APT.GetOrAdd("AbytekEBT.IsMainOrTemp", Context.APT.Scope.IsMain);
+
             let ProjectInstanceParams = Context.APT.Get("AbytekEBT.ProjectInstanceParams");
             let ProjectInstance = Context.APT.Set(
                 "AbytekEBT.ProjectInstance",
@@ -98,7 +100,7 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
             Context.APT.Set("AbytekEBT.Applications", []);
 
             let PrepareEnabled = APT.Common.ForwardBool(
-                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Scope.IsMain)
+                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", IsMainOrTemp)
             );
             let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
 

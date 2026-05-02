@@ -815,5 +815,8 @@ APT.Extensions.AbytekEBT.EnsureTempProject = function(Package)
             APT.Extensions.AbytekEBT.SetupProject(this);
         `
     );
-    return Package.Import(TempProjectEntryDirectory);
+
+    let TempProjectData = new APT.Core.F_ScopeData();
+    TempProjectData.Set("AbytekEBT.IsMainOrTemp", Package.IsMain);
+    return Package.Import(TempProjectEntryDirectory, TempProjectData);
 }
