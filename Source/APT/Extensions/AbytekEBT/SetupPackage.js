@@ -52,11 +52,15 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
             const Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Package");
             Context.APT.Set("AbytekEBT.Options", Options);
 
-            const Project = Context.APT.Set(
+            let Project = APT.Extensions.AbytekEBT.SearchProjectForPackage(Context.APT.Scope);
+            if (!Project)
+            {
+                Project = APT.Extensions.AbytekEBT.EnsureTempProject(Context.APT.Scope);
+            }
+            Context.APT.Set(
                 "AbytekEBT.Project", 
-                APT.Extensions.AbytekEBT.SearchProjectForPackage(Context.APT.Scope)
+                Project
             );
-            APT.Common.Assert(Project, `Not found project for Package at scope: ${Context.APT.Scope.EntryDirectory}`);
             Project.Push(
                 "AbytekEBT.Packages",
                 Context.APT.Scope

@@ -101,7 +101,6 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
                 Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", Context.APT.Scope.IsMain)
             );
             let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
-            let PrepareApplicationFilter = Context.APT.GetOrAdd("AbytekEBT.Prepare.ApplicationFilter", []);
 
             // Find & import
             let Engine = null;
@@ -151,6 +150,18 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
                     );
                 }
             }
+
+            //
+            let ApplicationNames = [];
+            for (const Application of Context.APT.Get("AbytekEBT.Applications"))
+            {
+                ApplicationNames.push(
+                    Application.Get("AbytekEBT.Name")
+                );
+            }
+
+            // 
+            let PrepareApplicationFilter = Context.APT.GetOrAdd("AbytekEBT.Prepare.ApplicationFilter", ApplicationNames);
 
             // Broadcast events
             let BeforePrepareEvent = Context.APT.GetOrAdd("AbytekEBT.Events.BeforePrepare", []);

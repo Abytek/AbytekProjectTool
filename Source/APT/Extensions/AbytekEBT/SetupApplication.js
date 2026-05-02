@@ -10,35 +10,33 @@ APT.Extensions.AbytekEBT.GetDefaultSetupApplicationOptions = function()
 
 APT.Extensions.AbytekEBT.SearchProjectForApplication = function(ApplicationScope)
 {
-    let Result = null;
+    let Parent = ApplicationScope.Parent;
+    while (Parent)
     {
-        let Parent = ApplicationScope.Parent;
-        while (Parent)
+        if (Parent.Has("AbytekEBT.IsProject"))
         {
-            if (Parent.Has("AbytekEBT.IsProject"))
-            {
-                Result = Parent;
-            }
-            Parent = Parent.Parent;
+            return Parent;
         }
+        if (Parent.Has("AbytekEBT.Project"))
+        {
+            return Parent.Get("AbytekEBT.Project");
+        }
+        Parent = Parent.Parent;
     }
-    return Result;
+    return null;
 }
 APT.Extensions.AbytekEBT.SearchPackageForApplication = function(ApplicationScope)
 {
-    let Result = null;
+    let Parent = ApplicationScope.Parent;
+    while (Parent)
     {
-        let Parent = ApplicationScope.Parent;
-        while (Parent)
+        if (Parent.Has("AbytekEBT.IsPackage"))
         {
-            if (Parent.Has("AbytekEBT.IsPackage"))
-            {
-                Result = Parent;
-            }
-            Parent = Parent.Parent;
+            return Parent;
         }
+        Parent = Parent.Parent;
     }
-    return Result;
+    return null;
 }
 APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
 {

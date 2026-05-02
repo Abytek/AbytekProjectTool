@@ -776,3 +776,33 @@ APT.Extensions.AbytekEBT.ImportModules = function(ParentScope, ModulesDirectory)
         APT.Extensions.AbytekEBT.ImportModules(Scope, path.join(Scope.EntryDirectory, "Modules", "Public"));
     }
 }
+
+
+// Temp project
+APT.Extensions.AbytekEBT.CalculateTempProjectEntryDirectory = function(PackageEntryDirectory)
+{
+    return path.join(PackageEntryDirectory, "Build", "TempProject");
+}
+APT.Extensions.AbytekEBT.EnsureTempProject = function(Package)
+{
+    const PackageName = Package.Get("AbytekEBT.Name");
+
+    const TempProjectEntryDirectory = APT.Extensions.AbytekEBT.CalculateTempProjectEntryDirectory(Package.EntryDirectory);
+    fs.mkdirSync(TempProjectEntryDirectory, { recursive: true });
+
+    APT.Common.SmartWriteFile(
+        path.join(TempProjectEntryDirectory, "APT.js"),
+        `
+            APT.On(
+                "Import",
+                function()
+                {
+                    APT.Set("AbytekEBT.Name", "${PackageName}.TempProject");
+                    APT.Import("${Package.EntryDirectory.replaceAll("\\", "/")}");
+                }
+            );
+            APT.Extensions.AbytekEBT.SetupProject(this);
+        `
+    );
+    return Package.Import(TempProjectEntryDirectory);
+}
