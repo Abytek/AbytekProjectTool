@@ -695,7 +695,7 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
     );
     if (fs.existsSync(ApplicationDescriptorsDirectory))
     {
-        fs.rmdirSync(ApplicationDescriptorsDirectory, { recursive: true, force: true });
+        fs.rmSync(ApplicationDescriptorsDirectory, { recursive: true, force: true });
     }
 
     const ApplicationDescriptorsDirectoryJSON = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorsDirectoryJSON(
