@@ -97,7 +97,7 @@ APT.Common.GitClone = function(GitDetails, Directory)
                 err => {
                     if (fs.existsSync(Directory))
                     {
-                        fs.rmdirSync(Directory, { recursive: true, force: true });
+                        fs.rmSync(Directory, { recursive: true, force: true });
                     }
                     Succeeded = false;
                     console.error('Clone failed:', err)
