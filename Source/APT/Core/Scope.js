@@ -7,11 +7,11 @@ AMJS.Import("./ScopeData");
 
 APT.Core.F_Scope = class
 {
-    constructor(Parent, EntryDirectory, Data, SignatureData, IsMain = false)
+    constructor(Parent, EntryDirectory, EntryFile, Data, SignatureData, IsMain = false)
     {
         this.Parent = Parent;
         this.EntryDirectory = EntryDirectory;
-        this.EntryFile = path.join(EntryDirectory, "APT.js");
+        this.EntryFile = EntryFile;
         this.Context = null;
         this.HasEntryFile = fs.existsSync(this.EntryFile);
         this.Data = Data;

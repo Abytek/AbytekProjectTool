@@ -212,9 +212,9 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
 
         APT.Log("APT", `Imported recursive: ${RelativeEntryDirectory}`);
     }
-    Import(ParentScope, BaseDirectories, RelativeEntryDirectory, Data, SignatureData, Required = true, ...ScopeCreationArgs)
+    Import(ParentScope, BaseDirectories, RelativePath, Data, SignatureData, Required = true, ...ScopeCreationArgs)
     {
-        APT.Log("APT", `Import scope: ${RelativeEntryDirectory}`);
+        APT.Log("APT", `Import scope: ${RelativePath}`);
         APT.Log("APT", `\t- Base directories: [${BaseDirectories}]`);
 
         let ParentData = null;
@@ -239,20 +239,31 @@ APT.Core.F_ScopeManager = class extends APT.Core.A_SystemChild
         SignatureData.Inherit(ParentSignatureData);
         APT.Log("APT", `\t- Signature data: [${SignatureData.GetSignature()}]`);
 
-        let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativeEntryDirectory);
-        if (!AbsoluteScopeEntryDirectory)
+        let AbsoluteScopeEntryFile = AMJS.ModuleSystem.SearchAbsoluteFile(BaseDirectories, RelativePath, "js");
+        let AbsoluteScopeEntryDirectory = AMJS.ModuleSystem.SearchAbsoluteDirectory(BaseDirectories, RelativePath);
+        if (!(AbsoluteScopeEntryFile || AbsoluteScopeEntryDirectory))
         {
             if (Required)
             {
-                throw new Error(`Scope entry directory: "${RelativeEntryDirectory}" not found`);
+                throw new Error(`Scope entry directory: "${RelativePath}" not found`);
             }
             return null;
         }
 
+        if (AbsoluteScopeEntryDirectory)
+        {
+            AbsoluteScopeEntryFile = path.join(AbsoluteScopeEntryDirectory, "APT.js");
+        }
+        else
+        {
+            AbsoluteScopeEntryDirectory = path.dirname(AbsoluteScopeEntryFile);
+        }
+
         APT.Log("APT", `Found scope entry directory: ${AbsoluteScopeEntryDirectory}`);
+        APT.Log("APT", `Found scope entry file: ${AbsoluteScopeEntryFile}`);
 
         // Create new scope instance
-        let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, Data, SignatureData, ...ScopeCreationArgs);
+        let Scope = new AMJS.Namespace.F_Scope(ParentScope, AbsoluteScopeEntryDirectory, AbsoluteScopeEntryFile, Data, SignatureData, ...ScopeCreationArgs);
 
         let ScopeManager = this;
 
