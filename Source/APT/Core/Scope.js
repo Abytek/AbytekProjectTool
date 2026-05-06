@@ -268,11 +268,11 @@ APT.Core.F_Scope = class
     {
         if (IsSignature)
         {
-            return this.SignatureData.GetSignature(this.EntryDirectory);
+            return this.SignatureData.GetSignature(this.EntryFile);
         }
         else
         {
-            return this.Data.GetSignature(this.EntryDirectory);
+            return this.Data.GetSignature(this.EntryFile);
         }
     }
 
