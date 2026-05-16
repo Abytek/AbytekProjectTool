@@ -639,6 +639,7 @@ const Ajv = require("ajv");
         Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
 
         // The most important
+        Result.push(`-DABYTEK_EBT_EXTERNAL_MODE=OFF`);
         Result.push(`-DABYTEK_ENGINE_DIR="${APT.Common.ToCLIArgument(EngineEntryDirectory)}"`);
         Result.push(`-DABYTEK_PROJECT_DIR="${APT.Common.ToCLIArgument(EntryDirectory)}"`);
         Result.push(`-DABYTEK_EBT_ENVIRONMENT="${CMakeInstance.Environment}"`);
