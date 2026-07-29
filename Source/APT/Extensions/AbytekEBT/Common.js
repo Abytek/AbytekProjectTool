@@ -8,6 +8,7 @@ const Ajv = require("ajv");
 {
     APT.Extensions.AbytekEBT.E_Environment = {
         DEVELOPMENT: "Development", 
+        DEVELOPMENT_MAX_OPTIMIZED: "DevelopmentMaxOptimized", 
         COOKED: "Cooked",
         COOKED_MAX_OPTIMIZED: "CookedMaxOptimized",
     }
