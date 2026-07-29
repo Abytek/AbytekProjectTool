@@ -93,7 +93,8 @@ APT.Extensions.AbytekEBT.SetupApplication = function(Context, Options)
 
             const CookPipeline = Context.APT.GetOrAdd("AbytekEBT.CookPipeline", APT.Extensions.AbytekEBT.DEFAULT_COOK_PIPELINE);
             const IncludeHeaders = Context.APT.GetOrAdd("AbytekEBT.IncludeHeaders", []);
-            const ApplicationClasses = Context.APT.GetOrAdd("AbytekEBT.ApplicationClasses", []);
+            const ApplicationClass = Context.APT.GetOrAdd("AbytekEBT.ApplicationClass", "Abytek::F_Application");
+            const ApplicationModuleClasses = Context.APT.GetOrAdd("AbytekEBT.ApplicationModuleClasses", []);
         }
     );
 }

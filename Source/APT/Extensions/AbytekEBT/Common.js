@@ -713,7 +713,8 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
         const ApplicationName = Application.Get("AbytekEBT.Name");
         const CookPipeline = Application.Get("AbytekEBT.CookPipeline");
         const IncludeHeaders = Application.Get("AbytekEBT.IncludeHeaders");
-        const ApplicationClasses = Application.Get("AbytekEBT.ApplicationClasses");
+        const ApplicationClass = Application.Get("AbytekEBT.ApplicationClass");
+        const ApplicationModuleClasses = Application.Get("AbytekEBT.ApplicationModuleClasses");
 
         const ApplicationDescriptorFileJSON = APT.Extensions.AbytekEBT.CalculateApplicationDescriptorFileJSON(
             ApplicationDescriptorsDirectoryJSON,
@@ -728,7 +729,8 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
             Name: ApplicationName,
             CookPipeline,
             IncludeHeaders,
-            ApplicationClasses
+            ApplicationClass,
+            ApplicationModuleClasses
         };
         const ApplicationDescriptorJSON = APT.Common.NiceJSONStringify(ApplicationDescriptor);
         APT.Common.SmartWriteFile(ApplicationDescriptorFileJSON, ApplicationDescriptorJSON);
@@ -738,7 +740,8 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
             set(ApplicationName ${ApplicationName})
             set(CookPipeline ${CookPipeline})
             set(IncludeHeaders "")
-            set(ApplicationClasses "")
+            set(ApplicationClass "${ApplicationClass.replaceAll("\\", "/")}")
+            set(ApplicationModuleClasses "")
         `;
         for (const IncludeHeader of IncludeHeaders)
         {
@@ -746,10 +749,10 @@ APT.Extensions.AbytekEBT.GenerateApplicationDescriptors = function(Scope)
                 list(APPEND IncludeHeaders "${IncludeHeader.replaceAll("\\", "/")}")
             `;
         }
-        for (const ApplicationClass of ApplicationClasses)
+        for (const ApplicationModuleClass of ApplicationModuleClasses)
         {
             ApplicationDescriptorCMake += `
-                list(APPEND ApplicationClasses "${ApplicationClass.replaceAll("\\", "/")}")
+                list(APPEND ApplicationModuleClasses "${ApplicationModuleClass}")
             `;
         }
         APT.Common.SmartWriteFile(ApplicationDescriptorFileCMake, ApplicationDescriptorCMake);
