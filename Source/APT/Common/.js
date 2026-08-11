@@ -19,5 +19,6 @@ AMJS.Import("./Platform");
 AMJS.Import("./ProcessorArch");
 AMJS.Import("./Files");
 AMJS.Import("./VisualStudio");
+AMJS.Import("./WindowsSDK");
 AMJS.Import("./CLI");
 AMJS.Import("./Event");

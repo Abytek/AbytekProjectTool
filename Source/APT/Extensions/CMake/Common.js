@@ -33,11 +33,11 @@ APT.Extensions.CMake.GetDefaultConfigForGenerator = function(Generator)
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.NINJA)
     {
-        return GetDefaultConfig();
+        return APT.Extensions.CMake.GetDefaultConfig();
     }
     else if (Generator == APT.Extensions.CMake.E_Generator.UNIX_MAKEFILES)
     {
-        return GetDefaultConfig();
+        return APT.Extensions.CMake.GetDefaultConfig();
     }
     APT.FatalError("APT", `Unknown generator: ${Generator}`);
 }

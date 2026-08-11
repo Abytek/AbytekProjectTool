@@ -21,7 +21,13 @@ APT.Extensions.AbytekEBT.CMakeConfigure = function(Scope, CMakeInstance)
             CMakeInstance
         )
     ];
-    
+    let CMakeConfigureExtraEnv = {
+        ...APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraEnv(
+            Scope,
+            CMakeInstance
+        )
+    };
+
     APT.Extensions.CMake.Configure(
         Scope.EntryDirectory,
         CMakeBuildDirectory,
@@ -29,7 +35,8 @@ APT.Extensions.AbytekEBT.CMakeConfigure = function(Scope, CMakeInstance)
             Generator: CMakeInstance.CMakeGenerator,
             Config: CMakeInstance.CMakeConfig,
             ProcessorArch: CMakeInstance.ProcessorArch,
-            ExtraArguments: CMakeConfigureExtraArguments
+            ExtraArguments: CMakeConfigureExtraArguments,
+            ExtraEnv: CMakeConfigureExtraEnv,
         }
     );
     APT.Log("APT", `Configurated project: ${Scope.EntryDirectory}`);

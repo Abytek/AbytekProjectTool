@@ -1,6 +1,7 @@
 
-const { spawnSync } = require("child_process");
+const { spawnSync, execFileSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
 AMJS.Import("./Common");
 
@@ -16,6 +17,7 @@ APT.Extensions.CMake.GetDefaultConfigureOptions = function()
     Options.Config = APT.Extensions.CMake.GetDefaultConfigForGenerator(Options.Generator);
     Options.ProcessorArch = APT.Common.E_ProcessorArch.AUTO;
     Options.ExtraArguments = [];
+    Options.ExtraEnv = {};
     return Options;
 }
 
@@ -46,6 +48,10 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
     if (Options.ExtraArguments == null)
     {
         Options.ExtraArguments = DefaultOptions.ExtraArguments;
+    }
+    if (Options.ExtraEnv == null)
+    {
+        Options.ExtraEnv = DefaultOptions.ExtraEnv;
     }
 
     SourceDirectory = path.resolve(SourceDirectory);
@@ -94,6 +100,20 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
             Arguments.push(`-A`);
             Arguments.push(APT.Common.ToCLIArgument(ProcessorArchArg));
         }
+        else if (Options.Generator == APT.Extensions.CMake.E_Generator.NINJA)
+        {
+            /*const ProcessorArchMap = {
+                [APT.Common.E_ProcessorArch.X86_32]: "x86",
+                [APT.Common.E_ProcessorArch.X86_64]: "x64",
+                [APT.Common.E_ProcessorArch.ARM_64]: "arm64",
+            };
+            const ProcessorArchArg = ProcessorArchMap[Options.ProcessorArch];
+            if (!ProcessorArchArg) {
+                throw new Error(`Unknown processor arch: ${Options.ProcessorArch}`);
+            }
+
+            Arguments.push(`-DCMAKE_GENERATOR_PLATFORM=${APT.Common.ToCLIArgument(ProcessorArchArg)}`);*/
+        }
         else
         {
             APT.FatalError("APT", `Invalid generator to set non-auto processor arch: ${Options.Generator}`);
@@ -112,7 +132,11 @@ APT.Extensions.CMake.Configure = function(SourceDirectory, BuildDirectory, Optio
         Arguments, 
         {
             stdio: "inherit",
-            shell: true
+            shell: true,
+            env: {
+                ...process.env,
+                ...Options.ExtraEnv
+            }
         }
     );
     if (result.status !== 0) 

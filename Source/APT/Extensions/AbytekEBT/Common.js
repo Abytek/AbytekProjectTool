@@ -635,6 +635,8 @@ const Ajv = require("ajv");
         
         const ScopeSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
         const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(CMakeInstance);
+
+        const PlatformTags = APT.Common.ParsePlatformTags(CMakeInstance.Platform);
         
         let Result = [];
         Result.push(`-DCMAKE_POLICY_VERSION_MINIMUM="3.5"`);
@@ -657,7 +659,47 @@ const Ajv = require("ajv");
         //
         Result.push(`-DABYTEK_ENGINE_BUILD_DIR="${APT.Common.ToCLIArgument(EngineCMakeBuildDirectoryConfig.Directory)}"`);
         Result.push(`-DABYTEK_PROJECT_BUILD_DIR="${APT.Common.ToCLIArgument(ScopeCMakeBuildDirectoryConfig.Directory)}"`);
+        return Result;
+    }
+    APT.Extensions.AbytekEBT.CalculateCMakeConfigureExtraEnv = function(
+        Scope,
+        CMakeInstance
+    )
+    {
+        let ProjectInstance = Scope.Data.Get("AbytekEBT.ProjectInstance");
+        let EngineScope = Scope.Data.Get("AbytekEBT.Engine");
 
+        let EntryDirectory = Scope.EntryDirectory;
+        let EngineEntryDirectory = EngineScope.EntryDirectory;
+
+        const ScopeCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+            EntryDirectory,
+            CMakeInstance
+        );
+        const EngineCMakeBuildDirectoryConfig = APT.Extensions.AbytekEBT.CalculateCMakeBuildDirectoryConfig(
+            EngineEntryDirectory,
+            CMakeInstance
+        );
+        
+        const ScopeSignature = APT.Extensions.AbytekEBT.CalculateProjectSignature(ProjectInstance);
+        const CMakeSignature = APT.Extensions.AbytekEBT.CalculateCMakeSignature(CMakeInstance);
+
+        const PlatformTags = APT.Common.ParsePlatformTags(CMakeInstance.Platform);
+        
+        let Result = {};
+
+        // For Ninja, requires finding default MSVC toolchain directory
+        if (
+            (CMakeInstance.CMakeGenerator == APT.Extensions.CMake.E_Generator.NINJA)
+            && PlatformTags.includes(APT.Common.E_PlatformTag.WINDOWS)
+        )
+        {
+            const MSVCEnvironment = APT.Common.GetMSVCEnvironment(CMakeInstance.ProcessorArch);
+            Result = {
+                ...Result,
+                ...MSVCEnvironment,
+            }
+        }
         return Result;
     }
 }
