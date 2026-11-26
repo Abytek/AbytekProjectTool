@@ -88,7 +88,7 @@ APT.Extensions.AbytekEBT.SetupPackage = function(Context, Options)
             }
             else
             {
-                APT.Extensions.AbytekEBT.EnsureTempProject(Context.APT.Scope);
+                APT.Extensions.AbytekEBT.EnsureTempProject(Context.APT.Scope, Options);
             }
         }
     );

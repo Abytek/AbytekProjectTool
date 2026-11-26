@@ -830,13 +830,13 @@ APT.Extensions.AbytekEBT.CalculateTempProjectEntryDirectory = function(PackageEn
 {
     return path.join(PackageEntryDirectory, "Build", "TempProject");
 }
-APT.Extensions.AbytekEBT.EnsureTempProject = function(Package)
+APT.Extensions.AbytekEBT.EnsureTempProject = function(Package, Options)
 {
     const PackageName = Package.Get("AbytekEBT.Name");
 
     const TempProjectEntryDirectory = APT.Extensions.AbytekEBT.CalculateTempProjectEntryDirectory(Package.EntryDirectory);
     fs.mkdirSync(TempProjectEntryDirectory, { recursive: true });
-
+    
     APT.Common.SmartWriteFile(
         path.join(TempProjectEntryDirectory, "APT.js"),
         `
@@ -859,7 +859,7 @@ APT.Extensions.AbytekEBT.EnsureTempProject = function(Package)
                     );
                 }
             );
-            APT.Extensions.AbytekEBT.SetupProject(this);
+            APT.Extensions.AbytekEBT.SetupProject(this, JSON.parse("${JSON.stringify(Options).replaceAll("\"", "\\\"")}"));
         `
     );
 
