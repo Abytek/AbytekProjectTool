@@ -86,23 +86,26 @@ APT.Extensions.AbytekEBT.SetupProject = function(Context, Options)
 
             const IsMainOrTemp = Context.APT.GetOrAdd("AbytekEBT.IsMainOrTemp", Context.APT.Scope.IsMain);
 
-            let ProjectInstanceParams = Context.APT.Get("AbytekEBT.ProjectInstanceParams");
-            let ProjectInstance = Context.APT.Set(
+            const ProjectInstanceParams = Context.APT.Get("AbytekEBT.ProjectInstanceParams");
+            const ProjectInstance = Context.APT.Set(
                 "AbytekEBT.ProjectInstance",
                 new APT.Extensions.AbytekEBT.F_ProjectInstance(ProjectInstanceParams)
             );
-            let PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
+            const PlatformTags = APT.Common.ParsePlatformTags(ProjectInstance.Platform);
             
-            let Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Project");
+            const Name = Context.APT.GetOrAdd("AbytekEBT.Name", "Project");
             Context.APT.Set("AbytekEBT.Options", Options);
 
             Context.APT.Set("AbytekEBT.Packages", []);
             Context.APT.Set("AbytekEBT.Applications", []);
 
-            let PrepareEnabled = APT.Common.ForwardBool(
-                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", IsMainOrTemp)
+            const PrepareExclusive = APT.Common.ForwardBool(
+                Context.APT.GetOrAddPublic("AbytekEBT.Prepare.Exclusive", false)
             );
-            let PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
+            const PrepareEnabled = APT.Common.ForwardBool(
+                Context.APT.GetOrAdd("AbytekEBT.Prepare.Enabled", PrepareExclusive || IsMainOrTemp)
+            );
+            const PrepareMode = Context.APT.GetOrAdd("AbytekEBT.Prepare.Mode", APT.Extensions.AbytekEBT.GetDefaultPrepareMode(PlatformTags));
 
             // Find & import
             let Engine = null;
